@@ -1,5 +1,5 @@
 # Specialised Crime Institutions & Data Pipelines
-_Agent: specialised-crime · Researched: 2026-09-19 · Entries: 0 verified / 40 total_
+_Agent: specialised-crime · Researched: 2026-09-19 · Entries: 0 verified / 41 total_
 
 > **Verification warning — read before trusting any URL below.**
 > This session's egress proxy blocked **every** `.gov.in`, `.nic.in`, Indian news and Indian

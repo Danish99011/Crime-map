@@ -1,6 +1,6 @@
 # Open Data Portals, APIs and Aggregators
 
-_Agent: open-data-portals · Researched: 2026-09-19 · Entries: 8 verified / 29 total_
+_Agent: open-data-portals · Researched: 2026-09-19 · Entries: 1 VERIFIED_LIVE / 22 CITED / 4 UNVERIFIED · 27 total_
 
 > **Environment caveat that shapes this whole dossier.** This session's egress proxy blocks
 > every `*.gov.in` host (`data.gov.in`, `api.data.gov.in`, `ndap.niti.gov.in`,

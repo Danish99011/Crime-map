@@ -1,6 +1,6 @@
 # Civil Society, Academic & Survey Sources on Indian Crime and Safety
 _Agent: civil-society-academic · Researched: 2026-09-19 · Entries: 9 verified / 35 total_
-_(9 = 8 `VERIFIED_LIVE` + 1 `VERIFIED_LANDING`; 10 `CITED`, 16 `UNVERIFIED`)_
+_(9 = 8 `VERIFIED_LIVE` + 1 `VERIFIED_LANDING`; 11 `CITED`, 15 `UNVERIFIED`)_
 
 > **Session constraint, stated up front.** This session's egress proxy blocked almost every
 > primary domain in scope — `rchiips.org`, `dhsprogram.com`, `acleddata.com`, `devdatalab.org`,
@@ -405,7 +405,7 @@ government original**, which is precisely the category the brief asked me to loo
 was egress-blocked here.
 
 ```
-id: civil-society-academic-opencity-bengaluru | tier: 4 | geo_coverage: Bengaluru + all-India holdings
+id: civil-society-academic-opencity | tier: 4 | geo_coverage: Bengaluru + all-India holdings
 geo_granularity: city | unit_of_record: aggregate-count | formats: [CSV, PDF, XLSX]
 access: open-download | machine_readable: 3 | verification: CITED | priority: 3
 notes: CKAN-style dataset/resource URL structure implies a usable CKAN API for Phase 2 harvesting

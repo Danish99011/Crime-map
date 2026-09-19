@@ -81,6 +81,7 @@ No wrapping array, no trailing commas, one source per line. Fields:
 | `urls` | object | `{"landing":..., "data":..., "api":..., "docs":...}` — omit keys you have no URL for |
 | `geo_coverage` | string | e.g. "all-India", "Telangana", "Mumbai city police jurisdiction" |
 | `geo_granularity` | string | one of: `national`,`state`,`district`,`city`,`police-district`,`police-station`,`ward`,`beat`,`grid`,`point`,`address` |
+| `location_semantics` | string | **what the geography in this source actually means** — see below |
 | `unit_of_record` | string | `aggregate-count`, `fir-record`, `incident-point`, `case-record`, `victim-record`, `survey-respondent`, `boundary-polygon`, `narrative-document` |
 | `time_start` | string | earliest year/date available, or `unknown` |
 | `time_latest` | string | most recent period available as of your check |
@@ -99,6 +100,31 @@ No wrapping array, no trailing commas, one source per line. Fields:
 | `evidence` | string | what you actually saw — page title, table names, years, row/file counts. 1-3 sentences. |
 | `how_to_obtain` | string | required when access is not `open-download`. Concrete steps. |
 | `notes` | string | anything else that matters |
+
+## `location_semantics` — the field that stops us shipping a wrong map
+
+One word, "location", hides at least seven different things in Indian crime data, and
+blending them produces a map that is confidently false. The cyber-fraud portal counts the
+**victim's** district. The national cyber centre's hotspot list counts the **offender's**
+district. NCRB counts the **police station that registered the FIR**. Trafficking data often
+records the **rescue** city rather than the source village; narcotics data records the
+**interdiction point**, which is a highway checkpoint, not where the drugs are sold.
+
+Every entry must declare which it is:
+
+| value | meaning |
+|---|---|
+| `offence-location` | where the act happened — the only semantics a safety map really wants |
+| `victim-residence` | where the victim lives or was registered |
+| `offender-residence` | where the accused lives or was traced to |
+| `reporting-office` | the police station, commission or portal that recorded it |
+| `service-point` | where a helpline, shelter, hospital or One Stop Centre delivered a service |
+| `interdiction-point` | where a seizure, raid or arrest occurred |
+| `court-venue` | where the case is being heard |
+| `jurisdiction-aggregate` | aggregated to an administrative area with semantics unstated by the publisher |
+| `unknown` | you could not determine it — say so rather than guessing |
+
+If a source mixes several, record the dominant one and explain the rest in `caveats`.
 
 ## Field Dictionary notes
 

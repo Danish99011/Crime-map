@@ -166,6 +166,39 @@ Not legal advice; a list of what an Indian lawyer must clear. Detail in
 what a portal's terms forbid. Rajasthan's captcha-gated FIR search is therefore out of scope even
 though it would be useful.
 
+## 7b. The design discipline to inherit from police.uk
+
+The benchmark dossier's sharpest observation: **police.uk is not a map, it is an anonymisation
+pipeline with a map on top.** No crime is ever published at its true location. Every crime is
+snapped to the nearest entry in a pre-built master list of anonymous map points, each sitting
+over a street centre, park or commercial premise, and each of whose catchment contains **at
+least eight postal addresses — or none at all**. If the nearest map point is more than 20 km
+away, the coordinates are zeroed out entirely.
+
+That rule is the reason a public crime map can exist in a democracy without becoming a tool for
+targeting households. It is worth restating that the published point-count estimates disagree
+across three independent third-party projects (680,000 / ~750,000 / ~760,000) and none cite an
+official figure — **the rule is solid, the number is folklore** until the official page is
+re-read.
+
+**What this means for India, which is the interesting part.** We have no point-level crime data,
+so we cannot make the mistake police.uk had to engineer around. Our smallest unit is the police
+station jurisdiction — which in urban India contains tens of thousands of people, far above any
+disclosure threshold. The anonymisation problem is solved for us by the data's coarseness.
+
+But the *principle* transfers and should be adopted as a hard rule: **never display a count for
+a unit below a minimum population and a minimum count threshold.** In India the binding risk is
+not identifying a household; it is §7(4) — stigmatising a locality that is segregated by caste
+or religion. Same discipline, different threat model.
+
+Two more things worth copying directly:
+- **The bulk CSV is the real product, not the API.** police.uk's API does not even carry the
+  area codes; the monthly CSV archive does, and that is what every serious analyst uses. We
+  should ship a bulk file from day one rather than treating it as an afterthought.
+- **The outcomes model.** police.uk shows what *happened* to each crime, not just that it was
+  reported. India's equivalent is the eCourts FIR-details join (see `judiciary-prisons`), with
+  the standing caveat that only chargesheeted cases reach court.
+
 ## 8. Ranked next actions
 
 **Verification first — everything below assumes it.**

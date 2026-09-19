@@ -123,6 +123,7 @@ Every entry must declare which it is:
 | `court-venue` | where the case is being heard |
 | `jurisdiction-aggregate` | aggregated to an administrative area with semantics unstated by the publisher |
 | `unknown` | you could not determine it — say so rather than guessing |
+| `n/a` | the entry is not crime data: a boundary file, statute, tool or methodology reference |
 
 If a source mixes several, record the dominant one and explain the rest in `caveats`.
 

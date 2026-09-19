@@ -31,11 +31,14 @@ REQUIRED = [
     "verification", "checked_on",
 ]
 
+# Ordered coarse -> fine. Agents found two levels the first draft of this enum
+# missed: `subdistrict` (the tehsil/taluk, India's real intermediate unit) and
+# `village` (LGD village codes, and the areas notified under the SC/ST Act).
 GRANULARITY = [
-    "national", "state", "district", "city", "police-district",
-    "police-station", "ward", "beat", "grid", "point", "address",
+    "national", "state", "district", "city", "subdistrict", "police-district",
+    "police-station", "ward", "village", "beat", "grid", "point", "address",
 ]
-# Ordered coarse -> fine, so a lower index means less useful for a street map.
+# A lower index means less useful for a street-level map.
 GRANULARITY_RANK = {g: i for i, g in enumerate(GRANULARITY)}
 
 VERIFICATION = ["VERIFIED_LIVE", "VERIFIED_LANDING", "CITED", "UNVERIFIED"]
@@ -48,11 +51,22 @@ CADENCE = [
     "irregular", "one-off",
 ]
 
+LOCATION_SEMANTICS = [
+    "offence-location", "victim-residence", "offender-residence",
+    "reporting-office", "service-point", "interdiction-point", "court-venue",
+    "jurisdiction-aggregate", "unknown",
+    # Boundary files, statutes, tooling and methodology references carry no
+    # crime geography of their own.
+    "n/a",
+]
+
 
 def validate(entry: dict, origin: str) -> list[str]:
     """Return a list of human-readable problems with one entry."""
     problems = []
     for field in REQUIRED:
+        if field == "urls":
+            continue  # shape is checked below; an empty object is legitimate
         if field not in entry or entry[field] in (None, "", []):
             problems.append(f"missing required field {field!r}")
 
@@ -65,6 +79,7 @@ def validate(entry: dict, origin: str) -> list[str]:
     check_enum("verification", VERIFICATION)
     check_enum("access", ACCESS)
     check_enum("cadence", CADENCE)
+    check_enum("location_semantics", LOCATION_SEMANTICS)
 
     for field, lo, hi in (
         ("tier", 1, 5),
@@ -81,8 +96,10 @@ def validate(entry: dict, origin: str) -> list[str]:
     if not isinstance(entry.get("urls"), dict):
         problems.append("urls must be an object")
 
-    # An entry we cannot get at needs to say how to get at it.
-    if entry.get("access") not in ("open-download", None) and not entry.get("how_to_obtain"):
+    # An entry we cannot simply download needs to say how to get at it.
+    # Self-service API registration is the one exception: the instruction is
+    # "sign up on the portal", which carries no information worth storing.
+    if entry.get("access") not in ("open-download", "api-key", None) and not entry.get("how_to_obtain"):
         problems.append(f"access={entry.get('access')!r} requires how_to_obtain")
 
     # An unverified claim without evidence is just a rumour; make it visible.
@@ -240,6 +257,13 @@ def main() -> int:
     write_outputs(entries)
 
     print(f"Merged {len(entries)} entries into catalogue.json / catalogue.csv / CATALOGUE.md")
+
+    missing_semantics = [e for e in entries if not e.get("location_semantics")]
+    if missing_semantics:
+        by_domain = Counter(e.get("domain", "?") for e in missing_semantics)
+        print(f"\n{len(missing_semantics)} entries still need location_semantics backfilled:")
+        for domain, count in by_domain.most_common():
+            print(f"  {count:4d}  {domain}")
     if problems:
         print(f"\n{len(problems)} schema problems:", file=sys.stderr)
         for problem in problems:

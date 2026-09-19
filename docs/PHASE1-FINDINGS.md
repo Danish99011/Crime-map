@@ -79,6 +79,12 @@ doing exactly the latter.
 - **A national citizen FIR search.** CCTNS is police-only; the Digital Police Portal does not
   expose one.
 - **Police station polygons for 29 of 36 states/UTs.**
+- **An official IPC→BNS concordance.** BNS s.358 simply repeals the IPC; there is no statutory
+  mapping schedule. Every dataset spanning 1 July 2024 therefore carries two incompatible
+  section-numbering systems with no authoritative crosswalk between them. The only mapping we
+  hold is a hand-built ~110-row table in `research/sources/taxonomy-methodology.md` §1.3, of
+  which two rows are web-verified. Building and maintaining that concordance is an unavoidable,
+  un-delegatable cost of ingesting any post-2024 Indian crime data.
 - **A national crime victimisation survey.** India has never run one. This is why reported
   crime is all we have, and why §5 matters so much.
 - **NFHS district-level violence data.** Corrected during this research: district fact sheets

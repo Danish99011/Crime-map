@@ -129,7 +129,20 @@ FIR. Trafficking data records the rescue city, not the source village. Narcotics
 the interdiction point — a highway checkpoint, not where drugs are sold. Court data records the
 court venue, a taluka seat. Blend these and the map is confidently false. Every source in the
 catalogue now carries a mandatory `location_semantics` field for this reason, and **almost all
-police-published counts are `reporting-office`, not `offence-location`.**
+police-published counts are `reporting-office`, not `offence-location`.** Across 540 sources the
+backfill came out at: reporting-office 181, n/a 150, offence-location 50, victim-residence 24,
+court-venue 21, interdiction-point 9, jurisdiction-aggregate 6, unknown 6, service-point 5,
+offender-residence 3.
+
+Three concrete cases where getting this wrong would produce a specifically defamatory map:
+
+1. **The cyber-fraud reporting portal records the victim's district; the cyber coordination
+   centre's hotspot list records the offender's district.** Same word, opposite ends of the same
+   offence. Plotting them on one layer would brand Jamtara and Bengaluru identically.
+2. **Human trafficking FIRs are registered where the victim is rescued.** A choropleth of them
+   marks Delhi and Mumbai as *source* areas when they are destinations.
+3. **Narcotics seizure tables record border, highway and port checkpoints.** That is a map of
+   enforcement effort, not of drug prevalence.
 
 ## 6. Contamination already in the wild
 

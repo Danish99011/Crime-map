@@ -7,6 +7,9 @@ Phase 1 answers one question before a line of product code is written:
 **what data actually exists, at what geographic resolution, how often does it refresh, and
 what is it legal and ethical to publish?**
 
+**Status: Phase 1 complete.** 540 sources catalogued across 17 domains, schema-clean.
+Findings and recommendations: [`../docs/PHASE1-FINDINGS.md`](../docs/PHASE1-FINDINGS.md).
+
 ## Layout
 
 | path | what it is |
@@ -14,7 +17,32 @@ what is it legal and ethical to publish?**
 | `_SPEC.md` | the research contract every dossier follows |
 | `sources/<domain>.md` | human-readable dossier per research domain |
 | `sources/<domain>.jsonl` | machine-readable source entries, one JSON per line |
+| `CATALOGUE.md` / `catalogue.json` / `catalogue.csv` | generated master catalogue |
 | `_raw/` | scratch, gitignored |
+
+## Tooling
+
+```bash
+python3 research/merge_catalogue.py            # rebuild the catalogue, report schema problems
+python3 research/merge_catalogue.py --strict   # non-zero exit if any entry is malformed
+python3 research/normalize_sources.py          # fold vocabulary drift back into the enums
+python3 research/verify_sources.py --patch     # link-check every URL (run from an unblocked network)
+```
+
+Edit the per-domain `.jsonl` files, never the generated catalogue.
+
+## The verification gap you must close first
+
+This research ran in a sandbox whose egress policy returned 403 for `*.gov.in`, `*.nic.in`,
+`data.police.uk`, OSM mirrors and `web.archive.org`. Agents could search but could not open
+Indian government pages. So of 540 sources, **43 are `VERIFIED_LIVE` and 18
+`VERIFIED_LANDING`; 357 are `CITED`** (URL and title seen in a search index) **and 122
+`UNVERIFIED`**.
+
+That is a target list, not a source list. `verify_sources.py` exists to close the gap: it is
+stdlib-only, rate-limits itself to one request per host, and records each page's `<title>`
+alongside its status code — because a portal that redirects unknown paths to its homepage
+answers `200` for URLs that no longer exist, and the title is what catches that.
 
 ## Research domains
 

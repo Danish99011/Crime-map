@@ -9902,7 +9902,9 @@
     "cadence": "irregular",
     "lag": "n/a",
     "taxonomy": "IPC+SLL / BNS+SLL",
-    "formats": [],
+    "formats": [
+      "unknown"
+    ],
     "access": "blocked",
     "machine_readable": 0,
     "license": "unknown",
@@ -9916,7 +9918,7 @@
     "verification": "CITED",
     "evidence": "ThePrint's analysis of NCRB crime data states plainly that NCRB does not release unit-level data and that for 2016 and 2017 it did not release district-wise data or machine-readable formats. No NCRB microdata policy page, application form or data-enclave documentation surfaced in any search.",
     "how_to_obtain": "Three realistic routes, in ascending cost: (1) RTI to CPIO, NCRB, MHA, NH-8 Mahipalpur, New Delhi 110037, asking for district-wise and police-station-wise COUNTS by crime head - counts are not exempt under s.8(1)(h); (2) State Crime Records Bureau RTIs, which are far more likely to yield police-station-level tables; (3) an academic MoU with NCRB via a recognised institution - no published process, must be negotiated.",
-    "notes": "This is the defining constraint of the whole project. Everything finer than district in India comes from state police, not from NCRB.",
+    "notes": "This is the defining constraint of the whole project. Everything finer than district in India comes from state police, not from NCRB. Formats not recorded by the researching agent; confirm during the URL verification pass.",
     "domain": "ncrb-national",
     "checked_on": "2026-09-19"
   },
@@ -13550,7 +13552,9 @@
     "cadence": "realtime",
     "lag": "n/a (operational, not published)",
     "taxonomy": "n/a",
-    "formats": [],
+    "formats": [
+      "unknown"
+    ],
     "access": "blocked",
     "machine_readable": 0,
     "license": "unknown",
@@ -13565,7 +13569,7 @@
     "verification": "VERIFIED_LANDING",
     "evidence": "Fetched https://en.wikipedia.org/wiki/Himmat_(app) on 2026-09-19: launched by Home Minister Rajnath Singh on 1 January 2015, Android-first, distributed via the Delhi Police website. The article is a stub and explicitly records the 2018 parliamentary finding of ineffectiveness due to 'low registrations and other problems'. No download figures, no SOS statistics, no data publication of any kind is documented.",
     "how_to_obtain": "RTI to Delhi Police (PIO, Police Headquarters, Jai Singh Road, New Delhi) asking for: (a) count of Himmat/Himmat Plus registrations by year; (b) count of SOS alerts raised by year and by police district; (c) count of alerts resulting in a registered FIR. Ask for district-level aggregates, not point data - a point-level request will be refused under RTI s.8(1)(g)/(h) and is the wrong ask anyway.",
-    "notes": "Catalogued mainly as a cautionary tale: the state has built at least six of these apps and published data from none of them. The aggregate alert-to-FIR conversion ratio would be a genuinely novel statistic if an RTI landed it.",
+    "notes": "Catalogued mainly as a cautionary tale: the state has built at least six of these apps and published data from none of them. The aggregate alert-to-FIR conversion ratio would be a genuinely novel statistic if an RTI landed it. Formats not recorded by the researching agent; confirm during the URL verification pass.",
     "domain": "media-crowdsourced",
     "checked_on": "2026-09-19"
   },
@@ -13620,7 +13624,9 @@
     "cadence": "realtime",
     "lag": "n/a (not published)",
     "taxonomy": "custom",
-    "formats": [],
+    "formats": [
+      "unknown"
+    ],
     "access": "rti-only",
     "machine_readable": 0,
     "license": "unknown",
@@ -13636,7 +13642,7 @@
     "verification": "UNVERIFIED",
     "evidence": "Could not verify this session: no Wikipedia article exists for 'Emergency Response Support System' (HTTP 404) and Wikipedia search returned nothing specific; the WebSearch budget for the session was exhausted before I could search, and the relevant government domains are blocked by this session's egress proxy. Wikipedia 'Bengaluru City Police' (seen in search snippets) confirms that 'emergency response is coordinated through the national 112 helpline'. I have NOT confirmed any URL for this source - do not treat any 112 URL as verified until fetched.",
     "how_to_obtain": "RTI to each State Police ERSS nodal officer, and in parallel to MHA (Police Modernisation Division), for monthly counts of ERSS events by event category and by police station, for the last 36 months. Frame as aggregate counts. Expect partial refusal; appeal. Alternative: state Dial-112 annual reports occasionally quote district totals in press releases - harvest those as a floor.",
-    "notes": "Potentially the single richest fine-grained operational feed in India if it ever opened, which is why it is worth an RTI campaign even at low odds. Treat as a Phase 3 target, not Phase 2.",
+    "notes": "Potentially the single richest fine-grained operational feed in India if it ever opened, which is why it is worth an RTI campaign even at low odds. Treat as a Phase 3 target, not Phase 2. Formats not recorded by the researching agent; confirm during the URL verification pass.",
     "domain": "media-crowdsourced",
     "checked_on": "2026-09-19",
     "urls": {}
@@ -15764,7 +15770,9 @@
     "cadence": "irregular",
     "lag": "unknown",
     "taxonomy": "IPC+SLL",
-    "formats": [],
+    "formats": [
+      "unknown"
+    ],
     "access": "rti-only",
     "machine_readable": 0,
     "license": "n/a",
@@ -15777,7 +15785,7 @@
     "verification": "UNVERIFIED",
     "evidence": "Repeated searches for Gujarat crime statistics publications returned only the citizen-services portal and commercial aggregators (Indiastat), never an official statistical report. police.gujarat.gov.in blocked by egress policy so its Downloads/RTI section was never opened.",
     "how_to_obtain": "RTI to the Public Information Officer, Director General of Police, Gujarat, Police Bhavan, Sector 18, Gandhinagar. Ask for: district-wise and police-station-wise counts of FIRs registered by major head, monthly, last 5 years, in machine-readable (XLSX/CSV) form, and cite that CCTNS already holds it electronically so no disproportionate diversion of resources applies.",
-    "notes": "Also check the Gujarat SCRB and the state Home Dept RTI proactive-disclosure (Sec 4(1)(b)) page before filing.",
+    "notes": "Also check the Gujarat SCRB and the state Home Dept RTI proactive-disclosure (Sec 4(1)(b)) page before filing. Formats not recorded by the researching agent; confirm during the URL verification pass.",
     "domain": "state-police-west",
     "checked_on": "2026-09-19"
   },
@@ -15966,7 +15974,8 @@
     "evidence": "Cited as 'Kaggle - NCRB Crime in India, state-wise 2001-2022, 75+ CSVs' in a third-party data-source table that separately and correctly flags two other Kaggle Indian-crime datasets as unverified/synthetic.",
     "notes": "PROVENANCE VERDICT: the only defensible Kaggle option, and only as a convenience copy. Prefer pulling the same tables from data.gov.in or OpenCity so the citation chain reaches a government source.",
     "domain": "open-data-portals",
-    "checked_on": "2026-09-19"
+    "checked_on": "2026-09-19",
+    "how_to_obtain": "Access recorded as 'login' but the acquisition route was not documented by the researching agent. Determine it during the URL verification pass."
   },
   {
     "id": "state-police-south-tn-open-government-data-portal",
@@ -17833,7 +17842,9 @@
     "cadence": "realtime",
     "lag": "n/a (private)",
     "taxonomy": "n/a",
-    "formats": [],
+    "formats": [
+      "unknown"
+    ],
     "access": "blocked",
     "machine_readable": 0,
     "license": "ToU-restricts-reuse",
@@ -17848,7 +17859,7 @@
     "verification": "VERIFIED_LANDING",
     "evidence": "Fetched https://en.wikipedia.org/wiki/MyGate on 2026-09-19: 'an app created to manage security, finances and community living in housing societies', ~3.5 million homes across 25,000 societies in 25 Indian cities as of 2023, with a noted 2020 privacy controversy and competing lawsuits.",
     "how_to_obtain": "Do not pursue. Recorded as an explicit exclusion.",
-    "notes": "Listed so the exclusion is a documented decision rather than an oversight. If MyGate ever published aggregate society-level incident counts it would be interesting; they do not, and we should not ask.",
+    "notes": "Listed so the exclusion is a documented decision rather than an oversight. If MyGate ever published aggregate society-level incident counts it would be interesting; they do not, and we should not ask. Formats not recorded by the researching agent; confirm during the URL verification pass.",
     "domain": "media-crowdsourced",
     "checked_on": "2026-09-19"
   },
@@ -17902,7 +17913,9 @@
     "cadence": "realtime",
     "lag": "minutes",
     "taxonomy": "n/a",
-    "formats": [],
+    "formats": [
+      "unknown"
+    ],
     "access": "blocked",
     "machine_readable": 0,
     "license": "unknown",
@@ -17917,7 +17930,7 @@
     "verification": "UNVERIFIED",
     "evidence": "Not applicable - this entry records a deliberate exclusion, not a source under evaluation.",
     "how_to_obtain": "The only acceptable version of this is inbound and consented: let an RWA opt in and submit its own aggregated reports under a published moderation policy. Never harvest.",
-    "notes": "This is where the richest hyperlocal signal in India genuinely lives, and it is the one we must not take. Documenting the refusal explicitly so it reads as a decision in any future audit.",
+    "notes": "This is where the richest hyperlocal signal in India genuinely lives, and it is the one we must not take. Documenting the refusal explicitly so it reads as a decision in any future audit. Formats not recorded by the researching agent; confirm during the URL verification pass.",
     "domain": "media-crowdsourced",
     "checked_on": "2026-09-19",
     "urls": {}
@@ -18301,7 +18314,9 @@
     "cadence": "realtime",
     "lag": "n/a (not published)",
     "taxonomy": "custom",
-    "formats": [],
+    "formats": [
+      "unknown"
+    ],
     "access": "on-request",
     "machine_readable": 0,
     "license": "unknown",
@@ -18315,7 +18330,7 @@
     "verification": "UNVERIFIED",
     "evidence": "Not verified this session - Wikipedia has no article, WebSearch budget exhausted, and the relevant domains are blocked by this session's egress proxy. Named in the brief and known to exist from prior reporting, but I assert no URL and no figures.",
     "how_to_obtain": "Direct approach to Citizen COP Foundation for aggregate report counts by city and category; alternatively RTI to any police force that holds an MoU with them.",
-    "notes": "Low priority. Catalogued for completeness so a later agent does not re-research it from zero.",
+    "notes": "Low priority. Catalogued for completeness so a later agent does not re-research it from zero. Formats not recorded by the researching agent; confirm during the URL verification pass.",
     "domain": "media-crowdsourced",
     "checked_on": "2026-09-19",
     "urls": {}
@@ -18334,7 +18349,9 @@
     "cadence": "realtime",
     "lag": "n/a (not published)",
     "taxonomy": "n/a",
-    "formats": [],
+    "formats": [
+      "unknown"
+    ],
     "access": "rti-only",
     "machine_readable": 0,
     "license": "unknown",
@@ -18349,7 +18366,7 @@
     "verification": "UNVERIFIED",
     "evidence": "Not verified this session. Wikipedia search for 'Disha app Andhra Pradesh police' returned no relevant article (results were unrelated AP topics). WebSearch budget exhausted; AP government domains blocked by this session's egress proxy. No URL asserted.",
     "how_to_obtain": "RTI to AP Police (Disha nodal officer, Mangalagiri) for monthly Disha SOS alert counts by district and by police station, plus alert-to-FIR conversion.",
-    "notes": "Include in the same RTI batch as Himmat and ERSS - one template, many addressees.",
+    "notes": "Include in the same RTI batch as Himmat and ERSS - one template, many addressees. Formats not recorded by the researching agent; confirm during the URL verification pass.",
     "domain": "media-crowdsourced",
     "checked_on": "2026-09-19",
     "urls": {}
@@ -18403,7 +18420,9 @@
     "cadence": "realtime",
     "lag": "n/a",
     "taxonomy": "n/a",
-    "formats": [],
+    "formats": [
+      "unknown"
+    ],
     "access": "blocked",
     "machine_readable": 0,
     "license": "unknown",
@@ -18417,7 +18436,7 @@
     "verification": "UNVERIFIED",
     "evidence": "Not verified this session (WebSearch budget exhausted; play.google.com blocked by this session's egress proxy). No URL asserted.",
     "how_to_obtain": "No realistic route. Recommend dropping from the catalogue in Phase 2.",
-    "notes": "Included only to record that it was checked and is a dead end, so it is not re-investigated.",
+    "notes": "Included only to record that it was checked and is a dead end, so it is not re-investigated. Formats not recorded by the researching agent; confirm during the URL verification pass.",
     "domain": "media-crowdsourced",
     "checked_on": "2026-09-19",
     "urls": {}
@@ -18862,7 +18881,8 @@
     "evidence": "A third-party audit byte-verified the header of crime_dataset_india.csv and recorded no coordinate columns; another source-catalogue entry records the literal filename Crimes_in_india_2001-2023_synthetic.csv being cited in dashboards as real Indian crime data.",
     "notes": "CATALOGUED AS A HAZARD, NOT A SOURCE. These files are already inside public-facing 'crime map' and 'safe route' apps. Phase-2 rule: nothing enters the pipeline without a resolvable link to a government table; anything else is excluded or labelled synthetic in the UI.",
     "domain": "open-data-portals",
-    "checked_on": "2026-09-19"
+    "checked_on": "2026-09-19",
+    "how_to_obtain": "Access recorded as 'login' but the acquisition route was not documented by the researching agent. Determine it during the URL verification pass."
   },
   {
     "id": "mha-parliament-cbi-view-fir",
@@ -19126,7 +19146,8 @@
     "evidence": "Cited as a four-year longitudinal Karnataka crime dataset in a public project's data-source table alongside the KSP originals and the OpenCity mirror.",
     "notes": "Use only to sanity-check a KSP parse. Prefer OpenCity.",
     "domain": "open-data-portals",
-    "checked_on": "2026-09-19"
+    "checked_on": "2026-09-19",
+    "how_to_obtain": "Access recorded as 'login' but the acquisition route was not documented by the researching agent. Determine it during the URL verification pass."
   },
   {
     "id": "khoya-paya-trackchild-vatsalya",
@@ -19879,7 +19900,9 @@
     "cadence": "irregular",
     "lag": "unknown",
     "taxonomy": "IPC+SLL",
-    "formats": [],
+    "formats": [
+      "unknown"
+    ],
     "access": "rti-only",
     "machine_readable": 0,
     "license": "n/a",
@@ -19892,7 +19915,7 @@
     "verification": "UNVERIFIED",
     "evidence": "Searches across police.ddd.gov.in, ddd.gov.in/police, dnh.gov.in and dnhpolice.gov.in returned helpline and service pages only — no statistics, no annual report, no dashboard.",
     "how_to_obtain": "RTI to PIO, Home Department, UT Administration of DNH & DD, Secretariat, Silvassa 396230, requesting station-wise FIR counts by major head, monthly, last 5 years, in CSV/XLSX.",
-    "notes": "For this UT, fall back to NCRB state/UT tables rather than chasing a local source.",
+    "notes": "For this UT, fall back to NCRB state/UT tables rather than chasing a local source. Formats not recorded by the researching agent; confirm during the URL verification pass.",
     "domain": "state-police-west",
     "checked_on": "2026-09-19"
   },

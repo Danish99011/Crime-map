@@ -659,6 +659,28 @@ enforcement-effort bias. A cited survey found 73% of 12,308 respondents had litt
 confidence in FSSAI/state regulators — relevant to how any adulteration layer is framed.
 ```
 
+### 41. CCTNS / ICJS — the structural answer to "why does India not have police.uk"
+NCRB-implemented; integrates **more than 14,000 police stations** (target ~15,000 stations plus
+5,000 supervisory offices) on a Core Application Software built by Wipro, holding FIR
+registration, investigation records and charge sheets. ICJS links CCTNS to e-Courts, e-Prisons,
+Forensics and Prosecution. NAFIS (linked) held 1.06 crore fingerprint records as of 31 Oct 2024.
+The citizen portal offers individual lookups (FIR copy, tenant/servant verification), not
+statistics.
+
+```
+id: specialised-crime-cctns-icjs | tier: 2 | geo_granularity: police-station
+unit_of_record: fir-record | cadence: realtime | access: login | verification: CITED
+url landing: https://ncrb.gov.in | priority: 3 | ingest_difficulty: 5
+*** The FIR records in CCTNS ARE police-station-identified. The only reason India has no
+street-level crime map is policy, not technology. Any serious version of this product
+eventually has to argue for a CCTNS aggregate-release policy. ***
+CAVEAT — legal: FIR-level data names accused persons who have not been convicted. Bulk
+publication carries acute DPDP Act and defamation exposure. Aggregate-only, k-anonymised,
+with a suppression threshold, or not at all.
+how_to_obtain: state-level engagement is far more tractable than NCRB — several state police
+forces already publish CCTNS-derived dashboards under their own branding. Start there.
+```
+
 ## Granularity reality check
 
 | Domain | Finest PUBLISHED geography | Finest HELD geography | Location semantics | Cadence | Lag |

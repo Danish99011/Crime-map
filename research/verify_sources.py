@@ -41,6 +41,19 @@ from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parent
 SOURCES = ROOT / "sources"
+# Hosts whose robots.txt forbids automated access outright, verified by hand
+# on 2026-09-20 and recorded in docs/TERMS-REVIEW.md. Both serve:
+#
+#     User-agent: *
+#     Disallow: /
+#
+# A link-checker is an automated agent, so `Disallow: /` covers it. These are
+# skipped as a rule-2 decision, not a performance one: their URLs are reported
+# as ROBOTS_DISALLOWED rather than silently dropped, so the catalogue records
+# that we chose not to look rather than implying the link is bad. Verify them
+# by hand, or through data.gov.in's registered API, which is an invited channel.
+ROBOTS_DISALLOWED = ("ncrb.gov.in", "data.gov.in")
+
 REPORT_JSON = ROOT / "url_check.json"
 REPORT_MD = ROOT / "URL_CHECK.md"
 
@@ -260,6 +273,16 @@ def main() -> int:
     args = parser.parse_args()
 
     targets = collect_urls(args.domain)
+
+    blocked = [t for t in targets
+               if any(urlsplit(t[3]).netloc.lower().endswith(h)
+                      for h in ROBOTS_DISALLOWED)]
+    if blocked:
+        targets = [t for t in targets if t not in blocked]
+        print(f"Not fetching {len(blocked)} URLs on "
+              f"{', '.join(ROBOTS_DISALLOWED)}: robots.txt disallows automated "
+              f"access to the whole site (docs/TERMS-REVIEW.md). Recorded as "
+              f"ROBOTS_DISALLOWED, not as broken links.")
     if args.skip_host:
         skip = {h.lower() for h in args.skip_host}
         kept = [t for t in targets
@@ -285,6 +308,12 @@ def main() -> int:
             result["verdict"] = verdict(result)
             rows.append(result)
             print(f"  [{done}/{len(targets)}] {result['verdict']:12s} {url}", flush=True)
+
+    for domain, entry_id, key, url in blocked:
+        rows.append({"url": url, "status": None, "verdict": "ROBOTS_DISALLOWED",
+                     "domain": domain, "entry_id": entry_id, "url_key": key,
+                     "note": "robots.txt disallows automated access to this host; "
+                             "check by hand or via the registered API"})
 
     write_report(rows)
     counts = defaultdict(int)

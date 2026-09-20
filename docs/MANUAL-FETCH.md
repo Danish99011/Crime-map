@@ -1,3 +1,29 @@
+> **Superseded on 2026-09-20, and kept for the record.**
+>
+> The egress policy was changed and the fetch ran from here. Nothing on this
+> page needs doing by hand any more for Maharashtra: the probe was run, the
+> form controls were read off the live page, the fetcher was finished against
+> them, and `scripts/harvest_mumbai.py` now collects Mumbai unattended. See
+> **`docs/LIVE-FETCH-2026-09-20.md`** for what was found and
+> **`docs/TERMS-REVIEW.md`** for the terms that permit it.
+>
+> Two asks below did survive, and both are now blocked on a *rule*, not a
+> network:
+>
+> * **NCRB district tables 2015-2024** (item 4). `ncrb.gov.in` and
+>   `data.gov.in` both publish `Disallow: /`, so the automated route is closed
+>   under `docs/INGESTION.md` rule 2. A person downloading them by hand, or the
+>   data.gov.in API with your own registered key, are the two routes left.
+> * **Bengaluru** (item 2). `ksp.karnataka.gov.in` is unreachable from here;
+>   the OpenCity CSVs are the better target anyway.
+>
+> Item 3, the Delhi station list, turned out not to be the constraint. Delhi
+> has a live FIR search back to 2015 -- but it refuses any query carrying
+> neither an FIR number nor a person's name, so it cannot enumerate a station's
+> FIRs, and we do not search by name.
+
+---
+
 # What I need you to run
 
 I cannot reach any `.gov.in` host from this environment, and that is an

@@ -13,6 +13,27 @@ _Consolidated from 17 research dossiers and 469 catalogued sources · 2026-09-19
 
 ---
 
+> **Corrections from the first live-network session, 2026-09-20.** The
+> verification caveat above has now been partly discharged, and four things in
+> this document are wrong or incomplete as a result. See
+> `docs/LIVE-FETCH-2026-09-20.md` for the evidence.
+>
+> 1. **NCRB and data.gov.in forbid automated access.** Both publish
+>    `User-agent: * / Disallow: /`. The "~2,521 NCRB resources on data.gov.in"
+>    in §2 are real, and off-limits to a scraper under INGESTION rule 2. This
+>    is the binding constraint on the district ceiling, not availability.
+> 2. **Delhi is not "e-FIR only".** `cctns.delhipolice.gov.in` searches all
+>    FIRs from 01-07-2015. But it refuses a search carrying neither an FIR
+>    number nor a person's name, so it is a lookup, not a listing, and yields
+>    no station-month series. The practical conclusion is unchanged; the reason
+>    is different, and the difference matters if anyone re-tries it.
+> 3. **Maharashtra's published series starts 2017-01-01**, and no query may
+>    span more than 90 days. The portal states both only in a validation
+>    message. There is no route to 2015-2016 by this feed.
+> 4. **Mumbai is one commissionerate, BRIHAN MUMBAI CITY**, not the two revenue
+>    districts this project assumed. The MHA station master uses the same
+>    string, which is what makes the FIR-to-station join possible at all.
+
 ## 1. The headline
 
 **A police.uk-equivalent crime map is buildable in India today, for about five states covering

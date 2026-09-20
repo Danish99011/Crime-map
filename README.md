@@ -4,16 +4,25 @@ A public crime-information portal for India, in the spirit of
 [police.uk](https://www.police.uk/) — so that an ordinary person can find out what
 crime looks like where they live, walk, rent or buy.
 
-**Current state: Bihar pilot, geography complete, crime feed not yet connected.**
+**Current state: Mumbai carries live FIRs. Bihar has the geography and no feed.**
+
+The two halves of the problem sit in different cities. Bihar publishes thana
+jurisdiction polygons and its FIR repository is unreachable from here. Mumbai is
+the exact inverse: Maharashtra publishes every FIR it registers, daily and
+station-level, and no boundaries at all. So Mumbai is drawn as stations, never
+as areas, because no honest area has been published.
 
 ## What exists
 
 ```
 research/     Phase 1: 540 catalogued sources across 17 domains
 docs/         PHASE1-FINDINGS.md (what is buildable) · INGESTION.md (the rules)
-pipeline/     The Bihar pipeline, end to end
-site/         The map page (generated)
-tests/        68 tests
+              TERMS-REVIEW.md (what each portal permits, read from the live sites)
+              LIVE-FETCH-2026-09-20.md (what the first unblocked session found)
+pipeline/     The Bihar pipeline, plus mahapolice.py / mumbai.py for Mumbai
+scripts/      harvest_mumbai.py -- the resumable live fetch
+site/         The map pages (generated)
+tests/        124 tests
 ```
 
 ## Run it
@@ -29,6 +38,22 @@ python3 -m pipeline.build_page   # render site/index.html
 
 python3 -m pytest tests/ -q
 ```
+
+### Mumbai, from the live portal
+
+```bash
+python3 scripts/fetch_live.py --probe          # look, fetch nothing
+python3 scripts/harvest_mumbai.py --from 2021-01 --to 2026-09   # resumable
+python3 -m pipeline.mumbai                     # aggregate to station-month
+python3 -m pipeline.build_mumbai_page          # render site/mumbai.html
+```
+
+The harvest is slow on purpose and slower still by the portal's own speed: it
+serves a 50-row page in 20-26 seconds and pages must be walked in order, so a
+recent month is about an hour and the full 2017-2026 series is a multi-day
+background job. It resumes, and it marks a month complete only when its row
+count matches the count the portal declares. Do not raise the concurrency --
+these are public-sector servers that citizens depend on.
 
 Then serve `site/` and open it. Everything under `data/` and the generated pages
 are reproducible from those commands and are not committed.
@@ -80,13 +105,18 @@ stated above the fold on the map itself. See `docs/INGESTION.md` rule 5.
 
 ## Next
 
-1. Run `research/verify_sources.py` from an unblocked network — 86% of the
-   Phase 1 catalogue is `CITED` rather than verified because every `.gov.in` host
-   was blocked during research.
-2. Work the remaining 118-row review queue. 85 of those are stations whose point
+1. **Keep the Mumbai harvest running.** `scripts/harvest_mumbai.py` resumes; the
+   full 2017-2026 series is tens of hours of polite fetching.
+2. **Get the NCRB district tables by hand.** `ncrb.gov.in` and `data.gov.in` both
+   publish `Disallow: /`, so the automated route is closed under
+   `docs/INGESTION.md` rule 2 — not by preference but by the term. A person
+   downloading them, or the data.gov.in API with a registered key, are the routes
+   left. This is what closes the 2015-2024 district gap.
+3. Work the remaining 118-row review queue. 85 of those are stations whose point
    lands in an unrelated polygon — almost certainly outposts or stations created
    after the boundaries were drawn — and need either local knowledge or a newer
    boundary source.
-3. Finish the Bihar FIR adapter — `docs/INGESTION.md` has the procedure.
 4. Verify the IPC→BNS concordance against NCRB's Sankalan compendium before any
    post-2024 data is published.
+5. Bengaluru, when `ksp.karnataka.gov.in` is reachable — or via the OpenCity
+   Karnataka CSVs, which are already machine-readable and licensed.

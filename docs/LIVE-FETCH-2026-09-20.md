@@ -149,11 +149,27 @@ attempt, from a network that reaches other `.gov.in` hosts in the same minute.
 Nothing about the source was established, so nothing is claimed about it. The
 OpenCity Karnataka CSVs remain the better first target there in any case.
 
-## 6. Gurugram and Noida
+## 6. Gurugram and Noida: confirmed from the live sites
 
-Not re-tested. Neither Haryana nor Uttar Pradesh was reported to publish a bulk
-FIR listing or station boundaries, and nothing found in this session changes
-that. They stay RTI targets.
+Both states' portals answer, and neither publishes a bulk FIR listing.
+
+| Host | Result |
+|---|---|
+| `www.haryanapolice.gov.in` | 200 (the apex `haryanapolice.gov.in` does not answer) |
+| `uppolice.gov.in` | 200 |
+| robots.txt on both | 404 — none published, so nothing disallowed |
+
+Both run the same CCTNS citizen-portal template, and on both the landing page
+offers the same five citizen links. The one that matters, **"FIR Download",
+points at `Citizen_login.aspx` on each.** It is login-gated: a citizen retrieves
+*their own* FIR, which is a different product from Maharashtra's published list
+of every FIR registered. There is no date-and-station search to drive.
+
+So the earlier conclusion holds, and now on evidence rather than on absence of
+evidence: **Gurugram and Noida stay RTI targets.** Neither state publishes
+station boundaries either, so even with a feed they would map as points only.
+
+`research/sources/rti-playbook.md` has the drafts.
 
 ---
 

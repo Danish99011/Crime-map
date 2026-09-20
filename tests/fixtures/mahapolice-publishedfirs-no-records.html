@@ -1,0 +1,30 @@
+<!--
+  Trimmed live capture - Maharashtra Police, Published FIRs.
+  Unit BRIHAN MUMBAI CITY (19378), 01/01/2020..31/12/2020, page size 50.
+  Taken 2026-09-20 by this project.
+
+  This is the portal explicitly saying it holds nothing for the query, which
+  is NOT the same thing as a failed fetch. Two portal-stated limits produced
+  it, both quoted verbatim in the validation message on the same response:
+
+      "From Date should be greater than 1/01/2017 and date difference
+       between From and To Date should be less than 90 days."
+
+  So the published series starts 2017-01-01 and no single query may span more
+  than 90 days. A 2020 full-year request violates both and comes back empty.
+
+  The parser must tell this apart from a schema change. An unrecognised page
+  is a failed fetch and must raise; this page is a verified zero and may be
+  recorded as one. Conflating them is how a map invents a safe neighbourhood.
+-->
+<div class="pagesubmission">
+    <span id="ContentPlaceHolder1_lbltotalrecord" style="font-weight:bold;">0</span>&nbsp;<span id="ContentPlaceHolder1_Label2">total records found</span>
+</div>
+<span id="ContentPlaceHolder1_lblMsg">From Date should be greater than 1/01/2017 and date difference between From and To Date should be less than 90 days.</span>
+<table class="GridTable" cellspacing="0" rules="all" border="1" id="ContentPlaceHolder1_gdvDeadBody" style="border-collapse:collapse;">
+	<tr>
+		<td>
+            <span id="ContentPlaceHolder1_gdvDeadBody_lblNoRowsFound">No Records Found</span>
+        </td>
+	</tr>
+</table>

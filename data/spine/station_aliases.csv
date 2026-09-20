@@ -1,142 +1,26 @@
 district,station_name,thana_id,confirmed_by,note
-ARARIA,ARARIA,BH-5140003,rule:name-over-geometry,"name matched 'ARARIA' at 1.0; point fell in 'ARARIA R.S OP', which is the unreliable witness"
-ARARIA,BHARGAWAN,BH-5140014,rule:corroborated,"name 'BHARGAWAN' ~ 'BHARGAMA' at 0.82, below the 0.86 threshold but the point falls inside it"
-ARARIA,JOGBANI,BH-5140031,rule:name-over-geometry,"name matched 'JOGABANI' at 0.933; point fell in 'BATHNAHA', which is the unreliable witness"
-AURANGABAD,DEVKUND,BH-5137019,rule:corroborated,"name 'DEVKUND' ~ 'DEOKUND' at 0.86, below the 0.86 threshold but the point falls inside it"
-AURANGABAD,JAMHAUR,BH-5137035,rule:corroborated,"name 'JAMHAUR' ~ 'JAMHORE' at 0.71, below the 0.86 threshold but the point falls inside it"
-AURANGABAD,UPHARA,BH-5137072,rule:corroborated,"'UPHARA' and 'UPAHARA': same consonant skeleton, unique in this district; the point falls inside it"
-AURANGABAD,KHAIRA,BH-5137074,rule:corroborated,"name 'KHAIRA' ~ 'NTPC KHAIRA' at 0.71, below the 0.86 threshold but the point falls inside it"
-AURANGABAD,NARARI KALA KHURD,BH-5137077,rule:name-over-geometry,"name matched 'NARARI KALA KHURD' at 1.0; point fell in 'BAREM OP', which is the unreliable witness"
-AURANGABAD,TANRWA,BH-5137081,rule:corroborated,"name 'TANRWA' ~ 'TANDWA' at 0.83, below the 0.86 threshold but the point falls inside it"
-BAGAHA,BAGAHA,BH-5803005,rule:name-over-geometry,"name matched 'BAGAHA' at 1.0; point fell in 'PATHAKHAULI OP', which is the unreliable witness"
-BAGAHA,GOBRAHIYA,BH-5803042,rule:name-over-geometry,"name matched 'GOBERAHIYA' at 0.941; point fell in 'DHANAHA', which is the unreliable witness"
-BANKA,DHORAIYA,BH-5797002,rule:corroborated,"name 'DHORAIYA' ~ 'DHURAIYA' at 0.86, below the 0.86 threshold but the point falls inside it"
-BANKA,Bandhua Kudawali,BH-5797048,rule:corroborated,"name 'Bandhua Kudawali' ~ 'BANDHUA KURAWA' at 0.86, below the 0.86 threshold but the point falls inside it"
-BEGUSARAI,BAKHARI,BH-5102006,rule:name-over-geometry,"name matched 'BAKHRI' at 0.909; point fell in 'CHHORAHI', which is the unreliable witness"
-BEGUSARAI,BALIA,BH-5102007,rule:name-over-geometry,"name matched 'BALIA' at 1.0; point fell in 'MUFASSIL', which is the unreliable witness"
-BEGUSARAI,GARHPURA,BH-5102016,rule:name-over-geometry,"name matched 'GARHPURA' at 1.0; point fell in 'MUFASSIL', which is the unreliable witness"
-BEGUSARAI,KHODAWANDPUR,BH-5102027,rule:corroborated,"name 'KHODAWANDPUR' ~ 'KHUDABANDPUR' at 0.82, below the 0.86 threshold but the point falls inside it"
-BEGUSARAI,NAYAGAON,BH-5102033,rule:name-over-geometry,"name matched 'NAYAGAON' at 1.0; point fell in 'MUFASSIL', which is the unreliable witness"
-BEGUSARAI,PHULWARIA,BH-5102036,rule:name-over-geometry,"name matched 'PHULWARIYA' at 1.0; point fell in 'TEGHRA', which is the unreliable witness"
-BEGUSARAI,SAHEBPUR KAMAL,BH-5102037,rule:name-over-geometry,"name matched 'SAHEBPUR KAMAL' at 1.0; point fell in 'BALIA', which is the unreliable witness"
-BEGUSARAI,BEGUSARAI MUFASSIL,BH-5102038,rule:corroborated,'BEGUSARAI MUFASSIL' and 'MUFASSIL': one name contains the other; the point falls inside it
-BEGUSARAI,DANDARI,BH-5102042,rule:name-over-geometry,"name matched 'DANDARI' at 1.0; point fell in 'MUFASSIL', which is the unreliable witness"
-WEST CHAMPARAN,MUFASSIL,BH-5127007,rule:corroborated,"name 'MUFASSIL' ~ 'BETTIAH (MUFFASIL)' at 0.70, below the 0.86 threshold but the point falls inside it"
-KAIMUR (BHABUA),KUDHNI,BH-5792029,rule:corroborated,"name 'KUDHNI' ~ 'KURHNI' at 0.83, below the 0.86 threshold but the point falls inside it"
-BHAGALPUR,BUDHUCHAK,BH-5103013,rule:name-over-geometry,"name matched 'BUDDHU CHAK' at 1.0; point fell in 'EKCHARI', which is the unreliable witness"
-BHAGALPUR,EKCHARI,BH-5103014,rule:name-over-geometry,"name matched 'EKCHARI' at 1.0; point fell in 'RASALPUR OP', which is the unreliable witness"
-BHAGALPUR,KAJARAILICHAK,BH-5103017,rule:corroborated,"name 'KAJARAILICHAK' ~ 'KAJRAILI' at 0.76, below the 0.86 threshold but the point falls inside it"
-BHAGALPUR,LODIPUR,BH-5103024,rule:name-over-geometry,"name matched 'LODIPUR' at 1.0; point fell in 'MOJAHIDPUR', which is the unreliable witness"
-BHAGALPUR,NATH NAGAR,BH-5103036,rule:name-over-geometry,"name matched 'NATHNAGAR' at 1.0; point fell in 'LALMATIYA OP', which is the unreliable witness"
-BHAGALPUR,SABAUR,BH-5103049,rule:name-over-geometry,"name matched 'SABAUR' at 1.0; point fell in 'INDUSTRIAL AREA', which is the unreliable witness"
-BHAGALPUR,SONHAULA,BH-5103052,rule:corroborated,"name 'SONHAULA' ~ 'SANHOULA' at 0.75, below the 0.86 threshold but the point falls inside it"
-BHAGALPUR,SANDKHAR,BH-5103058,rule:corroborated,"name 'SANDKHAR' ~ 'SANOKHAR' at 0.86, below the 0.86 threshold but the point falls inside it"
-BHAGALPUR,NTPC,BH-5103065,rule:name-over-geometry,"name matched 'NTPC' at 1.0; point fell in 'GORADIH', which is the unreliable witness"
-BHOJPUR,BIHIYA,BH-5124008,rule:name-over-geometry,"name matched 'BIHIYAN' at 0.909; point fell in 'JAGDISHPUR', which is the unreliable witness"
-BHOJPUR,JAGDISHPUR,BH-5124011,rule:name-over-geometry,"name matched 'JAGDISHPUR' at 1.0; point fell in 'DHANGAI', which is the unreliable witness"
-BUXAR,KRISHNABRAHM,BH-5793012,rule:corroborated,"name 'KRISHNABRAHM' ~ 'KARISHNA BARHAM' at 0.85, below the 0.86 threshold but the point falls inside it"
-DARBHANGA,BIRAUL,BH-5106011,rule:corroborated,"name 'BIRAUL' ~ 'BIROUL' at 0.83, below the 0.86 threshold but the point falls inside it"
-DARBHANGA,RAIYAM,BH-5106015,rule:corroborated,"name 'RAIYAM' ~ 'REYAM' at 0.80, below the 0.86 threshold but the point falls inside it"
-DARBHANGA,JALAI,BH-5106032,rule:corroborated,"'JALAI' and 'JALE': same consonant skeleton, unique in this district; the point falls inside it"
-DARBHANGA,KAMTAUL,BH-5106035,rule:corroborated,"name 'KAMTAUL' ~ 'KAMTOL' at 0.77, below the 0.86 threshold but the point falls inside it"
-DARBHANGA,KEUTI,BH-5106037,rule:corroborated,"name 'KEUTI' ~ 'KEWTI' at 0.80, below the 0.86 threshold but the point falls inside it"
-DARBHANGA,KUSESHWRA ASTHAN,BH-5106038,rule:corroborated,"name 'KUSESHWRA ASTHAN' ~ 'KUSHEWER STHAN' at 0.81, below the 0.86 threshold but the point falls inside it"
-DARBHANGA,SEMARI BAZAR,BH-5106054,rule:corroborated,"'SEMARI BAZAR' and 'SIMRI': same consonant skeleton, unique in this district; the point falls inside it"
+BEGUSARAI,NAWA KOTHI,BH-5102035,rule:code-matched,ps_cd 5102035 is i-Bhugoal PS_Code 'NAOKOTHI' in the same district; the name alone would not have matched
+BHAGALPUR,AKBARNER,BH-5103001,rule:code-matched,ps_cd 5103001 is i-Bhugoal PS_Code 'AKBARNAGAR' in the same district; the name alone would not have matched
+BUXAR,KRISHNABRAHM,BH-5793002,rule:code-matched,ps_cd 5793002 is i-Bhugoal PS_Code 'NAYABHOJPUR OP' in the same district; the name alone would not have matched
 DARBHANGA,DARBHANGA TOWN,BH-5106072,rule:corroborated,"'DARBHANGA TOWN' and 'DARBHANGA SADAR': same consonant skeleton, unique in this district; the point falls inside it"
-GAYA,AATI,BH-5109001,rule:corroborated,"name 'AATI' ~ 'ANTI' at 0.86, below the 0.86 threshold but the point falls inside it"
-GAYA,AMAS,BH-5109003,rule:name-over-geometry,"name matched 'AMAS' at 1.0; point fell in 'GURUA', which is the unreliable witness"
-GAYA,BUNIYADGANJ,BH-5109011,rule:name-over-geometry,"name matched 'BUNIYADGANJ' at 1.0; point fell in 'MUFASSIL', which is the unreliable witness"
-GAYA,KOTHIGRAM,BH-5109047,rule:corroborated,"name 'KOTHIGRAM' ~ 'KOTHI' at 0.71, below the 0.86 threshold but the point falls inside it"
-GAYA,MAGADH MEDICAL COLLEGE,BH-5109049,rule:corroborated,"name 'MAGADH MEDICAL COLLEGE' ~ 'MAGADH MEDICAL' at 0.81, below the 0.86 threshold but the point falls inside it"
-GAYA,GAYA MUFASSIL,BH-5109051,rule:corroborated,"name 'GAYA MUFASSIL' ~ 'MUFASSIL' at 0.78, below the 0.86 threshold but the point falls inside it"
-GAYA,ROSHANGANJ,BH-5109068,rule:corroborated,"name 'ROSHANGANJ' ~ 'RAUSHANGANJ' at 0.86, below the 0.86 threshold but the point falls inside it"
-GAYA,TEKARI,BH-5109076,rule:corroborated,"name 'TEKARI' ~ 'TIKARI' at 0.83, below the 0.86 threshold but the point falls inside it"
-GAYA,MEN,BH-5109078,rule:corroborated,"'MEN' and 'MAIN': same consonant skeleton, unique in this district; the point falls inside it"
-GOPALGANJ,MIRGANJ,BH-5139010,rule:name-over-geometry,"name matched 'MIRGANJ' at 1.0; point fell in 'UCHKAGAON', which is the unreliable witness"
-KATIHAR,NAGAR,BH-5130010,rule:corroborated,'NAGAR' and 'KATIHAR NAGAR': one name contains the other; the point falls inside it
-KATIHAR,KADWA,BH-5130012,rule:name-over-geometry,"name matched 'KADWA' at 1.0; point fell in 'KATIHAR NAGAR', which is the unreliable witness"
-KATIHAR,MUFASSIL,BH-5130013,rule:name-over-geometry,"name matched 'MUFASSIL' at 1.0; point fell in 'SHAYAK', which is the unreliable witness"
-KATIHAR,PRANPUR,BH-5130016,rule:name-over-geometry,"name matched 'PRANPUR' at 1.0; point fell in 'ROSHNA', which is the unreliable witness"
-KATIHAR,KURSAILA,BH-5130017,rule:corroborated,"name 'KURSAILA' ~ 'KURSELA' at 0.80, below the 0.86 threshold but the point falls inside it"
-KATIHAR,Sahayak Thana,BH-5130066,rule:name-over-geometry,"name matched 'SHAYAK' at 0.923; point fell in 'KATIHAR NAGAR', which is the unreliable witness"
-KHAGARIA,PASRAHA,BH-5108009,rule:corroborated,"name 'PASRAHA' ~ 'PASHRA' at 0.77, below the 0.86 threshold but the point falls inside it"
-KHAGARIA,Gangaur,BH-5108018,rule:corroborated,"name 'Gangaur' ~ 'GANGOUR OP' at 0.86, below the 0.86 threshold but the point falls inside it"
+GAYA,MAGADH VISWAVIDYALAY,BH-5109050,rule:code-matched,ps_cd 5109050 is i-Bhugoal PS_Code 'MAGADH UNIVERSITY' in the same district; the name alone would not have matched
+GAYA,Suhail,BH-5109066,rule:code-matched,ps_cd 5109066 is i-Bhugoal PS_Code 'SOHAIL' in the same district; the name alone would not have matched
+JEHANABAD,Barabar Tourism,BH-5790053,rule:code-matched,ps_cd 5790053 is i-Bhugoal PS_Code 'BARABAR' in the same district; the name alone would not have matched
+KATIHAR,Sahayak Thana,BH-5130023,rule:code-matched,ps_cd 5130023 is i-Bhugoal PS_Code 'SALMARI' in the same district; the name alone would not have matched
+KHAGARIA,MURKAHI,BH-5108007,rule:code-matched,ps_cd 5108007 is i-Bhugoal PS_Code 'MORKHI' in the same district; the name alone would not have matched
+KHAGARIA,Riverine Mohraghat,BH-5108013,rule:code-matched,ps_cd 5108013 is i-Bhugoal PS_Code 'MARIA OP' in the same district; the name alone would not have matched
+KHAGARIA,Bahadurpur,BH-5108017,rule:code-matched,ps_cd 5108017 is i-Bhugoal PS_Code 'BHARKHAND OP' in the same district; the name alone would not have matched
 KHAGARIA,Madaiya,BH-5108013,rule:corroborated,"name 'Madaiya' ~ 'MARIA OP' at 0.73, below the 0.86 threshold but the point falls inside it"
-KISHANGANJ,THAKURGANJ,BH-5791011,rule:name-over-geometry,"name matched 'THAKURGANJ' at 1.0; point fell in 'KURLIKOT', which is the unreliable witness"
-KISHANGANJ,TEDAGACHH,BH-5791044,rule:corroborated,"name 'TEDAGACHH' ~ 'TERHAGACHH' at 0.82, below the 0.86 threshold but the point falls inside it"
-KISHANGANJ,Paharkatta,BH-5791059,rule:corroborated,"name 'Paharkatta' ~ 'PAHARKATTA PS, ARRABARI OP' at 0.75, below the 0.86 threshold but the point falls inside it"
-LAKHISARAI,PIPARIA,BH-5802035,rule:name-over-geometry,"name matched 'PIPARIA' at 1.0; point fell in 'BARAHIYA', which is the unreliable witness"
-MADHUBANI,BHAIRAVSTHAN,BH-5129004,rule:name-over-geometry,"name matched 'BHAIRAVSTHAN' at 1.0; point fell in 'JHANJHARPUR', which is the unreliable witness"
-MADHUBANI,JAINAGAR,BH-5129008,rule:name-over-geometry,"name matched 'JAINAGAR' at 1.0; point fell in 'DEVDHA', which is the unreliable witness"
-MADHUBANI,DEODHA,BH-5129018,rule:corroborated,"name 'DEODHA' ~ 'DEVDHA' at 0.83, below the 0.86 threshold but the point falls inside it"
-MADHUBANI,PANDAUL,BH-5129022,rule:name-over-geometry,"name matched 'PANDAUL' at 1.0; point fell in 'SAKRI', which is the unreliable witness"
-MADHUBANI,NAGAR,BH-5129028,rule:corroborated,'NAGAR' and 'TOWN': both name the district headquarters station; the point falls inside it
-MADHUBANI,SAHARGHAT,BH-5129036,rule:name-over-geometry,"name matched 'SAHARGHAT' at 1.0; point fell in 'BISFI', which is the unreliable witness"
-EAST CHAMPARAN,DHAKA,BH-5128008,rule:name-over-geometry,"name matched 'DHAKA' at 1.0; point fell in 'CHIRAIA', which is the unreliable witness"
-EAST CHAMPARAN,PATAHI,BH-5128023,rule:name-over-geometry,"name matched 'PATAHI' at 1.0; point fell in 'TURKAULIA', which is the unreliable witness"
-EAST CHAMPARAN,MAHUAWA,BH-5128054,rule:name-over-geometry,"name matched 'MAHUAWA' at 1.0; point fell in 'PIPRAKOTHI', which is the unreliable witness"
-MUZAFFARPUR,GAIGHAT,BH-5114018,rule:name-over-geometry,"name matched 'GAIGHAT' at 1.0; point fell in 'BENIBAD OP', which is the unreliable witness"
-MUZAFFARPUR,KATHAIYA,BH-5114024,rule:name-over-geometry,"name matched 'KATAIYA' at 0.923; point fell in 'AZIZPUR OP', which is the unreliable witness"
-MUZAFFARPUR,KUDHANI,BH-5114028,rule:corroborated,"name 'KUDHANI' ~ 'KURAHANI' at 0.80, below the 0.86 threshold but the point falls inside it"
 MUZAFFARPUR,NAGAR,BH-5114054,rule:corroborated,'NAGAR' and 'MUZAFFARPUR SADAR': both name the district headquarters station; the point falls inside it
-MUZAFFARPUR,MOTIPUR,BH-5114038,rule:name-over-geometry,"name matched 'MOTIPUR' at 1.0; point fell in 'KATAIYA', which is the unreliable witness"
-MUZAFFARPUR,SADAR,BH-5114054,rule:corroborated,'SADAR' and 'MUZAFFARPUR SADAR': one name contains the other; the point falls inside it
-MUZAFFARPUR,SARAIYA,BH-5114056,rule:name-over-geometry,"name matched 'SARAIYA' at 1.0; point fell in 'PAROO', which is the unreliable witness"
-MUZAFFARPUR,Panapur,BH-5114069,rule:name-over-geometry,"name matched 'PANAPUR OP' at 1.0; point fell in 'SEWAIPATTI', which is the unreliable witness"
-MUZAFFARPUR,Turki Khararu,BH-5114073,rule:corroborated,'Turki Khararu' and 'TURKI OP': one name contains the other; the point falls inside it
-MUNGER,MUFFASSIL,BH-5113037,rule:name-over-geometry,"name matched 'MUFFASIL P.S' at 1.0; point fell in 'KASHIM BAZAR P.S', which is the unreliable witness"
-NALANDA,VENA,BH-5134029,rule:name-over-geometry,"name matched 'WENA PS' at 1.0; point fell in 'NALANDA PS', which is the unreliable witness"
-NALANDA,SARE,BH-5134065,rule:name-over-geometry,"name matched 'SARE PS' at 1.0; point fell in 'ASTHAWAN PS', which is the unreliable witness"
-NALANDA,TELHARA,BH-5134070,rule:name-over-geometry,"name matched 'TELHARA PS' at 1.0; point fell in 'LAHERI PS', which is the unreliable witness"
-NAUGACHHIA,ISMAILPUR,BH-5798011,rule:name-over-geometry,"name matched 'ISMAILPUR' at 1.0; point fell in 'SONBARSA NADI', which is the unreliable witness"
-NAWADA,KAUAKOL,BH-5136011,rule:corroborated,"name 'KAUAKOL' ~ 'KAWAKOL' at 0.86, below the 0.86 threshold but the point falls inside it"
+NALANDA,BIHAR,BH-5134005,rule:code-matched,ps_cd 5134005 is i-Bhugoal PS_Code 'BIHAR SHARIF PS' in the same district; the name alone would not have matched
 PATNA,BHADAUR,BH-5117082,rule:corroborated,"name 'BHADAUR' ~ 'BAHADURPUR' at 0.71, below the 0.86 threshold but the point falls inside it"
-PATNA,CHOWK,BH-5117014,rule:corroborated,"name 'CHOWK' ~ 'CITY CHOWK' at 0.71, below the 0.86 threshold but the point falls inside it"
-PATNA,PIPRA,BH-5117038,rule:name-over-geometry,"name matched 'PIPRA' at 1.0; point fell in 'PARSA BAZAR', which is the unreliable witness"
-PATNA,KOTWALI,BH-5117044,rule:name-over-geometry,"name matched 'KOTWALI' at 1.0; point fell in 'GANDHI MAIDAN', which is the unreliable witness"
-PATNA,SRI KRISHNA PURI,BH-5117046,rule:corroborated,'SRI KRISHNA PURI' and 'SK PURI': initials expanded; the point falls inside it
-PATNA,PHULWARI,BH-5117060,rule:corroborated,"name 'PHULWARI' ~ 'PHULWARI SHARIF' at 0.70, below the 0.86 threshold but the point falls inside it"
-PATNA,PATLIPUTRA,BH-5117069,rule:name-over-geometry,"name matched 'PATLIPUTRA' at 1.0; point fell in 'DIGHA', which is the unreliable witness"
-PATNA,SIGAURI,BH-5117079,rule:corroborated,"name 'SIGAURI' ~ 'SIGORHI' at 0.71, below the 0.86 threshold but the point falls inside it"
-PATNA,BEUR,BH-5117083,rule:corroborated,"'BEUR' and 'BEOUR JAIL': same consonant skeleton, unique in this district; the point falls inside it"
-PATNA,RAJEEV NAGAR,BH-5117092,rule:name-over-geometry,"name matched 'RAAJEEVNAGAR' at 1.0; point fell in 'DIGHA', which is the unreliable witness"
-PATNA,RUPASPUR,BH-5117095,rule:name-over-geometry,"name matched 'RUPASPUR' at 1.0; point fell in 'KHAGAUL', which is the unreliable witness"
-PURNIA,AMAUR,BH-5118001,rule:corroborated,"name 'AMAUR' ~ 'AMOUR' at 0.80, below the 0.86 threshold but the point falls inside it"
-PURNIA,Maranga,BH-5118007,rule:name-over-geometry,"name matched 'MARANGA' at 1.0; point fell in 'PURNIA SADAR', which is the unreliable witness"
-PURNIA,BARHARA KOTHI,BH-5118011,rule:corroborated,"name 'BARHARA KOTHI' ~ 'BARHARA' at 0.74, below the 0.86 threshold but the point falls inside it"
-PURNIA,SADAR,BH-5118064,rule:corroborated,'SADAR' and 'PURNIA SADAR': one name contains the other; the point falls inside it
-ROHTAS,BAGHELA,BH-5125004,rule:corroborated,"name 'BAGHELA' ~ 'BAGHAILA' at 0.77, below the 0.86 threshold but the point falls inside it"
-ROHTAS,DAWAT,BH-5125010,rule:corroborated,"name 'DAWAT' ~ 'DAWETH' at 0.73, below the 0.86 threshold but the point falls inside it"
-ROHTAS,SHIVSAGAR,BH-5125023,rule:corroborated,"name 'SHIVSAGAR' ~ 'SHEOSAGAR' at 0.78, below the 0.86 threshold but the point falls inside it"
-ROHTAS,SANJHAULI,BH-5125032,rule:corroborated,"name 'SANJHAULI' ~ 'SANGHAULI' at 0.82, below the 0.86 threshold but the point falls inside it"
+ROHTAS,AMJHAUR,BH-5125007,rule:code-matched,ps_cd 5125007 is i-Bhugoal PS_Code 'AMJHOR' in the same district; the name alone would not have matched
 ROHTAS,Sasaram,BH-5125022,rule:corroborated,"name 'Sasaram' ~ 'SASARAM (MUFASSIL)' at 0.70, below the 0.86 threshold but the point falls inside it"
-ROHTAS,Darigaon,BH-5125048,rule:name-over-geometry,"name matched 'DARIGAON OP' at 1.0; point fell in 'SASARAM (MUFASSIL)', which is the unreliable witness"
-SAMASTIPUR,HASANPUR,BH-5133006,rule:name-over-geometry,"name matched 'HASANPUR' at 1.0; point fell in 'MOHANPUR', which is the unreliable witness"
-SAMASTIPUR,BITHAN,BH-5133007,rule:name-over-geometry,"name matched 'BITHAN' at 1.0; point fell in 'HASANPUR', which is the unreliable witness"
-SAMASTIPUR,MUFASSIL,BH-5133012,rule:name-over-geometry,"name matched 'MUFFASIL' at 1.0; point fell in 'SAMASTIPUR SADAR', which is the unreliable witness"
+SAMASTIPUR,CHAKMAHESHI,BH-5133001,rule:code-matched,ps_cd 5133001 is i-Bhugoal PS_Code 'MOHANPUR' in the same district; the name alone would not have matched
 SAMASTIPUR,SHAHPUR PATORI,BH-5133004,rule:corroborated,'SHAHPUR PATORI' and 'PATORI': one name contains the other; the point falls inside it
-SAMASTIPUR,NAGAR,BH-5133024,rule:corroborated,'NAGAR' and 'SAMASTIPUR SADAR': both name the district headquarters station; the point falls inside it
-SARAN,AMNAUR,BH-5123001,rule:corroborated,"name 'AMNAUR' ~ 'AMNOUR' at 0.83, below the 0.86 threshold but the point falls inside it"
-SARAN,NAGAR,BH-5123003,rule:corroborated,"name 'NAGAR' ~ 'NAGRA' at 0.80, below the 0.86 threshold but the point falls inside it"
-SARAN,ISUAPUR,BH-5123014,rule:corroborated,"name 'ISUAPUR' ~ 'ISHUPUR' at 0.86, below the 0.86 threshold but the point falls inside it"
-SARAN,JANTA BAZAAR,BH-5123026,rule:corroborated,'JANTA BAZAAR' and 'LAHLADPUR (JANTA BAZAR)': one name contains the other; the point falls inside it
-SARAN,KOPA,BH-5123027,rule:name-over-geometry,"name matched 'KOPA' at 1.0; point fell in 'REVILGANJ', which is the unreliable witness"
-SARAN,KHAIRA,BH-5123046,rule:name-over-geometry,"name matched 'KHAIRA' at 1.0; point fell in 'NAGRA', which is the unreliable witness"
-SHEIKHPURA,CHEBADA,BH-5804013,rule:corroborated,"name 'CHEBADA' ~ 'CHEWARA' at 0.71, below the 0.86 threshold but the point falls inside it"
-SHEIKHPURA,KORMA,BH-5804036,rule:name-over-geometry,"name matched 'KORMA' at 1.0; point fell in 'MEHUS', which is the unreliable witness"
-SHEIKHPURA,JAIRAMPUR MORE,BH-5804042,rule:corroborated,"name 'JAIRAMPUR MORE' ~ 'JAIRAMPUR' at 0.82, below the 0.86 threshold but the point falls inside it"
-SHEOHAR,Tariyani Chhapra,BH-5801034,rule:name-over-geometry,"name matched 'TARIYANI CHHAPRA' at 1.0; point fell in 'TARIYANI', which is the unreliable witness"
-SITAMARHI,SITAMARHI,BH-5138015,rule:name-over-geometry,"name matched 'SITAMARHI' at 1.0; point fell in 'RIGA', which is the unreliable witness"
-SIWAN,AANDAR,BH-5135001,rule:corroborated,"name 'AANDAR' ~ 'ANDER' at 0.80, below the 0.86 threshold but the point falls inside it"
-SIWAN,ASAWN,BH-5135002,rule:name-over-geometry,"name matched 'ASAWN' at 1.0; point fell in 'ANDER', which is the unreliable witness"
-SIWAN,GAUTAM BUDDHA NAGAR,BH-5135005,rule:corroborated,'GAUTAM BUDDHA NAGAR' and 'G.B. NAGAR': initials expanded; the point falls inside it
-SIWAN,BARHARIA,BH-5135006,rule:name-over-geometry,"name matched 'BARHARIA' at 1.0; point fell in 'MAHADEWA OP', which is the unreliable witness"
-SIWAN,BHAGWANPUR,BH-5135008,rule:name-over-geometry,"name matched 'BHAGWANPUR' at 1.0; point fell in 'BASANTPUR', which is the unreliable witness"
-SIWAN,DARAUNDA,BH-5135012,rule:name-over-geometry,"name matched 'DARAUNDHA' at 0.941; point fell in 'MAHARAJGANJ', which is the unreliable witness"
-SIWAN,JAMO BAZAAR,BH-5135019,rule:corroborated,'JAMO BAZAAR' and 'JAMO': one name contains the other; the point falls inside it
-SUPAUL,MARAUNA,BH-5800024,rule:name-over-geometry,"name matched 'MARAUNA' at 1.0; point fell in 'NIRMALI', which is the unreliable witness"
-SUPAUL,BHAPTIAHI SARAI,BH-5800036,rule:corroborated,"name 'BHAPTIAHI SARAI' ~ 'BHAPTIYAHI' at 0.78, below the 0.86 threshold but the point falls inside it"
-VAISHALI,BALIGAON,BH-5104003,rule:name-over-geometry,"name matched 'BALIGAON' at 1.0; point fell in 'RAGHOPUR', which is the unreliable witness"
-VAISHALI,PATEPUR,BH-5104012,rule:name-over-geometry,"name matched 'PATEPUR' at 1.0; point fell in 'TISIAUTA', which is the unreliable witness"
-VAISHALI,KATARAHA,BH-5104014,rule:corroborated,"name 'KATARAHA' ~ 'KARTAHAN' at 0.75, below the 0.86 threshold but the point falls inside it"
-VAISHALI,RAGHOPUR,BH-5104020,rule:name-over-geometry,"name matched 'RAGHOPUR' at 1.0; point fell in 'JURAWANPUR', which is the unreliable witness"
+SARAN,NAGAR,BH-5123004,rule:code-matched,ps_cd 5123004 is i-Bhugoal PS_Code 'SARAN NAGAR THANA' in the same district; the name alone would not have matched
+SARAN,MUFASSIL,BH-5123005,rule:code-matched,ps_cd 5123005 is i-Bhugoal PS_Code 'CHAPRA MUFFASIL' in the same district; the name alone would not have matched
+SARAN,BHAGWAN BAZAAR,BH-5123006,rule:code-matched,ps_cd 5123006 is i-Bhugoal PS_Code 'BHAGWANPUR HAT' in the same district; the name alone would not have matched
+SITAMARHI,MAJORGANJ,BH-5138009,rule:code-matched,ps_cd 5138009 is i-Bhugoal PS_Code 'MEJARGANJ' in the same district; the name alone would not have matched
+SUPAUL,RIVERINE PS,BH-5800038,rule:code-matched,ps_cd 5800038 is i-Bhugoal PS_Code 'SUPAUL NADI THANA' in the same district; the name alone would not have matched
+VAISHALI,GAOROL,BH-5104006,rule:code-matched,ps_cd 5104006 is i-Bhugoal PS_Code 'GORAUL' in the same district; the name alone would not have matched

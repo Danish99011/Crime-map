@@ -4,7 +4,21 @@ The crime feed identifies a station by **name and district**. The map unit is a
 **thana polygon**. This module builds the correspondence between them and grades
 each row by how much evidence supports it.
 
-**There is no ground truth here.** We have two witnesses, and both lie in
+**There is a shared key, found late.** The i-Bhugoal `PS_Code` and the MHA
+`ps_cd` turn out to occupy the same code space: 725 of 808 territorial stations
+have their `ps_cd` present as a `PS_Code`, with a median name similarity of
+1.000 and exactly one district disagreement. This was not documented anywhere
+and both this module and `geography.py` were originally written assuming no
+crosswalk existed. The code is now the strongest witness where it is present —
+and it is decisive precisely where names fail, because the disagreements it
+survives are translations rather than errors: MHA `AUDHYOGIK` against i-Bhugoal
+`INDUSTRIAL AREA`, `NAGAR` against `TOWN`, `KHAGARIA` against `TOWN THANA`.
+
+It is not used blindly. A code match whose district disagrees is refused, and a
+code match that contradicts an exact name match is reported rather than silently
+preferred.
+
+**Beyond the code, there is no ground truth.** The other two witnesses lie in
 characteristic ways:
 
   * *Geometry* — does the station's point fall inside this polygon? About 3% of
@@ -56,13 +70,14 @@ CORROBORATE_MIN = 0.70
 # A name match this strong overrides a disagreeing point.
 NAME_WINS_MIN = 0.90
 
+CODE_MATCHED = "code-matched"              # shared ps_cd/PS_Code key, district agrees
 CONFIRMED = "confirmed"                    # name and geometry agree
 NAME_OVER_GEOMETRY = "name-over-geometry"  # they disagree; the name is strong
 CORROBORATED = "corroborated"              # weak name, but geometry agrees
 NAME_ONLY = "name-only"                    # name resolves; no usable point
 NEEDS_REVIEW = "needs-review"              # not enough evidence to commit
 
-MAPPABLE = {CONFIRMED, NAME_OVER_GEOMETRY, CORROBORATED, NAME_ONLY}
+MAPPABLE = {CODE_MATCHED, CONFIRMED, NAME_OVER_GEOMETRY, CORROBORATED, NAME_ONLY}
 
 
 # Every Bihar district headquarters has BOTH an urban station (Nagar / Town /
@@ -180,29 +195,70 @@ def grade(station: dict, thanas: dict, resolver: ThanaResolver,
     geometry_name = thanas[by_geometry]["name"] if by_geometry else None
     geometry_similarity = similarity(station["name"], geometry_name)
 
-    if by_name and by_geometry and by_name == by_geometry:
-        tier, thana_id, rule = CONFIRMED, by_name, "name and geometry agree"
-    elif by_name and by_geometry and result.confidence >= NAME_WINS_MIN:
-        tier, thana_id = NAME_OVER_GEOMETRY, by_name
-        rule = (f"name matched {thanas[by_name]['name']!r} at {result.confidence}; "
-                f"point fell in {geometry_name!r}, which is the unreliable witness")
-    elif by_name and not by_geometry:
-        tier, thana_id, rule = NAME_ONLY, by_name, "no usable point; unambiguous name match"
-    elif by_geometry and geometry_similarity >= CORROBORATE_MIN:
-        tier, thana_id = CORROBORATED, by_geometry
-        rule = (f"name {station['name']!r} ~ {geometry_name!r} at "
-                f"{geometry_similarity:.2f}, below the {ACCEPT} threshold but the "
-                f"point falls inside it")
-    elif by_geometry and (token_reason := token_evidence(
-            station["name"], geometry_name, station["district"],
-            (unique_skeletons or {}).get(canonical_district(station["district"]), set()))):
-        tier, thana_id = CORROBORATED, by_geometry
-        rule = (f"{station['name']!r} and {geometry_name!r}: {token_reason}; "
-                f"the point falls inside it")
+    # Witness 1: the shared key, where it exists and lands in the right district.
+    candidate = f"BH-{station['ps_cd_mha']}"
+    by_code = None
+    code_district_conflict = False
+    if candidate in thanas:
+        if thanas[candidate]["district"] == canonical_district(station["district"]):
+            by_code = candidate
+        else:
+            code_district_conflict = True
+
+    # Pick by witness strength, then record how many witnesses agree with the
+    # pick. The count is what makes a row auditable: "three independent sources
+    # say this" is a different claim from "one did".
+    if by_code and by_name and by_code != by_name and result.confidence >= 0.999:
+        # An exact name match and the key disagree. Rare, and worth surfacing
+        # rather than resolving by fiat: these are usually outpost upgrades,
+        # where a station was promoted and inherited a code.
+        chosen, tier = None, NEEDS_REVIEW
+        rule = (f"code says {thanas[by_code]['name']!r} but an exact name match says "
+                f"{thanas[by_name]['name']!r} — likely an outpost upgrade; needs a human")
     else:
-        tier, thana_id = NEEDS_REVIEW, None
-        rule = ("name too weak to accept and geometry does not corroborate it"
-                if by_geometry else "neither name nor geometry places this station")
+        chosen, rule = by_code or by_name or None, ""
+        if chosen is None and by_geometry:
+            if geometry_similarity >= CORROBORATE_MIN:
+                chosen = by_geometry
+                rule = (f"name {station['name']!r} ~ {geometry_name!r} at "
+                        f"{geometry_similarity:.2f}, below the {ACCEPT} threshold but the "
+                        f"point falls inside it")
+            elif (token_reason := token_evidence(
+                    station["name"], geometry_name, station["district"],
+                    (unique_skeletons or {}).get(canonical_district(station["district"]), set()))):
+                chosen = by_geometry
+                rule = (f"{station['name']!r} and {geometry_name!r}: {token_reason}; "
+                        f"the point falls inside it")
+
+        if chosen is None:
+            tier = NEEDS_REVIEW
+            rule = ("name too weak to accept and geometry does not corroborate it"
+                    if by_geometry else "neither name nor geometry places this station")
+        else:
+            agreeing = [label for label, value in
+                        (("code", by_code), ("name", by_name), ("geometry", by_geometry))
+                        if value == chosen]
+            if len(agreeing) >= 2:
+                tier = CONFIRMED
+                rule = f"{len(agreeing)} independent witnesses agree: {', '.join(agreeing)}"
+            elif agreeing == ["code"]:
+                tier = CODE_MATCHED
+                rule = (f"ps_cd {station['ps_cd_mha']} is i-Bhugoal PS_Code "
+                        f"{thanas[chosen]['name']!r} in the same district; "
+                        f"the name alone would not have matched")
+            elif agreeing == ["name"]:
+                tier = NAME_ONLY if not by_geometry else NAME_OVER_GEOMETRY
+                rule = (f"name matched {thanas[chosen]['name']!r} at {result.confidence}"
+                        + (f"; the point fell in {geometry_name!r}, the unreliable witness"
+                           if by_geometry else "; no usable point"))
+            else:
+                tier = CORROBORATED
+                rule = rule or "geometry, corroborated by partial name evidence"
+
+    thana_id = chosen
+    witnesses = [label for label, value in
+                 (("code", by_code), ("name", by_name), ("geometry", by_geometry))
+                 if thana_id and value == thana_id]
 
     return {
         "station_name": station["name"],
@@ -213,8 +269,12 @@ def grade(station: dict, thanas: dict, resolver: ThanaResolver,
         "tier": tier,
         "mappable": tier in MAPPABLE,
         "rule": rule,
+        "witnesses": ",".join(witnesses),
+        "witness_count": len(witnesses),
         "by_name": by_name or "",
         "by_name_confidence": result.confidence,
+        "by_code": by_code or "",
+        "code_district_conflict": code_district_conflict,
         "by_geometry": by_geometry or "",
         "by_geometry_name": geometry_name or "",
         "by_geometry_similarity": round(geometry_similarity, 3),
@@ -238,6 +298,7 @@ def build_crosswalk() -> tuple[list[dict], dict]:
     rows = [grade(station, thanas, resolver, unique_skeletons) for station in stations]
 
     tiers = Counter(r["tier"] for r in rows)
+    code_present = sum(1 for r in rows if r["by_code"])
     reached = {r["thana_id"] for r in rows if r["mappable"] and r["thana_id"]}
 
     # Reachability is a property of the polygons, not of the station list: a
@@ -251,14 +312,17 @@ def build_crosswalk() -> tuple[list[dict], dict]:
         "territorial_stations": len(rows),
         "tiers": dict(tiers),
         "mappable_stations": sum(1 for r in rows if r["mappable"]),
+        "shared_key_present": code_present,
+        "shared_key_district_conflicts": sum(1 for r in rows if r["code_district_conflict"]),
         "needs_review": tiers[NEEDS_REVIEW],
         "thana_polygons": len(thanas),
         "thanas_reached_by_a_station": len(reached),
         "thanas_not_reached_by_a_station": len(thanas) - len(reached),
         "thanas_unresolvable_by_name": len(unreachable),
         "unresolvable_examples": [thanas[t]["name"] for t in unreachable[:5]],
-        "concordance_where_both_witnesses_spoke": round(
-            tiers[CONFIRMED] / max(tiers[CONFIRMED] + tiers[NAME_OVER_GEOMETRY], 1), 4),
+        "by_witness_count": dict(Counter(r["witness_count"] for r in rows)),
+        "mapped_on_a_single_witness": sum(
+            1 for r in rows if r["mappable"] and r["witness_count"] == 1),
     }
     return rows, diagnostics
 
@@ -269,7 +333,7 @@ def write_aliases(rows: list[dict]) -> int:
     These are the rules doing work beyond the resolver's own threshold, written
     out so that each one can be inspected, argued with and overridden by hand.
     """
-    interesting = [r for r in rows if r["tier"] in (NAME_OVER_GEOMETRY, CORROBORATED)]
+    interesting = [r for r in rows if r["tier"] in (NAME_OVER_GEOMETRY, CORROBORATED, CODE_MATCHED)]
     path = SPINE / "station_aliases.csv"
 
     existing: list[dict] = []

@@ -1,5 +1,5 @@
 # Published-FIR Row Schema (Bihar target, CCTNS deployments observed)
-_Agent: bihar-fir-schema · Researched: 2026-09-20 · Entries: 3 verified / 7 total_
+_Agent: bihar-fir-schema · Researched: 2026-09-20 · Entries: 4 verified / 6 total_
 
 ## Executive summary
 

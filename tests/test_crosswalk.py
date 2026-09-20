@@ -10,6 +10,7 @@ import csv
 import pytest
 
 from pipeline.crosswalk import (
+    CODE_MATCHED,
     CONFIRMED,
     CORROBORATED,
     NAME_ONLY,
@@ -201,3 +202,58 @@ class TestTokenEvidence:
         is refused even though it matches."""
         from pipeline.crosswalk import token_evidence
         assert token_evidence("PIAR", "PAROO", "MUZAFFARPUR", set()) is None
+
+
+class TestSharedKey:
+    """i-Bhugoal's PS_Code and the MHA ps_cd occupy the same code space.
+
+    Nothing documented this and the pipeline was first written assuming no
+    crosswalk existed. The key is decisive exactly where names fail, because
+    the disagreements it survives are translations rather than errors: MHA
+    writes AUDHYOGIK where i-Bhugoal writes INDUSTRIAL AREA.
+    """
+
+    THANAS = dict(THANAS, **{
+        "BH-5103067": {"thana_id": "BH-5103067", "name": "INDUSTRIAL AREA", "district": "PATNA"},
+        "BH-9999999": {"thana_id": "BH-9999999", "name": "ELSEWHERE", "district": "GAYA"},
+        # A second Patna thana, so the name witness has something to say and can
+        # contradict the key.
+        "T-7": {"thana_id": "T-7", "name": "SADAR", "district": "PATNA"},
+    })
+
+    def graded(self, resolver, name, district, ps_cd, thana_id=""):
+        return grade({"name": name, "district": district, "ps_cd_mha": ps_cd,
+                      "thana_id": thana_id}, self.THANAS, resolver)
+
+    @pytest.fixture
+    def resolver(self):
+        return ThanaResolver(list(self.THANAS.values()))
+
+    def test_the_key_resolves_a_translated_name(self, resolver):
+        row = self.graded(resolver, "AUDHYOGIK", "PATNA", "5103067")
+        assert row["thana_id"] == "BH-5103067"
+        assert row["tier"] == CODE_MATCHED
+        assert row["witnesses"] == "code"
+
+    def test_a_key_landing_in_another_district_is_refused(self, resolver):
+        # The code exists but points at a Gaya thana. Trusting it would move
+        # this station's crime to another district.
+        row = self.graded(resolver, "SOMEPLACE", "PATNA", "9999999")
+        assert not row["thana_id"]
+        assert row["code_district_conflict"] is True
+        assert row["tier"] == NEEDS_REVIEW
+
+    def test_agreement_across_witnesses_is_counted(self, resolver):
+        row = self.graded(resolver, "INDUSTRIAL AREA", "PATNA", "5103067",
+                          thana_id="BH-5103067")
+        assert row["tier"] == CONFIRMED
+        assert row["witness_count"] == 3
+        assert set(row["witnesses"].split(",")) == {"code", "name", "geometry"}
+
+    def test_key_contradicting_an_exact_name_goes_to_review(self, resolver):
+        # Both witnesses are in the right district and disagree. Usually an
+        # outpost upgrade, where a promoted station inherited a code.
+        row = self.graded(resolver, "SADAR", "PATNA", "5103067")
+        assert row["tier"] == NEEDS_REVIEW
+        assert not row["thana_id"], "a contradiction must not be resolved by fiat"
+        assert "outpost upgrade" in row["rule"]

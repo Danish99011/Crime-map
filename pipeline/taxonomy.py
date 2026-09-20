@@ -109,6 +109,85 @@ WITHHELD_KEYS = tuple(h.key for h in CRIME_HEADS if h.withheld)
 # (304A, 376D, 498A). The suffix must NOT be separated by a space, or the act
 # name gets swallowed: "302 IPC" would parse as section "302IP".
 _SECTION_RE = re.compile(r"\b(\d{1,3}[A-Z]{0,2})\b")
+
+# Act names as police portals actually write them. Maharashtra's CCTNS portal
+# writes them in Marathi; Bihar's writes English. Both are matched here because
+# the same stock CCTNS software is deployed across states with the labels
+# localised, so a parser that only reads English silently mis-reads half of
+# India. Getting this wrong is not cosmetic: IPC 303 is murder by a life-convict
+# and BNS 303 is theft, so a missed act name turns thefts into homicides.
+_ACT_PATTERNS: tuple[tuple[str, re.Pattern], ...] = (
+    ("BNS", re.compile(r"भारतीय\s*न्याय\s*संहिता|बी\s*एन\s*एस|बीएनएस|"
+                       r"\bBNS\b|BHARATIYA\s+NYAYA", re.I)),
+    ("IPC", re.compile(r"भारतीय\s*दंड\s*संहिता|भा\.?द\.?वि|आई\s*पी\s*सी|"
+                       r"\bIPC\b|INDIAN\s+PENAL", re.I)),
+)
+
+# Devanagari digits appear in Marathi act years (१९८८). They are never section
+# numbers, so they are removed before sections are read.
+_DEVANAGARI_DIGITS = re.compile(r"[\u0966-\u096F]+")
+
+# A sections cell may carry several acts, separated by newlines or by a
+# semicolon that is followed by another act name.
+_SEGMENT_SPLIT = re.compile(r"[\r\n]+|;\s*(?=\S*[\u0900-\u097F A-Za-z]{4})")
+
+
+def detect_act(text: str | None) -> str:
+    """Return 'IPC', 'BNS' or 'SLL' for an act name in English or Devanagari."""
+    if not text:
+        return "SLL"
+    for code, pattern in _ACT_PATTERNS:
+        if pattern.search(text):
+            return code
+    return "SLL"
+
+
+def parse_section_field(text: str | None) -> list[tuple[str, str, list[str]]]:
+    """Split a portal's 'sections' cell into (act_code, act_name, sections).
+
+    Real example from Maharashtra, one FIR, two acts:
+
+        मोटरवाहन अधिनियम, १९८८  - 184 ;
+        भारतीय न्याय संहिता (बी एन एस), 2023 - 125(a),125(b),281,324(4) ;
+
+    Each act must be read with its own sections, because the same number means
+    different offences under different acts.
+    """
+    if not text:
+        return []
+    out = []
+    for segment in _SEGMENT_SPLIT.split(text):
+        segment = segment.strip(" ;\t")
+        if not segment:
+            continue
+        # Sections follow the last dash; everything before it names the act.
+        head, _, tail = segment.rpartition("-")
+        if not head:
+            head, tail = segment, ""
+        act_name = _DEVANAGARI_DIGITS.sub(" ", head).strip(" ,")
+        sections = parse_sections(tail)
+        if not sections:
+            continue
+        out.append((detect_act(act_name), act_name, sections))
+    return out
+
+
+def classify_field(text: str | None) -> tuple[str, bool, list[str]]:
+    """Classify a whole sections cell, honouring each act separately.
+
+    Returns (crime_key, confident, act_codes). Applies the principal offence
+    rule across every act in the FIR, matching NCRB practice.
+    """
+    segments = parse_section_field(text)
+    if not segments:
+        return "other", False, []
+    best_key, confident = "other", False
+    best_severity = 99
+    for act_code, _, sections in segments:
+        key, ok = classify(sections, act_code)
+        if ok and BY_KEY[key].severity < best_severity:
+            best_key, best_severity, confident = key, BY_KEY[key].severity, True
+    return best_key, confident, sorted({a for a, _, _ in segments})
 # Statute names and the noise around them, removed before sections are read.
 _ACT_TOKENS = re.compile(
     r"\b(IPC|BNS|BNSS|CRPC|CR\.?P\.?C|IEA|BSA|POCSO|ACT|SEC|SECTION|SECTIONS|"
@@ -139,7 +218,9 @@ def parse_sections(text: str | None) -> list[str]:
     """
     if not text:
         return []
-    cleaned = re.sub(r"\(\d+\)", " ", text.upper())
+    # Sub-section markers: 303(2), 125(a), 118(1). The parent section decides
+    # the head, so the marker is dropped rather than read as another number.
+    cleaned = re.sub(r"\((?:\d+|[a-zA-Z])\)", " ", text.upper())
     cleaned = _ACT_TOKENS.sub(" ", cleaned)
     # Drop bare years, which appear as "Arms Act, 1959" and are not sections.
     cleaned = re.sub(r"\b(1[89]|20)\d{2}\b", " ", cleaned)

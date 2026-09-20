@@ -9,3 +9,6 @@ node_modules/
 # `python3 -m pipeline.download` and `python3 -m pipeline.geography`.
 data/raw/
 data/spine/*.geojson
+site/*.json
+site/index.html
+site/artifact.html

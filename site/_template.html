@@ -1,0 +1,293 @@
+<title>Bihar Thana Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
+:root{
+  --paper:#f5f4f1; --surface:#fffefc; --ink:#161b22; --slate:#5b6672; --line:#ddd9d2;
+  --teal:#2d7d70; --teal-soft:#2d7d7040; --ochre:#b07229; --ochre-soft:#b0722926;
+  --indigo:#39457f; --focus:#39457f;
+  --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#13161b; --surface:#1b1f26; --ink:#e9e7e2; --slate:#9aa3ae; --line:#2b313a;
+  --teal:#54a99b; --teal-soft:#54a99b42; --ochre:#d69a52; --ochre-soft:#d69a522e;
+  --indigo:#8b96dd; --focus:#8b96dd;
+}}
+:root[data-theme="dark"]{
+  --paper:#13161b; --surface:#1b1f26; --ink:#e9e7e2; --slate:#9aa3ae; --line:#2b313a;
+  --teal:#54a99b; --teal-soft:#54a99b42; --ochre:#d69a52; --ochre-soft:#d69a522e;
+  --indigo:#8b96dd; --focus:#8b96dd;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+  font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:3px}
+h1,h2,h3{font-family:var(--serif);font-weight:600;text-wrap:balance;margin:0}
+.wrap{max-width:1360px;margin:0 auto;padding-inline:16px;padding-block:20px 40px}
+
+header{border-bottom:1px solid var(--line);padding-bottom:16px;margin-bottom:18px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--slate);margin:0 0 6px}
+h1{font-size:clamp(24px,3.4vw,34px);line-height:1.15}
+.sub{color:var(--slate);margin:6px 0 0;max-width:62ch}
+
+.alert{display:flex;gap:12px;align-items:flex-start;margin:16px 0 20px;padding:14px 16px;
+  border:1px solid var(--line);border-left:3px solid var(--ochre);background:var(--ochre-soft);
+  border-radius:4px}
+.alert strong{display:block;font-family:var(--serif);font-size:15px}
+.alert p{margin:4px 0 0;color:var(--slate);max-width:70ch}
+.alert-mark{font-family:var(--mono);color:var(--ochre);font-size:18px;line-height:1.2}
+
+.layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(300px,1fr);gap:22px;align-items:start}
+@media (max-width:900px){.layout{grid-template-columns:1fr}}
+
+.mapcard{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:6px;
+  padding:10px;overflow:hidden}
+svg.map{display:block;width:100%;height:auto;max-width:100%;touch-action:manipulation}
+svg.map path{stroke:var(--surface);stroke-width:.45;cursor:pointer;transition:opacity .12s}
+svg.map path.on{fill:var(--teal-soft)}
+svg.map path.off{fill:url(#hatch)}
+svg.map path:hover{opacity:.72}
+svg.map path.sel{stroke:var(--indigo);stroke-width:2.4;paint-order:stroke}
+@media (prefers-reduced-motion:reduce){svg.map path{transition:none}}
+
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:10px;padding-top:10px;
+  border-top:1px solid var(--line);font-size:12px;color:var(--slate)}
+.key{display:inline-flex;align-items:center;gap:7px}
+.chip{width:18px;height:11px;border:1px solid var(--line);border-radius:2px;display:inline-block}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.psec{padding:14px 16px;border-bottom:1px solid var(--line)}
+.psec:last-child{border-bottom:0}
+.psec h2{font-size:13px;font-family:var(--mono);font-weight:500;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--slate)}
+
+.search{width:100%;margin-top:10px;padding:8px 10px;font:inherit;color:var(--ink);
+  background:var(--paper);border:1px solid var(--line);border-radius:4px}
+.results{list-style:none;margin:8px 0 0;padding:0;max-height:168px;overflow-y:auto}
+.results li+li{border-top:1px solid var(--line)}
+.results button{width:100%;text-align:left;background:none;border:0;padding:7px 4px;
+  font:inherit;color:var(--ink);cursor:pointer;display:flex;justify-content:space-between;gap:10px}
+.results button:hover{color:var(--indigo)}
+.results .dist{color:var(--slate);font-size:12px;font-family:var(--mono)}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:12px;margin-top:12px}
+.stat .num{font-family:var(--mono);font-size:22px;font-variant-numeric:tabular-nums;line-height:1.1}
+.stat .lbl{font-size:11.5px;color:var(--slate);margin-top:2px}
+.stat.ok .num{color:var(--teal)} .stat.gap .num{color:var(--ochre)}
+
+dl.kv{margin:10px 0 0;display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:13px}
+dl.kv dt{color:var(--slate)}
+dl.kv dd{margin:0;font-family:var(--mono);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+
+.tag{display:inline-block;padding:1px 7px;border-radius:99px;font-size:11px;font-family:var(--mono);
+  border:1px solid currentColor}
+.tag.t-ok{color:var(--teal)} .tag.t-gap{color:var(--ochre)} .tag.t-none{color:var(--slate)}
+
+ul.cats{list-style:none;margin:10px 0 0;padding:0;font-size:13px}
+ul.cats li{display:flex;justify-content:space-between;align-items:center;gap:10px;
+  padding:5px 0;border-bottom:1px solid var(--line)}
+ul.cats li:last-child{border-bottom:0}
+ul.cats .why{display:block;color:var(--slate);font-size:11.5px;margin-top:2px;max-width:46ch}
+
+ol.cav{list-style:none;margin:10px 0 0;padding:0;counter-reset:c}
+ol.cav li{padding:9px 0 9px 26px;border-bottom:1px solid var(--line);position:relative;counter-increment:c}
+ol.cav li:last-child{border-bottom:0}
+ol.cav li::before{content:counter(c);position:absolute;left:0;top:9px;font-family:var(--mono);
+  font-size:11px;color:var(--slate)}
+ol.cav b{display:block;font-family:var(--serif);font-weight:600;font-size:14px}
+ol.cav span{color:var(--slate);display:block;margin-top:2px}
+ol.cav li.critical b{color:var(--ochre)}
+
+footer{margin-top:26px;padding-top:14px;border-top:1px solid var(--line);
+  color:var(--slate);font-size:12px}
+footer code{font-family:var(--mono);font-size:11.5px}
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Bihar &middot; police station jurisdictions</p>
+    <h1>Bihar Thana Map</h1>
+    <p class="sub">896 police station jurisdictions, drawn from the Bihar government&rsquo;s own
+      i&#8209;Bhugoal boundaries. This is the geography a crime map for Bihar would sit on &mdash;
+      and a map of how much of it we can currently see.</p>
+  </header>
+
+  <div class="alert">
+    <span class="alert-mark" aria-hidden="true">&#9888;</span>
+    <div>
+      <strong>No crime data is loaded. This map shows data coverage, not crime.</strong>
+      <p>Bihar&rsquo;s FIR repository could not be reached from the environment this was built in.
+        The colours below say whether a crime feed could be attached to each thana &mdash; nothing
+        at all about whether it is safe.</p>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div>
+      <div class="mapcard">
+        <svg class="map" id="map" role="img" aria-label="Map of Bihar police station jurisdictions">
+          <defs>
+            <pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <rect width="6" height="6" fill="var(--ochre-soft)"></rect>
+              <line x1="0" y1="0" x2="0" y2="6" stroke="var(--ochre)" stroke-width="1.1" opacity="0.55"></line>
+            </pattern>
+          </defs>
+          <g id="shapes"></g>
+        </svg>
+        <div class="legend">
+          <span class="key"><span class="chip" style="background:var(--teal-soft)"></span>
+            Crime feed can be attached</span>
+          <span class="key"><span class="chip" style="background:var(--ochre-soft);
+            background-image:repeating-linear-gradient(45deg,var(--ochre) 0 1px,transparent 1px 4px)"></span>
+            No station we can resolve &mdash; blind spot</span>
+        </div>
+      </div>
+    </div>
+
+    <aside class="panel">
+      <section class="psec">
+        <h2>Coverage</h2>
+        <div class="stats">
+          <div class="stat"><div class="num" id="s-total">&mdash;</div><div class="lbl">thanas</div></div>
+          <div class="stat ok"><div class="num" id="s-on">&mdash;</div><div class="lbl">attachable</div></div>
+          <div class="stat gap"><div class="num" id="s-off">&mdash;</div><div class="lbl">blind spots</div></div>
+        </div>
+        <label class="sr" for="q" hidden>Search thanas</label>
+        <input class="search" id="q" type="search" placeholder="Search a thana or district&hellip;"
+               autocomplete="off" spellcheck="false">
+        <ul class="results" id="results"></ul>
+      </section>
+
+      <section class="psec" id="detail">
+        <h2>Selected thana</h2>
+        <p class="sub" id="detail-empty" style="margin-top:8px;font-size:13px">
+          Choose a thana on the map or search above.</p>
+        <dl class="kv" id="detail-kv" hidden></dl>
+      </section>
+
+      <section class="psec">
+        <h2>Crime categories</h2>
+        <ul class="cats" id="cats"></ul>
+      </section>
+
+      <section class="psec">
+        <h2>What is wrong with this data</h2>
+        <ol class="cav" id="cav"></ol>
+      </section>
+    </aside>
+  </div>
+
+  <footer id="prov"></footer>
+</div>
+
+<script id="payload" type="application/json">__DATA__</script>
+<script>
+(function(){
+  "use strict";
+  var DATA = JSON.parse(document.getElementById("payload").textContent);
+  var meta = DATA.meta, thanas = DATA.thanas, vp = DATA.viewport;
+  var byId = {}, selected = null;
+
+  var svg = document.getElementById("map");
+  svg.setAttribute("viewBox", "0 0 " + vp.width + " " + vp.height);
+  var g = document.getElementById("shapes");
+  var NS = "http://www.w3.org/2000/svg";
+
+  var frag = document.createDocumentFragment();
+  thanas.forEach(function(t){
+    byId[t.i] = t;
+    var p = document.createElementNS(NS, "path");
+    p.setAttribute("d", t.p);
+    p.setAttribute("class", t.a ? "on" : "off");
+    p.setAttribute("data-id", t.i);
+    var title = document.createElementNS(NS, "title");
+    title.textContent = t.n + " — " + t.d + (t.a ? "" : " (blind spot)");
+    p.appendChild(title);
+    frag.appendChild(p);
+  });
+  g.appendChild(frag);
+
+  document.getElementById("s-total").textContent = meta.thanas;
+  document.getElementById("s-on").textContent = meta.attachable;
+  document.getElementById("s-off").textContent = meta.unattachable;
+
+  function select(id){
+    var node = g.querySelector('path.sel');
+    if (node) node.classList.remove("sel");
+    var t = byId[id];
+    var kv = document.getElementById("detail-kv");
+    var empty = document.getElementById("detail-empty");
+    if (!t){ kv.hidden = true; empty.hidden = false; selected = null; return; }
+    selected = id;
+    var target = g.querySelector('path[data-id="' + id + '"]');
+    if (target){ target.classList.add("sel"); target.parentNode.appendChild(target); }
+
+    var rows = [
+      ["Thana", t.n],
+      ["District", t.d],
+      ["Boundary id", t.i],
+      ["Crime data", '<span class="tag t-none">no data</span>'],
+      ["Feed route", t.a
+        ? '<span class="tag t-ok">attachable</span>'
+        : '<span class="tag t-gap">blind spot</span>']
+    ];
+    if (t.s) rows.push(["Station", t.s]);
+    if (t.e) rows.push(["Evidence", t.e]);
+    kv.innerHTML = rows.map(function(r){
+      return "<dt>" + r[0] + "</dt><dd>" + r[1] + "</dd>";
+    }).join("");
+    kv.hidden = false; empty.hidden = true;
+  }
+
+  g.addEventListener("click", function(e){
+    var p = e.target.closest("path[data-id]");
+    if (p) select(p.getAttribute("data-id"));
+  });
+
+  var q = document.getElementById("q"), results = document.getElementById("results");
+  function render(list){
+    results.innerHTML = list.slice(0, 40).map(function(t){
+      return '<li><button type="button" data-id="' + t.i + '">' +
+        '<span>' + t.n + '</span><span class="dist">' + t.d + '</span></button></li>';
+    }).join("");
+  }
+  q.addEventListener("input", function(){
+    var v = q.value.trim().toLowerCase();
+    if (!v){ results.innerHTML = ""; return; }
+    render(thanas.filter(function(t){
+      return t.n.toLowerCase().indexOf(v) > -1 || t.d.toLowerCase().indexOf(v) > -1;
+    }));
+  });
+  results.addEventListener("click", function(e){
+    var b = e.target.closest("button[data-id]");
+    if (b) select(b.getAttribute("data-id"));
+  });
+
+  document.getElementById("cats").innerHTML = meta.categories.map(function(c){
+    var tag = c.withheld
+      ? '<span class="tag t-gap">withheld</span>'
+      : '<span class="tag t-none">awaiting data</span>';
+    var why = c.withheld ? '<span class="why">' + c.withheld + '</span>'
+      : (c.no_ipc_predecessor ? '<span class="why">New under BNS 2023 &mdash; no pre-2024 baseline exists.</span>'
+      : (c.resolution_loss ? '<span class="why">Several IPC offences collapse into one BNS offence; pre- and post-2024 counts are not comparable.</span>' : ""));
+    return "<li><span>" + c.label + why + "</span>" + tag + "</li>";
+  }).join("");
+
+  document.getElementById("cav").innerHTML = meta.caveats.map(function(c){
+    return '<li class="' + c.severity + '"><b>' + c.headline + "</b><span>" + c.detail + "</span></li>";
+  }).join("");
+
+  var src = meta.sources || {};
+  var bits = Object.keys(src).map(function(k){
+    return "<strong>" + (src[k].name || k) + "</strong> &mdash; " + (src[k].attribution || "") +
+      " (" + (src[k].licence || "licence unstated") + ")";
+  });
+  document.getElementById("prov").innerHTML = "Sources: " + bits.join(" &middot; ") +
+    ". Geometry simplified for display; analytical geometry is unsimplified. " +
+    "Built by the pipeline in <code>pipeline/</code>; see <code>docs/PHASE1-FINDINGS.md</code>.";
+})();
+</script>

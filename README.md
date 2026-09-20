@@ -49,9 +49,13 @@ wrong (a Begusarai station lands in Nalanda, 80km away), and large rural
 mapping is graded by evidence, and the 240 rows where the two witnesses disagree
 go to a review queue rather than to the map.
 
-**568 of 896 thanas can currently take a crime feed.** The other 328 have no
-station we can confidently resolve a FIR to. They render as *no data*, never as
-zero crime — the distinction the whole design turns on.
+**All 896 thanas are reachable; 689 are corroborated.** An earlier version of
+this README reported "328 blind spots". That figure was wrong — it counted
+thanas with no MHA station point, but the crime feed names stations and the
+resolver matches those names against polygons directly, so a missing point is a
+missing *second witness*, not a missing route. Every polygon now resolves from
+its own name. 689 are additionally confirmed by an independent station record;
+the other 207 rest on one source.
 
 **The law changed underneath the data.** The IPC was repealed on 1 July 2024 and
 the BNS that replaced it has no statutory concordance. The relation is
@@ -79,8 +83,10 @@ stated above the fold on the map itself. See `docs/INGESTION.md` rule 5.
 1. Run `research/verify_sources.py` from an unblocked network — 86% of the
    Phase 1 catalogue is `CITED` rather than verified because every `.gov.in` host
    was blocked during research.
-2. Work the 240-row review queue into `data/spine/station_aliases.csv`; that is
-   the path from 568 attachable thanas to roughly 850.
+2. Work the remaining 118-row review queue. 85 of those are stations whose point
+   lands in an unrelated polygon — almost certainly outposts or stations created
+   after the boundaries were drawn — and need either local knowledge or a newer
+   boundary source.
 3. Finish the Bihar FIR adapter — `docs/INGESTION.md` has the procedure.
 4. Verify the IPC→BNS concordance against NCRB's Sankalan compendium before any
    post-2024 data is published.

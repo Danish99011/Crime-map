@@ -133,6 +133,18 @@ def normalise_name(value: str | None) -> str:
     return re.sub(r"(.)\1+", r"\1", text)
 
 
+# A thana and an outpost (O.P.) can share a name within one district — Purnia has
+# both CHAMPA NAGAR and CHAMPA NAGAR O.P. `normalise_name` strips the suffix,
+# which is right for matching "BAKHRI PS" to "Bakhri" but collapses those two.
+# This recovers the distinction only when it is needed to break a tie.
+_OUTPOST_RE = re.compile(r"\b(O\.?P\.?|OUTPOST)\b|\bOP$", re.I)
+
+
+def unit_type(value: str | None) -> str:
+    """'outpost' or 'station' — the distinction a name suffix carries."""
+    return "outpost" if value and _OUTPOST_RE.search(value.strip()) else "station"
+
+
 def name_similarity(left: str | None, right: str | None) -> float:
     a, b = normalise_name(left), normalise_name(right)
     if not a or not b:

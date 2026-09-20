@@ -119,10 +119,10 @@ footer code{font-family:var(--mono);font-size:11.5px}
   <div class="alert">
     <span class="alert-mark" aria-hidden="true">&#9888;</span>
     <div>
-      <strong>No crime data is loaded. This map shows data coverage, not crime.</strong>
+      <strong>No crime data is loaded. This map shows data readiness, not crime.</strong>
       <p>Bihar&rsquo;s FIR repository could not be reached from the environment this was built in.
-        The colours below say whether a crime feed could be attached to each thana &mdash; nothing
-        at all about whether it is safe.</p>
+        The shading below says how well each thana is corroborated by a second source &mdash;
+        nothing at all about whether it is safe.</p>
     </div>
   </div>
 
@@ -140,10 +140,10 @@ footer code{font-family:var(--mono);font-size:11.5px}
         </svg>
         <div class="legend">
           <span class="key"><span class="chip" style="background:var(--teal-soft)"></span>
-            Crime feed can be attached</span>
+            Station confirmed by a second source</span>
           <span class="key"><span class="chip" style="background:var(--ochre-soft);
             background-image:repeating-linear-gradient(45deg,var(--ochre) 0 1px,transparent 1px 4px)"></span>
-            No station we can resolve &mdash; blind spot</span>
+            Resolvable, but no corroborating station point</span>
         </div>
       </div>
     </div>
@@ -153,8 +153,8 @@ footer code{font-family:var(--mono);font-size:11.5px}
         <h2>Coverage</h2>
         <div class="stats">
           <div class="stat"><div class="num" id="s-total">&mdash;</div><div class="lbl">thanas</div></div>
-          <div class="stat ok"><div class="num" id="s-on">&mdash;</div><div class="lbl">attachable</div></div>
-          <div class="stat gap"><div class="num" id="s-off">&mdash;</div><div class="lbl">blind spots</div></div>
+          <div class="stat ok"><div class="num" id="s-on">&mdash;</div><div class="lbl">resolvable by name</div></div>
+          <div class="stat gap"><div class="num" id="s-off">&mdash;</div><div class="lbl">uncorroborated</div></div>
         </div>
         <label class="sr" for="q" hidden>Search thanas</label>
         <input class="search" id="q" type="search" placeholder="Search a thana or district&hellip;"
@@ -212,8 +212,8 @@ footer code{font-family:var(--mono);font-size:11.5px}
   g.appendChild(frag);
 
   document.getElementById("s-total").textContent = meta.thanas;
-  document.getElementById("s-on").textContent = meta.attachable;
-  document.getElementById("s-off").textContent = meta.unattachable;
+  document.getElementById("s-on").textContent = meta.resolvable;
+  document.getElementById("s-off").textContent = meta.uncorroborated;
 
   function select(id){
     var node = g.querySelector('path.sel');
@@ -231,9 +231,10 @@ footer code{font-family:var(--mono);font-size:11.5px}
       ["District", t.d],
       ["Boundary id", t.i],
       ["Crime data", '<span class="tag t-none">no data</span>'],
-      ["Feed route", t.a
-        ? '<span class="tag t-ok">attachable</span>'
-        : '<span class="tag t-gap">blind spot</span>']
+      ["Name lookup", '<span class="tag t-ok">resolvable</span>'],
+      ["Corroboration", t.a
+        ? '<span class="tag t-ok">station confirmed</span>'
+        : '<span class="tag t-gap">none</span>']
     ];
     if (t.s) rows.push(["Station", t.s]);
     if (t.e) rows.push(["Evidence", t.e]);

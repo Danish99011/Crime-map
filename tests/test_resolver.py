@@ -119,3 +119,36 @@ class TestAliases:
         )
         # The same station name in a different district must not pick up the alias.
         assert resolver.resolve("JOGBANI", "PATNA").method == "unknown-district"
+
+
+class TestUnitType:
+    """A thana and its outpost can share a name inside one district.
+
+    Purnia has both CHAMPA NAGAR and CHAMPA NAGAR O.P. `normalise_name` strips
+    the suffix — correct for matching "BAKHRI PS" to "Bakhri" — which collapsed
+    the two into an unresolvable pair. The query itself says which is meant.
+    """
+
+    @pytest.fixture
+    def twin(self):
+        return ThanaResolver([
+            thana("T-1", "CHAMPA NAGAR O.P", "PURNIA"),
+            thana("T-2", "CHAMPA NAGAR", "PURNIA"),
+        ])
+
+    def test_outpost_and_station_are_told_apart(self, twin):
+        assert twin.resolve("CHAMPA NAGAR", "PURNIA").thana_id == "T-2"
+        assert twin.resolve("CHAMPA NAGAR O.P", "PURNIA").thana_id == "T-1"
+        assert twin.resolve("Champa Nagar OP", "PURNIA").thana_id == "T-1"
+
+    def test_the_method_says_how_it_was_decided(self, twin):
+        assert twin.resolve("CHAMPA NAGAR", "PURNIA").method == "exact-unit-type"
+
+    def test_a_genuine_duplicate_is_still_ambiguous(self):
+        # Two stations of the same type and name cannot be told apart, and
+        # guessing would put one station's crime in the other's jurisdiction.
+        resolver = ThanaResolver([
+            thana("T-1", "MEHANDIA", "ARWAL"),
+            thana("T-2", "MEHANDIYA", "ARWAL"),
+        ])
+        assert resolver.resolve("MEHANDIA", "ARWAL").method == "ambiguous-exact"

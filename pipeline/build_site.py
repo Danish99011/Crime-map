@@ -40,10 +40,8 @@ SITE = ROOT / "site"
 WEB_SIMPLIFY_DEGREES = 0.0012
 
 
-# Tiers a name-keyed crime feed can actually resolve into. `geometry-only` is
-# deliberately excluded: it means a station point landed in this polygon but the
-# names disagree, so an incoming FIR naming that station would not resolve here.
-ATTACHABLE_TIERS = {"confirmed", "name-only"}
+# Tiers whose mapping we accept. See pipeline/crosswalk.py for what each means.
+ATTACHABLE_TIERS = {"confirmed", "name-over-geometry", "corroborated", "name-only"}
 
 
 def load_crosswalk() -> dict[str, dict]:
@@ -52,7 +50,7 @@ def load_crosswalk() -> dict[str, dict]:
     best: dict[str, dict] = {}
     if not path.exists():
         return best
-    rank = {"confirmed": 0, "name-only": 1}
+    rank = {"confirmed": 0, "name-over-geometry": 1, "corroborated": 2, "name-only": 3}
     with path.open(encoding="utf-8") as handle:
         for row in csv.DictReader(handle):
             thana_id = row["thana_id"]
@@ -76,6 +74,11 @@ def build() -> dict:
     # still runs, so the empty state is the real pipeline's output, not a mock.
     aggregation = aggregate([], resolver, thana_ids, source_name="not yet ingested")
 
+    # Reachability and corroboration are different questions, and conflating
+    # them is what produced the earlier, wrong "328 blind spots" figure. A
+    # polygon with no MHA station point is still reachable: the crime feed names
+    # stations, and the resolver matches those names against polygons directly.
+    # What such a polygon lacks is a second, independent witness that it exists.
     features = []
     for feature in collection["features"]:
         properties = feature["properties"]
@@ -93,8 +96,11 @@ def build() -> dict:
                 "name": properties["name"],
                 "district": properties["district"],
                 "crime_status": thana_status(thana_id, aggregation),
-                # Whether a crime feed could be attached here at all.
-                "feed_status": "attachable" if evidence else "unattachable",
+                # Can the resolver return this polygon from a station name?
+                "resolvable": resolver.resolve(
+                    properties["name"], properties["district"]).thana_id == thana_id,
+                # Does a second source independently confirm a station here?
+                "corroborated": bool(evidence),
                 "evidence": evidence["tier"] if evidence else None,
                 "station": evidence["station_name"] if evidence else None,
             },
@@ -106,13 +112,15 @@ def build() -> dict:
         json.dumps({"type": "FeatureCollection", "features": features},
                    separators=(",", ":")), encoding="utf-8")
 
-    attachable = sum(1 for f in features if f["properties"]["feed_status"] == "attachable")
+    corroborated = sum(1 for f in features if f["properties"]["corroborated"])
+    resolvable = sum(1 for f in features if f["properties"]["resolvable"])
     meta = {
         "state": "Bihar",
         "unit": "Police station jurisdiction (thana)",
         "thanas": len(features),
-        "thanas_attachable": attachable,
-        "thanas_unattachable": len(features) - attachable,
+        "thanas_resolvable": resolvable,
+        "thanas_corroborated": corroborated,
+        "thanas_uncorroborated": len(features) - corroborated,
         "crime_data_status": "none ingested",
         "coverage": aggregation.coverage,
         "caveats": aggregation.caveats,
@@ -123,8 +131,8 @@ def build() -> dict:
 
     print(f"site/thanas.geojson  {geo_path.stat().st_size / 1e6:.2f} MB  "
           f"{len(features)} thanas")
-    print(f"site/meta.json       {attachable} attachable / "
-          f"{len(features) - attachable} unattachable")
+    print(f"site/meta.json       {resolvable}/{len(features)} resolvable, "
+          f"{corroborated} corroborated by a station point")
     return meta
 
 

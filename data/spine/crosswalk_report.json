@@ -1,15 +1,18 @@
 {
   "territorial_stations": 808,
   "tiers": {
-    "conflict": 70,
+    "name-over-geometry": 69,
     "confirmed": 546,
-    "geometry-only": 164,
-    "unresolved": 6,
+    "corroborated": 53,
+    "needs-review": 118,
     "name-only": 22
   },
-  "mappable_stations": 568,
+  "mappable_stations": 690,
+  "needs_review": 118,
   "thana_polygons": 896,
-  "thanas_reached_by_a_mappable_station": 568,
-  "thanas_with_no_mappable_station": 328,
-  "concordance_where_both_witnesses_spoke": 0.8864
+  "thanas_reached_by_a_station": 689,
+  "thanas_not_reached_by_a_station": 207,
+  "thanas_unresolvable_by_name": 0,
+  "unresolvable_examples": [],
+  "concordance_where_both_witnesses_spoke": 0.8878
 }

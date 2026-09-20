@@ -12,6 +12,7 @@ data/spine/*.geojson
 site/*.json
 site/index.html
 site/artifact.html
+site/mumbai.html
 
 # --- secure-check: credentials and local state must never be committed ---
 .env.*

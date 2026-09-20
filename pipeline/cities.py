@@ -65,8 +65,13 @@ CITIES: tuple[City, ...] = (
                         "OUTER NORTH", "AIRPORT", "RAILWAYS", "METRO"),
          bbox=(76.83, 28.40, 77.35, 28.89),
          boundary_file="GSDL_DL_Police_Station_Boundaries.geojsonl",
-         fir_feed="e-FIR only; no bulk published-FIR listing found",
-         notes="Delhi Police publish an annual review; no open station-month series."),
+         fir_feed="CCTNS FIR search back to 2015, but a lookup not a listing",
+         notes="Corrected 2026-09-20 against the live site: cctns.delhipolice.gov.in "
+               "/citizen/firSearch.htm searches ALL FIRs from 01-07-2015, not just "
+               "e-FIR, with no CAPTCHA. It still yields no station-month series, "
+               "because its own validation refuses a search carrying neither an FIR "
+               "number nor a person's name -- and we do not search by name. "
+               "Geography-rich, data-poor; RTI remains the route."),
     City("bangalore", "Bengaluru", "KARNATAKA",
          mha_districts=("BANGALORE CITY", "BENGALURU CITY", "BANGALORE",
                         "BENGALURU", "BANGALORE RURAL", "BENGALURU RURAL"),
@@ -82,8 +87,17 @@ CITIES: tuple[City, ...] = (
          fir_feed="Rajasthan FIR search exists but is CAPTCHA-gated; out of scope",
          notes="Polygons carry police district, circle and range."),
     City("mumbai", "Mumbai", "MAHARASHTRA",
-         mha_districts=("MUMBAI", "MUMBAI CITY", "MUMBAI SUBURBAN",
-                        "BRIHAN MUMBAI", "GREATER MUMBAI"),
+         # "BRIHAN MUMBAI CITY" is the label that matters: the MHA station
+         # master and the Maharashtra FIR portal happen to use exactly the
+         # same string for it, which is what lets a published FIR join to a
+         # station point at all. It was missing here, so Mumbai fell through
+         # to the bounding box and picked up Thane, Navi Mumbai and one
+         # mislocated Bangalore station -- 142 "Mumbai" stations of which 90
+         # were Mumbai. Navi Mumbai and Railway Mumbai are separate
+         # commissionerates with their own FIR feeds and are deliberately
+         # not folded in here.
+         mha_districts=("BRIHAN MUMBAI CITY", "MUMBAI", "MUMBAI CITY",
+                        "MUMBAI SUBURBAN", "BRIHAN MUMBAI", "GREATER MUMBAI"),
          bbox=(72.75, 18.87, 73.05, 19.32),
          fir_feed="Maharashtra published FIRs: every FIR, daily, station-level, timestamped",
          notes="Best crime feed in India; no jurisdiction polygons published."),
@@ -135,8 +149,13 @@ def load_stations(city: City) -> list[dict]:
         properties = feature["properties"]
         if (properties.get("district") or "").upper() in wanted:
             by_label.append(feature)
-        elif (min_lon <= properties["longitude"] <= max_lon
+        elif ((properties.get("state") or "").upper() == city.state
+              and min_lon <= properties["longitude"] <= max_lon
               and min_lat <= properties["latitude"] <= max_lat):
+            # The box is a fallback for districts spelled differently, not a
+            # licence to import another state. A handful of points in this
+            # file carry coordinates from the wrong end of the country, and
+            # without the state guard a Bangalore station lands in Mumbai.
             by_box.append(feature)
     # District labels are authoritative where they match; the box catches
     # stations whose district is spelled differently.

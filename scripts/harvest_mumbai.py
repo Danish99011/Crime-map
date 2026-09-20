@@ -103,6 +103,22 @@ def harvest_month(client: MahapoliceClient, unit_id: str, year: int, month: int,
     seen = {(r["police_station"], r["fir_no_with_year"]) for r in rows}
     collected = list(rows)
 
+    # Rows are written as they arrive rather than at the end of the month.
+    # A page costs about twenty seconds of someone else's server, so a month
+    # is half an hour of work; losing it to an interrupted run would mean
+    # asking that server to do it all again for nothing.
+    path = OUT / f"{key}.jsonl"
+    OUT.mkdir(parents=True, exist_ok=True)
+    handle = path.open("w", encoding="utf-8")
+
+    def flush(batch):
+        for row in batch:
+            handle.write(json.dumps({k: row.get(k, "") for k in KEEP},
+                                    ensure_ascii=False) + "\n")
+        handle.flush()
+
+    flush(rows)
+
     if declared:
         pages = (declared + PAGE_SIZE - 1) // PAGE_SIZE
         for number in range(2, pages + 1):
@@ -126,16 +142,12 @@ def harvest_month(client: MahapoliceClient, unit_id: str, year: int, month: int,
                 break
             seen.update((r["police_station"], r["fir_no_with_year"]) for r in fresh)
             collected.extend(fresh)
-            if number % 20 == 0:
+            flush(fresh)
+            if number % 10 == 0:
                 print(f"    page {number}/{pages}  {len(collected)} rows",
                       flush=True)
 
-    path = OUT / f"{key}.jsonl"
-    OUT.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8") as handle:
-        for row in collected:
-            handle.write(json.dumps({k: row.get(k, "") for k in KEEP},
-                                    ensure_ascii=False) + "\n")
+    handle.close()
 
     complete = declared is not None and len(collected) == declared
     record = {
@@ -206,7 +218,8 @@ def main() -> int:
                 return 1
             continue
         flag = "ok" if record["complete"] else f"INCOMPLETE {record}"
-        print(f"  {record['collected']} rows of {record['declared']}  {flag}",
+        print(f"  {record['collected']} rows of {record['declared']}  {flag}  "
+              f"[{client.requests_made} requests, {client.retries} retries]",
               flush=True)
 
     complete = sum(1 for v in state["months"].values() if v.get("complete"))

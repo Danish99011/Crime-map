@@ -253,9 +253,20 @@ def main() -> int:
     parser.add_argument("--delay", type=float, default=1.5, help="seconds between requests to the same host")
     parser.add_argument("--timeout", type=float, default=30.0)
     parser.add_argument("--patch", action="store_true", help="write results back into the source jsonl files")
+    parser.add_argument("--skip-host", action="append", default=[], metavar="HOST",
+                        help="do not touch this host; repeatable. Use it when another "
+                             "job already owns that host, so the two do not make "
+                             "concurrent requests to one public-sector server.")
     args = parser.parse_args()
 
     targets = collect_urls(args.domain)
+    if args.skip_host:
+        skip = {h.lower() for h in args.skip_host}
+        kept = [t for t in targets
+                if not any(urlsplit(t[3]).netloc.lower().endswith(h) for h in skip)]
+        print(f"Skipping {len(targets) - len(kept)} URLs on {', '.join(sorted(skip))} "
+              f"(another job owns those hosts)")
+        targets = kept
     if not targets:
         print("No URLs found. Have the research agents written research/sources/*.jsonl yet?", file=sys.stderr)
         return 1

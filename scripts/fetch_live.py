@@ -87,7 +87,30 @@ TITLE = re.compile(r"<title[^>]*>(.*?)</title>", re.I | re.S)
 ATTR = re.compile(r'(\w[\w:-]*)\s*=\s*"([^"]*)"')
 
 
-def fetch(url: str, data: bytes | None = None, timeout: float = 45.0) -> tuple[int, str]:
+def fetch(url: str, data: bytes | None = None, timeout: float = 45.0,
+          tries: int = 4) -> tuple[int, str]:
+    """Fetch, retrying transient resets.
+
+    Without the retry this probe lies. On 2026-09-20 it reported all four
+    targets "unreachable" while curl reached two of them in the same minute:
+    the link drops roughly one request in five, and a single attempt turns
+    that into a false verdict about a source. Reporting a working portal as
+    dead is the expensive direction of that error -- it is what made an
+    earlier session give up on Maharashtra, which turned out to be the best
+    feed available.
+    """
+    last = (0, "")
+    for attempt in range(tries):
+        status, body = _fetch_once(url, data, timeout)
+        if status:
+            return status, body
+        last = (status, body)
+        time.sleep(2.0 * (attempt + 1))
+    return last
+
+
+def _fetch_once(url: str, data: bytes | None = None,
+                timeout: float = 45.0) -> tuple[int, str]:
     request = urllib.request.Request(
         url, data=data,
         headers={"User-Agent": UA, "Accept": "text/html,application/xhtml+xml",

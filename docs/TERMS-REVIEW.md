@@ -83,11 +83,31 @@ breaching either returns "No Records Found", which is why
 
 ## ncrb.gov.in and data.gov.in
 
-Reachable (HTTP 307 and 302 respectively). NCRB publications are Government of
-India works released for public use; data.gov.in resources carry the
-**Government Open Data License – India (GODL)**, which permits reuse with
-attribution. Not yet harvested in this session, so not yet reviewed in the
-detail Maharashtra was.
+**Verdict: automated access is prohibited on both. Do not scrape either.**
+
+Both are reachable (HTTP 307 and 302). Both publish the same robots.txt:
+
+```
+User-agent: *
+Disallow: /
+```
+
+That disallows crawling of the entire site, with no exception for any path.
+Under rule 2 this closes the automated route to the NCRB district tables for
+2015-2024, which is the gap they would have filled. The licences are permissive
+— NCRB publications are Government of India works, and data.gov.in resources
+carry the **Government Open Data Licence – India (GODL)**, which allows reuse
+with attribution — but a permissive licence on the *content* is not permission
+to *crawl the site*, and a public-interest purpose is not a defence against the
+term. The two are separate questions and only one of them is settled here.
+
+Two routes remain, and both need a person rather than a scraper:
+
+1. **Download the tables by hand.** robots.txt governs automated agents, not a
+   person clicking a link. The licence then permits the reuse.
+2. **Use the data.gov.in API with a registered key** — an invited, documented
+   channel rather than crawling. That needs the user's own key; this session
+   did not create one and should not.
 
 ## ksp.karnataka.gov.in and delhipolice.gov.in
 

@@ -83,6 +83,7 @@ class MahapoliceClient:
             urllib.request.HTTPCookieProcessor(self._jar))
         self._last_body = ""
         self.requests_made = 0
+        self.retries = 0
 
     # ---------------------------------------------------------------- transport
 
@@ -112,9 +113,21 @@ class MahapoliceClient:
                     return self._last_body
             except Exception as exc:                # reset, timeout, TLS, HTTP
                 last = exc
-                # Backoff, but bounded: these are transient tunnel resets, and
-                # hammering a police server harder is the wrong response.
-                time.sleep(min(self.delay * (attempt + 1), 30.0))
+                self.retries += 1
+                # A connection reset means the server never finished serving
+                # this request, so retrying promptly adds no load to it -- the
+                # politeness that matters is the delay between *served*
+                # requests, which `_pause` keeps. Escalating backoff here was
+                # costing minutes per page on a link that drops roughly one
+                # request in five, turning a month into a day's work for no
+                # benefit to the portal. Later attempts still back off, in
+                # case the server itself is the thing struggling.
+                reset = isinstance(exc, (ConnectionResetError, TimeoutError)) or \
+                    "reset" in str(exc).lower() or "timed out" in str(exc).lower()
+                if reset and attempt < 3:
+                    time.sleep(1.0)
+                else:
+                    time.sleep(min(self.delay * (attempt + 1), 30.0))
         raise PortalError(f"{url} failed after {self.tries} attempts: {last}")
 
     def _pause(self) -> None:

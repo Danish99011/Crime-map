@@ -1,0 +1,53 @@
+ncrb_ogd_label,spine_district,revenue_district,unit_type,note
+ANTI TERRORIST SQUAD,,,non-district-aggregate,"drop before joining - state total or special unit (ATS/EOU), not a geography"
+ARARIA,ARARIA,ARARIA,territorial-police-district,
+ARWAL,ARWAL,ARWAL,territorial-police-district,
+AURANGABAD,AURANGABAD,AURANGABAD,territorial-police-district,
+BAGAHA,BAGAHA,WEST CHAMPARAN,territorial-police-district,police district carved out of revenue district WEST CHAMPARAN; sum with WEST CHAMPARAN for 38-district products
+BANKA,BANKA,BANKA,territorial-police-district,
+BEGUSARAI,BEGUSARAI,BEGUSARAI,territorial-police-district,
+BETTIAH,WEST CHAMPARAN,WEST CHAMPARAN,territorial-police-district,label differs from spine
+BHABHUA,KAIMUR (BHABUA),KAIMUR (BHABUA),territorial-police-district,label differs from spine
+BHAGALPUR,BHAGALPUR,BHAGALPUR,territorial-police-district,
+BHOJPUR,BHOJPUR,BHOJPUR,territorial-police-district,
+BUXAR,BUXAR,BUXAR,territorial-police-district,
+DARBHANGA,DARBHANGA,DARBHANGA,territorial-police-district,
+ECONOMIC OFFENCES UNIT,,,non-district-aggregate,"drop before joining - state total or special unit (ATS/EOU), not a geography"
+GAYA,GAYA,GAYA,territorial-police-district,
+GOPALGANJ,GOPALGANJ,GOPALGANJ,territorial-police-district,
+JAMALPUR RAILWAY,RLY JAMALPUR,,railway-police-district,railway GRP unit - NO polygon in thana spine; do not map to territory
+JAMALPUR RLY.,RLY JAMALPUR,,railway-police-district,railway GRP unit - NO polygon in thana spine; do not map to territory
+JAMUI,JAMUI,JAMUI,territorial-police-district,
+JEHANABAD,JEHANABAD,JEHANABAD,territorial-police-district,
+KATIHAR,KATIHAR,KATIHAR,territorial-police-district,
+KATIHAR RAILWAY,RLY KATIHAR,,railway-police-district,railway GRP unit - NO polygon in thana spine; do not map to territory
+KATIHAR RLY.,RLY KATIHAR,,railway-police-district,railway GRP unit - NO polygon in thana spine; do not map to territory
+KHAGARIA,KHAGARIA,KHAGARIA,territorial-police-district,
+KISHANGANJ,KISHANGANJ,KISHANGANJ,territorial-police-district,
+LAKHISARAI,LAKHISARAI,LAKHISARAI,territorial-police-district,
+MADHEPURA,MADHEPURA,MADHEPURA,territorial-police-district,
+MADHUBANI,MADHUBANI,MADHUBANI,territorial-police-district,
+MOTIHARI,EAST CHAMPARAN,EAST CHAMPARAN,territorial-police-district,label differs from spine
+MUNGER,MUNGER,MUNGER,territorial-police-district,
+MUZAFFARPUR,MUZAFFARPUR,MUZAFFARPUR,territorial-police-district,
+MUZAFFARPUR RAILWAY,RLY MUJAFFARPUR,,railway-police-district,railway GRP unit - NO polygon in thana spine; do not map to territory
+MUZAFFARPUR RLY.,RLY MUJAFFARPUR,,railway-police-district,railway GRP unit - NO polygon in thana spine; do not map to territory
+NALANDA,NALANDA,NALANDA,territorial-police-district,
+NAUGACHIA,NAUGACHHIA,BHAGALPUR,territorial-police-district,police district carved out of revenue district BHAGALPUR; sum with BHAGALPUR for 38-district products
+NAWADAH,NAWADA,NAWADA,territorial-police-district,label differs from spine
+PATNA,PATNA,PATNA,territorial-police-district,
+PATNA RAILWAY,RLY PATNA,,railway-police-district,railway GRP unit - NO polygon in thana spine; do not map to territory
+PATNA RLY.,RLY PATNA,,railway-police-district,railway GRP unit - NO polygon in thana spine; do not map to territory
+PURNEA,PURNIA,PURNIA,territorial-police-district,label differs from spine
+ROHTAS,ROHTAS,ROHTAS,territorial-police-district,
+SAHARSA,SAHARSA,SAHARSA,territorial-police-district,
+SAMASTIPUR,SAMASTIPUR,SAMASTIPUR,territorial-police-district,
+SARAN,SARAN,SARAN,territorial-police-district,
+SHEIKHPURA,SHEIKHPURA,SHEIKHPURA,territorial-police-district,
+SHEOHAR,SHEOHAR,SHEOHAR,territorial-police-district,
+SITAMARHI,SITAMARHI,SITAMARHI,territorial-police-district,
+SIWAN,SIWAN,SIWAN,territorial-police-district,
+SUPAUL,SUPAUL,SUPAUL,territorial-police-district,
+TOTAL,,,non-district-aggregate,"drop before joining - state total or special unit (ATS/EOU), not a geography"
+VAISHALI,VAISHALI,VAISHALI,territorial-police-district,
+ZZ TOTAL,,,non-district-aggregate,"drop before joining - state total or special unit (ATS/EOU), not a geography"

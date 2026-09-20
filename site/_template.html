@@ -93,6 +93,15 @@ ul.cats li{display:flex;justify-content:space-between;align-items:center;gap:10p
 ul.cats li:last-child{border-bottom:0}
 ul.cats .why{display:block;color:var(--slate);font-size:11.5px;margin-top:2px;max-width:46ch}
 
+ul.avail{list-style:none;margin:10px 0 0;padding:0;font-size:13px}
+ul.avail li{padding:7px 0;border-bottom:1px solid var(--line)}
+ul.avail li:last-child{border-bottom:0}
+ul.avail .row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+ul.avail .why{display:block;color:var(--slate);font-size:11.5px;margin-top:3px;max-width:48ch}
+ul.avail .tag{white-space:nowrap}
+.st-kind{color:var(--slate);font-family:var(--mono);font-size:11px}
+.st-km{color:var(--slate);font-family:var(--mono);font-size:11.5px;font-variant-numeric:tabular-nums}
+
 ol.cav{list-style:none;margin:10px 0 0;padding:0;counter-reset:c}
 ol.cav li{padding:9px 0 9px 26px;border-bottom:1px solid var(--line);position:relative;counter-increment:c}
 ol.cav li:last-child{border-bottom:0}
@@ -169,9 +178,19 @@ footer code{font-family:var(--mono);font-size:11.5px}
         <dl class="kv" id="detail-kv" hidden></dl>
       </section>
 
+      <section class="psec" id="stations-sec" hidden>
+        <h2>Police stations here</h2>
+        <ul class="cats" id="stations"></ul>
+      </section>
+
       <section class="psec">
         <h2>Crime categories</h2>
         <ul class="cats" id="cats"></ul>
+      </section>
+
+      <section class="psec">
+        <h2>What this map can show</h2>
+        <ul class="avail" id="avail"></ul>
       </section>
 
       <section class="psec">
@@ -236,12 +255,38 @@ footer code{font-family:var(--mono);font-size:11.5px}
         ? '<span class="tag t-ok">station confirmed</span>'
         : '<span class="tag t-gap">none</span>']
     ];
+    rows.push(["Stations inside", String((t["in"] || []).length)]);
     if (t.s) rows.push(["Station", t.s]);
     if (t.e) rows.push(["Evidence", t.e]);
     kv.innerHTML = rows.map(function(r){
       return "<dt>" + r[0] + "</dt><dd>" + r[1] + "</dd>";
     }).join("");
     kv.hidden = false; empty.hidden = true;
+
+    var KIND = {territorial:"", mahila:"women\u2019s station", sc_st:"SC/ST station",
+                prohibition:"prohibition", traffic:"traffic", railway:"railway", cyber:"cyber"};
+    var sec = document.getElementById("stations-sec");
+    var list = document.getElementById("stations");
+    var inside = t["in"] || [], near = t.nr || [];
+    function line(s, tagText){
+      var kind = KIND[s[1]] ? '<span class="st-kind"> \u00b7 ' + KIND[s[1]] + "</span>" : "";
+      return "<li><span>" + s[0] + kind + "</span><span class=\"st-km\">" +
+        (tagText || "~" + s[2] + " km") + "</span></li>";
+    }
+    var html = "";
+    if (inside.length){
+      html += inside.map(function(s){ return line(s); }).join("");
+    } else {
+      html += '<li><span>No station point falls inside this thana' +
+        '<span class="why">The nearest are listed below. A missing point means the ' +
+        'station master has no record here, not that the area is unpoliced.</span></span></li>';
+    }
+    if (near.length){
+      html += '<li><span class="st-kind" style="letter-spacing:.08em">NEAREST</span></li>' +
+        near.map(function(s){ return line(s); }).join("");
+    }
+    list.innerHTML = html;
+    sec.hidden = false;
   }
 
   g.addEventListener("click", function(e){
@@ -276,6 +321,14 @@ footer code{font-family:var(--mono);font-size:11.5px}
       : (c.no_ipc_predecessor ? '<span class="why">New under BNS 2023 &mdash; no pre-2024 baseline exists.</span>'
       : (c.resolution_loss ? '<span class="why">Several IPC offences collapse into one BNS offence; pre- and post-2024 counts are not comparable.</span>' : ""));
     return "<li><span>" + c.label + why + "</span>" + tag + "</li>";
+  }).join("");
+
+  var STATUS = {"available":"t-ok","blocked":"t-gap","not-published":"t-gap",
+                "does-not-exist":"t-none","policy-pending":"t-none"};
+  document.getElementById("avail").innerHTML = (meta.availability || []).map(function(a){
+    return "<li><div class=\"row\"><span>" + a.field + "</span>" +
+      '<span class="tag ' + (STATUS[a.status] || "t-none") + '">' + a.status + "</span></div>" +
+      '<span class="why">' + a.detail + "</span></li>";
   }).join("");
 
   document.getElementById("cav").innerHTML = meta.caveats.map(function(c){

@@ -86,6 +86,11 @@ def project(features: list[dict]) -> tuple[list[dict], dict]:
             "a": 1 if properties["corroborated"] else 0,
             "e": properties.get("evidence") or "",
             "s": properties.get("station") or "",
+            # Stations located inside this thana, and the nearest ones to its
+            # centre. Compacted to [name, kind, km] triples to keep the page
+            # small enough to inline.
+            "in": [[x["name"], x["kind"], x["km"]] for x in properties.get("stations_inside", [])],
+            "nr": [[x["name"], x["kind"], x["km"]] for x in properties.get("stations_nearest", [])],
             "p": path,
         })
     return out, {"width": round(WIDTH), "height": round(height)}
@@ -110,6 +115,7 @@ def build() -> dict:
             "categories": [c for c in meta["categories"] if c["key"] != "other"],
             "coverage": meta["coverage"],
             "sources": meta["sources"],
+            "availability": meta["availability"],
         },
     }
     out = SITE / "map_data.json"

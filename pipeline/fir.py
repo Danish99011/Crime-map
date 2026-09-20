@@ -24,7 +24,7 @@ from dataclasses import dataclass, field
 from datetime import date, datetime
 from typing import Iterable, Iterator
 
-from .taxonomy import classify, parse_sections
+from .taxonomy import classify_field, parse_section_field
 
 # Columns that must never be carried, whatever a source calls them. Matched
 # case-insensitively against the column name. This is a backstop: the real
@@ -77,11 +77,31 @@ class FirRecord:
     sections: tuple[str, ...]
     crime_key: str
     classified: bool
+    # Acts cited on this FIR: IPC, BNS and/or SLL (special and local laws).
+    # SLL counts are not comparable across states — state laws differ — so the
+    # map must be able to filter them out.
+    acts: tuple[str, ...] = ()
+    # When the offence happened, as distinct from when it was registered.
+    # Bihar's repository publishes this; Maharashtra's does not. Where it
+    # exists it is the better date for a map, because registration can lag the
+    # offence by days or years.
+    occurred_on: date | None = None
     dropped_columns: tuple[str, ...] = field(default=(), repr=False)
 
     @property
     def month(self) -> str | None:
-        return self.registered_on.strftime("%Y-%m") if self.registered_on else None
+        """The month this FIR is counted in.
+
+        Prefers when the offence happened over when it was registered, because
+        that is what a resident means by "crime here last month". Falls back to
+        the registration date, which is all most states publish.
+        """
+        basis = self.occurred_on or self.registered_on
+        return basis.strftime("%Y-%m") if basis else None
+
+    @property
+    def month_basis(self) -> str:
+        return "occurrence" if self.occurred_on else "registration"
 
     @classmethod
     def from_row(cls, row: dict, mapping: dict[str, str], source: str,
@@ -100,10 +120,15 @@ class FirRecord:
         kept = {c for c in mapping.values() if c}
         dropped = tuple(sorted(c for c in row if c not in kept))
 
-        act = get("act")
-        sections = tuple(parse_sections(get("sections")))
-        crime_key, classified = classify(list(sections), act)
+        # The sections cell may carry several acts at once, each with its own
+        # numbering, so it is parsed as a whole rather than as a flat list.
+        sections_text = get("sections") or get("act")
+        crime_key, classified, acts = classify_field(sections_text, act_hint=get("act"))
+        sections = tuple(
+            s for _, _, numbers in parse_section_field(sections_text) for s in numbers)
+        act = get("act") or ",".join(acts)
         registered = parse_date(get("registered_on"))
+        occurred = parse_date(get("occurred_on"))
 
         year_text = get("fir_year")
         fir_year = int(year_text) if year_text.isdigit() else (
@@ -121,6 +146,8 @@ class FirRecord:
             sections=sections,
             crime_key=crime_key,
             classified=classified,
+            acts=tuple(acts),
+            occurred_on=occurred,
             dropped_columns=dropped,
         )
 

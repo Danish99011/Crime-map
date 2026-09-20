@@ -176,13 +176,22 @@ class BiharScrbSource:
     """
 
     base_url: str = "https://scrb.bihar.gov.in"
-    path: str = "/View_FIR.aspx"
+    # Corrected from View_FIR.aspx after a third-party scraper was found naming
+    # this path. Still CITED, not verified: the host is unreachable from here.
+    path: str = "/FIRiew.aspx"
     delay_seconds: float = 2.0
     user_agent: str = "IndiaCrimeMap/0.1 (public-interest research; contact in repo)"
     name: str = "bihar-scrb"
 
-    # Filled in from probe() output. Empty means "not yet known".
-    controls: dict[str, str] = field(default_factory=dict)
+    # Form controls named by a third-party scraper of this portal. CITED, not
+    # verified — probe() must confirm them against the live form before use.
+    controls: dict[str, str] = field(default_factory=lambda: {
+        "district": "ddlDistrict",
+        "police_station": "ddlPoliceStation",
+        "date_from": "txtfDate",
+        "date_to": "txttDate",
+        "submit": "btnSearch",
+    })
 
     # Set deliberately by an operator who has read the site's terms of use.
     terms_reviewed: bool = False
@@ -236,6 +245,30 @@ class BiharScrbSource:
         raise NotImplementedError(
             "Result-row parsing must be written against a real result page. Save one, "
             "add it to tests/fixtures/, and implement parsing test-first.")
+
+
+# Column names a third-party scraper reports for Bihar's published-FIR table.
+# CITED, not verified. Bihar uniquely publishes incident_date — when the offence
+# happened — and also publishes complainant and accused names, which is why
+# FirRecord cannot hold them.
+BIHAR_COLUMNS = {
+    "district": "district",
+    "police_station": "police_station",
+    "fir_number": "fir_no",
+    "registered_on": "fir_date",
+    "occurred_on": "incident_date",
+    "sections": "sections",
+}
+
+# Maharashtra's CCTNS portal, verified against harvested rows in tests/fixtures.
+MAHARASHTRA_COLUMNS = {
+    "district": "district",
+    "police_station": "policeStation",
+    "fir_number": "firNumber",
+    "fir_year": "year",
+    "registered_on": "registrationDate",
+    "sections": "sections",
+}
 
 
 def load_records(sources: Iterable[FirSource]) -> list[FirRecord]:

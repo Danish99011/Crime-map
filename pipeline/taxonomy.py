@@ -132,14 +132,23 @@ _DEVANAGARI_DIGITS = re.compile(r"[\u0966-\u096F]+")
 _SEGMENT_SPLIT = re.compile(r"[\r\n]+|;\s*(?=\S*[\u0900-\u097F A-Za-z]{4})")
 
 
-def detect_act(text: str | None) -> str:
-    """Return 'IPC', 'BNS' or 'SLL' for an act name in English or Devanagari."""
-    if not text:
-        return "SLL"
+def detect_act_or_none(text: str | None) -> str | None:
+    """'IPC' or 'BNS' if either is named here, else None."""
     for code, pattern in _ACT_PATTERNS:
-        if pattern.search(text):
+        if text and pattern.search(text):
             return code
-    return "SLL"
+    return None
+
+
+def detect_act(text: str | None) -> str:
+    """Return 'IPC', 'BNS' or 'SLL' for an act name in English or Devanagari.
+
+    Anything named that is not the penal code is a special or local law. Those
+    counts are not comparable across states, since state legislatures differ on
+    prohibition, gambling and cow protection, so they are labelled rather than
+    folded in.
+    """
+    return detect_act_or_none(text) or ("SLL" if text else "SLL")
 
 
 def parse_section_field(text: str | None) -> list[tuple[str, str, list[str]]]:
@@ -161,33 +170,52 @@ def parse_section_field(text: str | None) -> list[tuple[str, str, list[str]]]:
         if not segment:
             continue
         # Sections follow the last dash; everything before it names the act.
-        head, _, tail = segment.rpartition("-")
-        if not head:
-            head, tail = segment, ""
+        # A segment with no dash is bare section numbers — some feeds carry the
+        # act in its own column instead.
+        head, dash, tail = segment.rpartition("-")
+        if not dash:
+            head, tail = "", segment
         act_name = _DEVANAGARI_DIGITS.sub(" ", head).strip(" ,")
         sections = parse_sections(tail)
         if not sections:
             continue
-        out.append((detect_act(act_name), act_name, sections))
+        if act_name:
+            act_code = detect_act(act_name)
+        else:
+            # No act name before a dash, but the act may still be written
+            # inline ("302 IPC"). Only accept a real match; otherwise leave it
+            # unknown so the caller's act column can decide.
+            act_code = detect_act_or_none(segment) or ""
+        out.append((act_code, act_name, sections))
     return out
 
 
-def classify_field(text: str | None) -> tuple[str, bool, list[str]]:
+def classify_field(text: str | None,
+                   act_hint: str | None = None) -> tuple[str, bool, list[str]]:
     """Classify a whole sections cell, honouring each act separately.
 
     Returns (crime_key, confident, act_codes). Applies the principal offence
     rule across every act in the FIR, matching NCRB practice.
+
+    `act_hint` names the act for feeds that carry it in its own column rather
+    than inline. It is only used for segments that name no act themselves, so an
+    inline act always wins — which matters, because a row's act column may say
+    "BNS" while one of its segments cites the Motor Vehicles Act.
     """
     segments = parse_section_field(text)
     if not segments:
         return "other", False, []
+    hint = detect_act(act_hint) if act_hint else ""
     best_key, confident = "other", False
     best_severity = 99
+    acts = set()
     for act_code, _, sections in segments:
-        key, ok = classify(sections, act_code)
+        resolved = act_code or hint
+        acts.add(resolved or "UNKNOWN")
+        key, ok = classify(sections, resolved or None)
         if ok and BY_KEY[key].severity < best_severity:
             best_key, best_severity, confident = key, BY_KEY[key].severity, True
-    return best_key, confident, sorted({a for a, _, _ in segments})
+    return best_key, confident, sorted(acts)
 # Statute names and the noise around them, removed before sections are read.
 _ACT_TOKENS = re.compile(
     r"\b(IPC|BNS|BNSS|CRPC|CR\.?P\.?C|IEA|BSA|POCSO|ACT|SEC|SECTION|SECTIONS|"

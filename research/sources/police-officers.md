@@ -1,5 +1,5 @@
 # Police Officers and Station Contact Data — Can We Name the SHO?
-_Agent: police-officers · Researched: 2026-09-20 · Entries: 4 verified / 18 total_
+_Agent: police-officers · Researched: 2026-09-20 · Entries: 2 verified / 20 total_
 
 > **Scope.** Two questions, both answered here. **(A)** Is per-station officer-in-charge data
 > (name, rank, phone, email) obtainable in India, and Bihar in particular? **(B)** Should our map
@@ -582,6 +582,40 @@ we can publish, and all of which are *more* effective than a name that is 40% li
 the time it is read. We should build that escalation panel deliberately and well, and treat it as
 the answer to this objection rather than a consolation for it. What we must not do is put a
 person's name next to a number that cannot bear the weight of it.
+
+---
+
+## Source entries
+
+Full field set for every entry is in `police-officers.jsonl` (20 lines, same schema as every other dossier).
+Index, ordered as in the JSONL:
+
+| # | id | name | tier | granularity | access | verification | pri |
+|---|---|---|---|---|---|---|---|
+| 1 | `police-officers-bihar-grih-darshan` | Grih Darshan / PoliceSoft thana master (Home Department, Bihar) — SOAP web service | 2 | `police-station` | `blocked` | `CITED` | 4 |
+| 2 | `police-officers-india-police-stations-points` | INDIA_POLICE_STATIONS.geojson — national police station point layer | 2 | `police-station` | `open-download` | `VERIFIED_LIVE` | 5 |
+| 3 | `police-officers-police-uk-neighbourhood-team` | police.uk neighbourhood team endpoint — GET /{force}/{neighbourhood}/people | 2 | `police-station` | `open-download` | `CITED` | 3 |
+| 4 | `police-officers-police-uk-senior-officers` | police.uk force senior officers endpoint — GET /forces/{force}/people | 2 | `state` | `open-download` | `CITED` | 2 |
+| 5 | `police-officers-rti-s4-1-b-directory` | RTI Act 2005 s.4(1)(b)(ix)-(x) — suo motu duty to publish a directory of officers and employees | 1 | `national` | `open-download` | `CITED` | 5 |
+| 6 | `police-officers-dpdp-s3cii-officers` | DPDP Act 2023 s.3(c)(ii) as applied to police officer directories | 1 | `national` | `blocked` | `CITED` | 5 |
+| 7 | `police-officers-prakash-singh-tenure-directive` | Prakash Singh v Union of India (2006) — Directive 3, minimum two-year tenure for SHO in charge of a police station | 3 | `national` | `blocked` | `CITED` | 4 |
+| 8 | `police-officers-bihar-sho-transfer-churn` | Bihar SHO / police officer transfer orders, May-September 2026 (churn evidence) | 5 | `police-district` | `blocked` | `CITED` | 3 |
+| 9 | `police-officers-delhi-know-your-police-station` | Delhi Police 'Know Your Police Station' (KYPS) lookup | 2 | `police-station` | `blocked` | `CITED` | 2 |
+| 10 | `police-officers-jharkhand-ps-contacts` | Jharkhand Police 'Police Station Contacts' directory | 2 | `police-station` | `blocked` | `CITED` | 2 |
+| 11 | `police-officers-hyderabad-know-your-ps` | Hyderabad City Police 'Know Your Police Station' | 2 | `police-station` | `blocked` | `CITED` | 1 |
+| 12 | `police-officers-third-party-sho-directories` | Third-party republished Delhi SHO / Duty Officer contact lists | 5 | `police-station` | `blocked` | `CITED` | 1 |
+| 13 | `police-officers-osm-amenity-police-india` | OpenStreetMap amenity=police in India — station phone/operator tags | 5 | `point` | `scrape` | `VERIFIED_LIVE` | 3 |
+| 14 | `police-officers-bprd-dopo` | Data on Police Organisations (DoPO), annual | 1 | `state` | `blocked` | `CITED` | 3 |
+| 15 | `police-officers-bihar-sho-mafia-discipline-rti` | RTI finding: 50+ Bihar SHOs disciplined for sand/liquor mafia collusion (2022-2025) | 5 | `state` | `blocked` | `CITED` | 2 |
+| 16 | `police-officers-bihar-officer-safety` | Attacks on Bihar police by sand and liquor mafia; Bihar declared Naxal-free (Feb 2026) | 5 | `state` | `blocked` | `CITED` | 2 |
+| 17 | `police-officers-uksa-recorded-crime-designation` | UK Statistics Authority removal of National Statistics designation from police recorded crime (Jan 2014) and HMIC crime-recording inspection | 3 | `national` | `open-download` | `CITED` | 4 |
+| 18 | `police-officers-lalita-kumari-burking` | Lalita Kumari v Govt of UP (2013) and the persistence of burking; BNSS s.173(3) | 3 | `national` | `blocked` | `CITED` | 4 |
+| 19 | `police-officers-bihar-ps-jurisdiction-polygons` | Bihar police station jurisdiction polygons (i-Bhugoal, via Bharatmaps) — officer attributes unverified | 2 | `police-station` | `open-download` | `CITED` | 4 |
+| 20 | `police-officers-rti-draft-5f-5g` | RTI drafts 5(f) office-and-contact directory and 5(g) changes of charge per station — extensions to rti-playbook.md | 4 | `police-station` | `rti-only` | `UNVERIFIED` | 5 |
+
+Grades: **2 `VERIFIED_LIVE`** (the national station layer, parsed byte by byte; the OSM harvester's documented
+coverage), **17 `CITED`** (URL real, extract quoted, page not opened — see Research conditions), **1 `UNVERIFIED`**
+(the two RTI drafts, which are this dossier's own output and have not been filed).
 
 ---
 

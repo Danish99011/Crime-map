@@ -72,32 +72,39 @@ def field_availability() -> list[dict]:
     research/sources/rti-playbook.md for the routes.
     """
     return [
-        {"field": "Police stations nearby", "status": "available",
+        {"field": "Police stations nearby", "status": "available", "recency": "current",
          "detail": "929 Bihar station points with coordinates, from the MHA station master."},
-        {"field": "Number of stations", "status": "available",
-         "detail": "Counted per thana, with specialist units listed separately because "
-                   "a Mahila or SC/ST station sits inside a thana without policing it."},
-        {"field": "Case types", "status": "available",
-         "detail": "20 law-neutral crime heads mapped from IPC and BNS sections. Two are "
-                   "withheld from every public Indian FIR feed by law."},
-        {"field": "Cases registered", "status": "blocked",
-         "detail": "Bihar publishes every FIR at scrb.bihar.gov.in, but the host is "
-                   "unreachable from this environment. The pipeline is written and waiting; "
-                   "see docs/INGESTION.md."},
-        {"field": "Cases closed, and when", "status": "not-published",
-         "detail": "FIR listings carry no disposal field. Outcomes live in the court system, "
-                   "joined by FIR number, and bulk access there is CAPTCHA-gated. Police-side "
-                   "disposal is published only at district level, annually."},
-        {"field": "Location of each case", "status": "does-not-exist",
-         "detail": "No Indian authority publishes geocoded crime incidents. An FIR records "
-                   "the police station that registered it, not where the offence happened. "
-                   "The thana jurisdiction is the finest honest unit, and any product showing "
+        {"field": "Number of stations", "status": "available", "recency": "current",
+         "detail": "Counted per thana, with specialist units listed separately because a "
+                   "Mahila or SC/ST station sits inside a thana without policing it."},
+        {"field": "Case types", "status": "available", "recency": "current",
+         "detail": "20 law-neutral crime heads mapped from IPC and BNS sections, tested "
+                   "against real published-FIR rows in Marathi and English."},
+        {"field": "Cases registered — last 5 years", "status": "blocked", "recency": "needed",
+         "detail": "Bihar publishes every FIR daily at scrb.bihar.gov.in/FIRiew.aspx, which is "
+                   "current and exactly what is wanted. The host is unreachable from this "
+                   "environment; the pipeline is written and waiting."},
+        {"field": "Cases registered — historical", "status": "available", "recency": "2001-2014",
+         "detail": "NCRB district tables for all 44 Bihar police districts, 1.66 million "
+                   "offences. Twelve years stale, so it is a baseline to validate against and "
+                   "not an answer to whether an area is safe now."},
+        {"field": "Cases closed, and when", "status": "route-found", "recency": "not for Bihar",
+         "detail": "Court records carry the FIR number, police station, disposal and decision "
+                   "date, in bulk and without a CAPTCHA. But the open district-court corpus "
+                   "covers Telangana only; Bihar district outcomes are absent. Patna High Court "
+                   "captions do carry thana and FIR for 2024 — but they are bail decisions, "
+                   "not verdicts."},
+        {"field": "Location of each case", "status": "does-not-exist", "recency": "n/a",
+         "detail": "No Indian authority publishes geocoded crime incidents. An FIR records the "
+                   "police station that registered it, not where the offence happened. Bihar's "
+                   "feed does carry an incident date, which is rarer and better than most. The "
+                   "thana jurisdiction is the finest honest unit, and any product showing "
                    "street-level pins for India is inventing them."},
-        {"field": "Station house officer", "status": "policy-pending",
-         "detail": "Obtainable from state police directories, but postings rotate often and a "
-                   "stale name beside crime counts is worse than none. Naming an individual "
-                   "next to figures driven by population and reporting propensity invites a "
-                   "reading the data cannot support."},
+        {"field": "Station house officer", "status": "declined", "recency": "n/a",
+         "detail": "The record exists — Bihar's Grih Darshan holds a name, mobile and email per "
+                   "thana — but around 27% of Patna's SHOs moved in a single transfer order, so "
+                   "any copy is stale within weeks. We publish the station and the post, not the "
+                   "person: landline, official email, 112, and a link to the force's own page."},
     ]
 
 

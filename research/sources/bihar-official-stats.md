@@ -14,6 +14,18 @@ _Agent: bihar-official-stats · Researched: 2026-09-20 · Entries: 6 verified-li
 > No `.gov.in` URL in this dossier was fetched by me; those are marked `CITED` and carry a
 > third-party scrape date instead of my own.
 
+> **Independently corroborated by the project's own `research/verify_sources.py`** (full 797-URL
+> sweep, 2026-09-20). Of this dossier's 20 catalogued URLs: the **3 `raw.githubusercontent.com`
+> data URLs returned `OK`** — those are the ones the ingest actually depends on — while every
+> `.gov.in` URL returned `UNREACHABLE / "Tunnel connection failed: 403 Forbidden"`, matching the
+> denial recorded above.
+>
+> **Pipeline note:** that sweep also shows `github.com` **HTML** pages return `403 FORBIDDEN` in
+> this environment while `raw.githubusercontent.com` returns `200`. So the `landing`/`docs`
+> github.com URLs in this dossier are correct but unverifiable from here; fetch repo content via
+> `raw.githubusercontent.com`, and enumerate repo files via GitHub **code search** with `repo:`
+> (the `api.github.com` `git/trees` endpoint is per-repo gated and 403s).
+
 ---
 
 ## Executive summary
@@ -214,7 +226,7 @@ columns     ncrb_ogd_label, spine_district, revenue_district, unit_type, note
 verification VERIFIED_LIVE — validated in both directions, zero residual
 ```
 
-53 rows: 44 mappable police districts + the drop-list (`TOTAL`, `ZZ TOTAL`, `Anti Terrorist Squad`,
+52 rows: 44 mappable police districts + the drop-list (`TOTAL`, `ZZ TOTAL`, `Anti Terrorist Squad`,
 `Economic Offences Unit`) + the 2014 `Railway` spelling variants. See §How it joins.
 
 ### 8. NCRB state-level disposal & arrest tables (negative finding, downloaded as benchmark)

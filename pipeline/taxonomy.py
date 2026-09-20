@@ -123,9 +123,23 @@ _ACT_PATTERNS: tuple[tuple[str, re.Pattern], ...] = (
                        r"\bIPC\b|INDIAN\s+PENAL", re.I)),
 )
 
-# Devanagari digits appear in Marathi act years (१९८८). They are never section
-# numbers, so they are removed before sections are read.
+# Devanagari digits appear in Marathi act years (१९८८) AND in the section
+# numbers themselves: Maharashtra writes pre-BNS FIRs as
+# "भारतीय दंड संहिता १८६० - ३८०", where १८६० is the year 1860 and ३८० is
+# section 380. An earlier version of this module assumed they were only ever
+# years and deleted them, which left 97% of the first live Mumbai month
+# unclassified -- every pre-2024 theft and burglary silently became "other".
+#
+# So they are transliterated rather than dropped, and the existing rule that
+# strips bare years does the rest. The digits are contiguous in Unicode, so
+# the mapping is arithmetic.
 _DEVANAGARI_DIGITS = re.compile(r"[\u0966-\u096F]+")
+_DEVANAGARI_TO_ASCII = {0x0966 + n: str(n) for n in range(10)}
+
+
+def devanagari_digits_to_ascii(text: str) -> str:
+    """Rewrite ०-९ as 0-9, leaving everything else untouched."""
+    return text.translate(_DEVANAGARI_TO_ASCII)
 
 # A sections cell may carry several acts, separated by newlines or by a
 # semicolon that is followed by another act name.
@@ -246,6 +260,10 @@ def parse_sections(text: str | None) -> list[str]:
     """
     if not text:
         return []
+    # Devanagari section numbers first, so everything below sees one numeral
+    # system. Act years written in Devanagari become ordinary years here and
+    # are removed by the year rule a few lines down, exactly as Latin ones are.
+    text = devanagari_digits_to_ascii(text)
     # Sub-section markers: 303(2), 125(a), 118(1). The parent section decides
     # the head, so the marker is dropped rather than read as another number.
     cleaned = re.sub(r"\((?:\d+|[a-zA-Z])\)", " ", text.upper())

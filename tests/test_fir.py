@@ -99,3 +99,50 @@ class TestClassification:
         # Mirrors NCRB: one offence per FIR, the most serious. Recorded so the
         # depletion of subordinate heads is a known property, not a surprise.
         assert classify(parse_sections("302/323/379"), "IPC")[0] == "homicide"
+
+
+class TestDevanagariSectionNumbers:
+    """Marathi FIRs write the section number itself in Devanagari digits.
+
+    This was found the hard way: the first live Mumbai month fetched from
+    citizen.mahapolice.gov.in came back 97% unclassified. The cause was an
+    assumption recorded in taxonomy.py that Devanagari digits "appear in
+    Marathi act years and are never section numbers" -- true of the 2025 BNS
+    fixtures the rule was written against, false of everything before the BNS
+    changeover, where the portal writes:
+
+        भारतीय दंड संहिता १८६० - ३८० ;      (IPC 1860 s.380, theft)
+
+    An unclassified FIR is not a harmless gap. It lands in "other", so a map
+    built from pre-2024 records would show almost no burglary anywhere in
+    Mumbai -- an absence presented as a fact about the city rather than about
+    our parser.
+    """
+
+    def test_devanagari_section_number_is_read(self):
+        assert parse_sections("भारतीय दंड संहिता १८६० - ३८० ;") == ["380"]
+
+    def test_and_classifies_the_same_as_latin_digits(self):
+        devanagari = classify(parse_sections("भारतीय दंड संहिता १८६० - ३८० ;"), "IPC")
+        latin = classify(parse_sections("भारतीय दंड संहिता १८६० - 380 ;"), "IPC")
+        assert devanagari == latin
+        assert devanagari[1] is True
+
+    def test_the_act_year_is_still_not_read_as_a_section(self):
+        # १८६० is 1860, the year the IPC was enacted, and must not become a
+        # section. This is what the original strip-the-digits rule got right.
+        assert "1860" not in parse_sections("भारतीय दंड संहिता १८६० - ३८० ;")
+
+    def test_mixed_devanagari_and_latin_in_one_cell(self):
+        text = "शस्त्र अधिनियम, १९५९ - २५,३ ; भारतीय दंड संहिता १८६० - 380 ;"
+        sections = parse_sections(text)
+        assert "25" in sections and "3" in sections and "380" in sections
+        assert "1959" not in sections and "1860" not in sections
+
+    @pytest.mark.parametrize("text,expected", [
+        ("भारतीय दंड संहिता १८६० - ३०२ ;", "302"),   # murder
+        ("भारतीय दंड संहिता १८६० - ३७९ ;", "379"),   # theft
+        ("भारतीय दंड संहिता १८६० - ४२० ;", "420"),   # cheating
+    ])
+    def test_common_ipc_sections_in_devanagari(self, text, expected):
+        assert expected in parse_sections(text)

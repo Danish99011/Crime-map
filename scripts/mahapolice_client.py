@@ -57,6 +57,7 @@ PAGE_SIZE = "ctl00$ContentPlaceHolder1$ucRecordView$ddlPageSize"
 PAGE_NUMBER = "ctl00$ContentPlaceHolder1$ucGridRecordView$txtPageNumber"
 PAGE_GO = "ctl00$ContentPlaceHolder1$ucGridRecordView$btnPageNumber"
 SEARCH = "ctl00$ContentPlaceHolder1$btnSearch"
+GRID = "ctl00$ContentPlaceHolder1$gdvDeadBody"
 
 STATE_KEYS = ("__VIEWSTATE", "__VIEWSTATEGENERATOR", "__EVENTVALIDATION",
               "__VIEWSTATEENCRYPTED")
@@ -220,6 +221,38 @@ class MahapoliceClient:
             raise PortalError(
                 f"search for unit {unit_id} {date_from}..{date_to} returned the "
                 f"portal's error page. This is a failure, not an empty result.")
+        return page
+
+    def goto_grid_page(self, number: int, unit_id: str, date_from: str,
+                       date_to: str, page_size: int = 50,
+                       station_id: str | None = None) -> str:
+        """Move to page `number` using the GridView's own pager postback.
+
+        The grid renders its page links as
+        `__doPostBack('ctl00$ContentPlaceHolder1$gdvDeadBody', 'Page$N')`, and
+        driving that directly is more reliable than the page-number textbox:
+        it is what the page itself does, it needs no other field to be
+        re-posted consistently, and it works for pages beyond the ten the
+        pager chooses to render.
+
+        The search whose results are being paged must be the most recent
+        request on this client, because the posted __VIEWSTATE carries it.
+        """
+        if station_id is None:
+            station_id = self._placeholder(STATION)
+        form = self._form_state(self._last_body)
+        form.update({
+            "__EVENTTARGET": GRID, "__EVENTARGUMENT": f"Page${number}",
+            "__LASTFOCUS": "",
+            UNIT: unit_id, STATION: station_id,
+            DATE_FROM: date_from, DATE_TO: date_to, FIR_NO: "",
+            PAGE_SIZE: str(page_size),
+            "ctl00$hdnSessionIdleTime": "", "ctl00$hdnUserUniqueId": "",
+        })
+        page = self._request(FORM, urllib.parse.urlencode(form).encode(), FORM)
+        self._pause()
+        if self._is_error_page(page):
+            raise PortalError(f"paging to {number} returned the portal error page")
         return page
 
     def goto_page(self, unit_id: str, date_from: str, date_to: str,

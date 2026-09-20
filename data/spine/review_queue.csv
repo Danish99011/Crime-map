@@ -1,13 +1,11 @@
 station_name,district,ps_cd_mha,thana_id,thana_name,tier,mappable,rule,by_name,by_name_confidence,by_geometry,by_geometry_name,by_geometry_similarity,proposal
 NAGAR,AURANGABAD,5137004,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.714,BH-5137003,MUFASSIL,0.167,BH-5137003
-UPHARA,AURANGABAD,5137072,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.667,BH-5137072,UPAHARA,0.667,BH-5137072
 Azan,AURANGABAD,5137082,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.5,BH-5137049,MADANPUR,0.5,BH-5137049
 THAKRAHAN,BAGAHA,5803010,,,needs-review,False,neither name nor geometry places this station,,0.625,,,0.0,
 Dhankund,BANKA,5797049,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.571,BH-5797002,DHURAIYA,0.4,BH-5797002
 SAMHO,BEGUSARAI,5102001,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.526,BH-5102001,SHAMHO AKHA KURHA,0.526,BH-5102001
 BEGUSARAI TOWN,BEGUSARAI,5102010,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.5,BH-5102038,MUFASSIL,0.3,BH-5102038
 NAWA KOTHI,BEGUSARAI,5102035,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.824,BH-5102031,MATIHANI,0.235,BH-5102031
-BEGUSARAI MUFASSIL,BEGUSARAI,5102038,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.609,BH-5102038,MUFASSIL,0.609,BH-5102038
 BALTHAR,WEST CHAMPARAN,5127004,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.556,BH-5127024,SIKTA,0.167,BH-5127024
 BHANGAHA,WEST CHAMPARAN,5127005,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.667,BH-5127019,MAINATAND,0.235,BH-5127019
 GOPALPUR,WEST CHAMPARAN,5127015,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.429,BH-5127024,SIKTA,0.154,BH-5127024
@@ -29,10 +27,7 @@ Hasanbazar,BHOJPUR,5124045,,,needs-review,False,name too weak to accept and geom
 NAGAR,BUXAR,5793007,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.714,BH-5793014,MUFASSIL,0.167,BH-5793014
 ASHOK PAPER MILLS,DARBHANGA,5106002,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.5,BH-5106002,APM,0.353,BH-5106002
 L.N.M. UNIVERSITY,DARBHANGA,5106013,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.462,BH-5106072,DARBHANGA SADAR,0.148,BH-5106072
-JALAI,DARBHANGA,5106032,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.667,BH-5106032,JALE,0.667,BH-5106032
 LAHERIA SARAI,DARBHANGA,5106043,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.556,BH-5106072,DARBHANGA SADAR,0.462,BH-5106072
-SEMARI BAZAR,DARBHANGA,5106054,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.5,BH-5106054,SIMRI,0.5,BH-5106054
-DARBHANGA TOWN,DARBHANGA,5106055,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.667,BH-5106072,DARBHANGA SADAR,0.667,BH-5106072
 CHANDAULI,GAYA,5109013,,,needs-review,False,name too weak to accept and geometry does not corroborate it,BH-5109013,0.889,BH-5109049,MAGADH MEDICAL,0.273,BH-5109049
 CIVIL LINES,GAYA,5109014,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.32,BH-5109049,MAGADH MEDICAL,0.182,BH-5109049
 DELHA,GAYA,5109015,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.462,BH-5109049,MAGADH MEDICAL,0.333,BH-5109049
@@ -42,7 +37,6 @@ MAGADH VISWAVIDYALAY,GAYA,5109050,,,needs-review,False,name too weak to accept a
 RAMPUR,GAYA,5109052,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.667,BH-5109049,MAGADH MEDICAL,0.211,BH-5109049
 Suhail,GAYA,5109066,,,needs-review,False,neither name nor geometry places this station,,0.833,,,0.0,
 Vishnupad Temple,GAYA,5109070,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.364,BH-5109049,MAGADH MEDICAL,0.286,BH-5109049
-MEN,GAYA,5109078,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.571,BH-5109078,MAIN,0.571,BH-5109078
 MOHAMMADPUR,GOPALGANJ,5139013,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.609,BH-5139016,SIDHWALIA,0.316,BH-5139016
 CHANDRAMANDI,JAMUI,5799019,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.727,BH-5799009,CHAKAI,0.556,BH-5799009
 SIMULTALLA,JAMUI,5799040,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.471,BH-5799024,JHAJHA,0.267,BH-5799024
@@ -51,7 +45,6 @@ Batia,JAMUI,5799052,,,needs-review,False,name too weak to accept and geometry do
 Garhi,JAMUI,5799056,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.545,BH-5799028,KHAIRA,0.4,BH-5799028
 Barabar Tourism,JEHANABAD,5790053,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.667,BH-5790009,BISHUNGANJ,0.25,BH-5790009
 Junathi,JEHANABAD,5790054,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.375,BH-5790016,PARAS BIGHA,0.25,BH-5790016
-NAGAR,KATIHAR,5130010,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.714,BH-5130010,KATIHAR NAGAR,0.588,BH-5130010
 KHAGARIA,KHAGARIA,5108005,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.667,BH-5108005,TOWN THANA,0.0,BH-5108005
 MURKAHI,KHAGARIA,5108007,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.667,BH-5108021,CHITRAGUPT NAGAR OP,0.182,BH-5108021
 Riverine Mohraghat,KHAGARIA,5108013,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.323,BH-5108001,ALAULI,0.091,BH-5108001
@@ -60,7 +53,6 @@ Bahadurpur,KHAGARIA,5108017,,,needs-review,False,name too weak to accept and geo
 Piparpani,KHAGARIA,5108020,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.571,BH-5108001,ALAULI,0.133,BH-5108001
 Bannu Bagicha,LAKHISARAI,5802054,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.556,BH-5802011,CHANAN,0.353,BH-5802011
 KHUTAUNA,MADHUBANI,5129014,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.429,BH-5129017,LAUKAHA,0.429,BH-5129017
-NAGAR,MADHUBANI,5129028,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.769,BH-5129028,TOWN,0.222,BH-5129028
 CHAKIA,EAST CHAMPARAN,5128003,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.769,BH-5128022,PIPRA,0.182,BH-5128022
 CHHATAUNI,EAST CHAMPARAN,5128004,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.571,BH-5128017,MUFFASSIL,0.267,BH-5128017
 CHHODADANO,EAST CHAMPARAN,5128006,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.5,BH-5128011,DARPA,0.429,BH-5128011
@@ -77,10 +69,7 @@ BRAHMPURA,MUZAFFARPUR,5114010,,,needs-review,False,name too weak to accept and g
 HATHAURI,MUZAFFARPUR,5114020,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.769,BH-5114020,HATHODI,0.667,BH-5114020
 KAZI MOHAMMADPUR,MUZAFFARPUR,5114027,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.571,BH-5114054,MUZAFFARPUR SADAR,0.345,BH-5114054
 VISHWAVIDYALAYA,MUZAFFARPUR,5114031,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.476,BH-5114054,MUZAFFARPUR SADAR,0.267,BH-5114054
-NAGAR,MUZAFFARPUR,5114032,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.5,BH-5114054,MUZAFFARPUR SADAR,0.3,BH-5114054
 MITHANPURA,MUZAFFARPUR,5114034,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.706,BH-5114054,MUZAFFARPUR SADAR,0.48,BH-5114054
-SADAR,MUZAFFARPUR,5114054,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.6,BH-5114054,MUZAFFARPUR SADAR,0.5,BH-5114054
-Turki Khararu,MUZAFFARPUR,5114073,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.625,BH-5114073,TURKI OP,0.625,BH-5114073
 BIHAR,NALANDA,5134005,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.625,BH-5134023,LAHERI PS,0.182,BH-5134023
 CHIKSOHRA,NALANDA,5134041,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.778,BH-5134011,HILSA PS,0.571,BH-5134011
 NAGAR,NAWADA,5136013,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.571,BH-5136013,NAWADA,0.545,BH-5136013
@@ -89,21 +78,15 @@ HATHIDAH,PATNA,5117034,,,needs-review,False,name too weak to accept and geometry
 MARANCHI,PATNA,5117037,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.625,BH-5117051,MOKAMA,0.286,BH-5117051
 SAKSOHARA,PATNA,5117039,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.625,BH-5117016,BELCHHI,0.133,BH-5117016
 SHAHJEHANPUR,PATNA,5117040,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.737,BH-5117035,DANIYAWAN,0.2,BH-5117035
-SRI KRISHNA PURI,PATNA,5117046,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.621,BH-5117046,SK PURI,0.6,BH-5117046
-BEUR,PATNA,5117083,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.615,BH-5117083,BEOUR JAIL,0.615,BH-5117083
 HAWAI ADDA,PATNA,5117086,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.526,BH-5117003,AIRPORT,0.267,BH-5117003
 NTPC,PATNA,5117090,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.462,BH-5117059,PANDARAK,0.167,BH-5117059
 SALIMPUR,PATNA,5117096,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.667,BH-5117005,BAKHTIYARPUR,0.556,BH-5117005
 KHAJANCHI HAT,PURNIA,5118039,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.476,BH-5118064,PURNIA SADAR,0.273,BH-5118064
-SADAR,PURNIA,5118064,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.625,BH-5118064,PURNIA SADAR,0.625,BH-5118064
 AMJHAUR,ROHTAS,5125007,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.769,BH-5125021,ROHTAS,0.154,BH-5125021
 SASARAM NAGAR,ROHTAS,5125022,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.64,BH-5125022,SASARAM (MUFASSIL),0.64,BH-5125022
 SONBARASA KACHAHARI,SAHARSA,5120044,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.621,BH-5120038,SAHARSA SADAR,0.333,BH-5120038
-SHAHPUR PATORI,SAMASTIPUR,5133013,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.632,BH-5133004,PATORI,0.632,BH-5133004
-NAGAR,SAMASTIPUR,5133024,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.667,BH-5133024,SAMASTIPUR SADAR,0.3,BH-5133024
 MUFASSIL,SARAN,5123005,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.7,BH-5123004,SARAN NAGAR THANA,0.125,BH-5123004
 BHAGWAN BAZAAR,SARAN,5123006,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.64,BH-5123004,SARAN NAGAR THANA,0.381,BH-5123004
-JANTA BAZAAR,SARAN,5123026,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.69,BH-5123026,LAHLADPUR (JANTA BAZAR),0.69,BH-5123026
 BELA,SITAMARHI,5138004,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.727,BH-5138020,PARIHAR,0.182,BH-5138020
 KANHAULI,SITAMARHI,5138008,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.5,BH-5138018,SONBARSA,0.25,BH-5138018
 MAJORGANJ,SITAMARHI,5138009,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.778,BH-5138012,RIGA,0.462,BH-5138012
@@ -112,8 +95,6 @@ Choraut,SITAMARHI,5138033,,,needs-review,False,name too weak to accept and geome
 Mahindwara,SITAMARHI,5138035,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.444,BH-5138013,RUNISAIDPUR,0.381,BH-5138013
 Punaura,SITAMARHI,5138036,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.571,BH-5138014,DUMRA,0.5,BH-5138014
 Suppi,SITAMARHI,5138037,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.667,BH-5138009,MEJARGANJ,0.0,BH-5138009
-GAUTAM BUDDHA NAGAR,SIWAN,5135005,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.609,BH-5135005,G.B. NAGAR,0.609,BH-5135005
-JAMO BAZAAR,SIWAN,5135019,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.615,BH-5135019,JAMO,0.615,BH-5135019
 NAGAR,SIWAN,5135026,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.833,BH-5135027,MUFFASIL,0.167,BH-5135027
 RIVERINE PS,SUPAUL,5800038,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.526,BH-5800043,SUPAUL,0.0,BH-5800043
 GAOROL,VAISHALI,5104006,,,needs-review,False,neither name nor geometry places this station,,0.667,,,0.0,

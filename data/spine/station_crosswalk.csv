@@ -38,7 +38,7 @@ NABINAGAR,AURANGABAD,5137054,BH-5137054,NABINAGAR,confirmed,True,name and geomet
 OBRA,AURANGABAD,5137060,BH-5137060,OBRA,confirmed,True,name and geometry agree,BH-5137060,1.0,BH-5137060,OBRA,1.0,
 RAFIGANJ,AURANGABAD,5137068,BH-5137068,RAFIGANJ,confirmed,True,name and geometry agree,BH-5137068,1.0,BH-5137068,RAFIGANJ,1.0,
 RISHIYAP,AURANGABAD,5137069,BH-5137069,RISIYAP,confirmed,True,name and geometry agree,BH-5137069,0.923,BH-5137069,RISIYAP,0.923,
-UPHARA,AURANGABAD,5137072,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.667,BH-5137072,UPAHARA,0.667,BH-5137072
+UPHARA,AURANGABAD,5137072,BH-5137072,UPAHARA,corroborated,True,"'UPHARA' and 'UPAHARA': same consonant skeleton, unique in this district; the point falls inside it",,0.667,BH-5137072,UPAHARA,0.667,
 FESAR,AURANGABAD,5137073,BH-5137073,PHESAR,confirmed,True,name and geometry agree,BH-5137073,1.0,BH-5137073,PHESAR,1.0,
 KHAIRA,AURANGABAD,5137074,BH-5137074,NTPC KHAIRA,corroborated,True,"name 'KHAIRA' ~ 'NTPC KHAIRA' at 0.71, below the 0.86 threshold but the point falls inside it",,0.714,BH-5137074,NTPC KHAIRA,0.714,
 KHUDWAN,AURANGABAD,5137075,BH-5137075,KHUDWAN,confirmed,True,name and geometry agree,BH-5137075,1.0,BH-5137075,KHUDWAN,1.0,
@@ -91,7 +91,7 @@ NIMACHAND PUR,BEGUSARAI,5102034,BH-5102034,NEEMA CHANDPURA,confirmed,True,name a
 NAWA KOTHI,BEGUSARAI,5102035,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.824,BH-5102031,MATIHANI,0.235,BH-5102031
 PHULWARIA,BEGUSARAI,5102036,BH-5102036,PHULWARIYA,name-over-geometry,True,"name matched 'PHULWARIYA' at 1.0; point fell in 'TEGHRA', which is the unreliable witness",BH-5102036,1.0,BH-5102040,TEGHRA,0.154,
 SAHEBPUR KAMAL,BEGUSARAI,5102037,BH-5102037,SAHEBPUR KAMAL,name-over-geometry,True,"name matched 'SAHEBPUR KAMAL' at 1.0; point fell in 'BALIA', which is the unreliable witness",BH-5102037,1.0,BH-5102007,BALIA,0.333,
-BEGUSARAI MUFASSIL,BEGUSARAI,5102038,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.609,BH-5102038,MUFASSIL,0.609,BH-5102038
+BEGUSARAI MUFASSIL,BEGUSARAI,5102038,BH-5102038,MUFASSIL,corroborated,True,'BEGUSARAI MUFASSIL' and 'MUFASSIL': one name contains the other; the point falls inside it,,0.609,BH-5102038,MUFASSIL,0.609,
 TEGHRA,BEGUSARAI,5102040,BH-5102040,TEGHRA,confirmed,True,name and geometry agree,BH-5102040,1.0,BH-5102040,TEGHRA,1.0,
 BHAGWANPUR,BEGUSARAI,5102041,BH-5102041,BHAGWANPUR,confirmed,True,name and geometry agree,BH-5102041,1.0,BH-5102041,BHAGWANPUR,1.0,
 DANDARI,BEGUSARAI,5102042,BH-5102042,DANDARI,name-over-geometry,True,"name matched 'DANDARI' at 1.0; point fell in 'MUFASSIL', which is the unreliable witness",BH-5102042,1.0,BH-5102038,MUFASSIL,0.286,
@@ -203,15 +203,15 @@ L.N.M. UNIVERSITY,DARBHANGA,5106013,,,needs-review,False,name too weak to accept
 MORO,DARBHANGA,5106014,BH-5106014,MORO,confirmed,True,name and geometry agree,BH-5106014,1.0,BH-5106014,MORO,1.0,
 RAIYAM,DARBHANGA,5106015,BH-5106015,REYAM,corroborated,True,"name 'RAIYAM' ~ 'REYAM' at 0.80, below the 0.86 threshold but the point falls inside it",,0.8,BH-5106015,REYAM,0.8,
 GHAN SHYAMPUR,DARBHANGA,5106023,BH-5106023,GHANSHYAMPUR,confirmed,True,name and geometry agree,BH-5106023,1.0,BH-5106023,GHANSHYAMPUR,1.0,
-JALAI,DARBHANGA,5106032,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.667,BH-5106032,JALE,0.667,BH-5106032
+JALAI,DARBHANGA,5106032,BH-5106032,JALE,corroborated,True,"'JALAI' and 'JALE': same consonant skeleton, unique in this district; the point falls inside it",,0.667,BH-5106032,JALE,0.667,
 JAMALPUR,DARBHANGA,5106033,BH-5106033,JAMALPUR,confirmed,True,name and geometry agree,BH-5106033,1.0,BH-5106033,JAMALPUR,1.0,
 KAMTAUL,DARBHANGA,5106035,BH-5106035,KAMTOL,corroborated,True,"name 'KAMTAUL' ~ 'KAMTOL' at 0.77, below the 0.86 threshold but the point falls inside it",,0.769,BH-5106035,KAMTOL,0.769,
 KEUTI,DARBHANGA,5106037,BH-5106037,KEWTI,corroborated,True,"name 'KEUTI' ~ 'KEWTI' at 0.80, below the 0.86 threshold but the point falls inside it",,0.8,BH-5106037,KEWTI,0.8,
 KUSESHWRA ASTHAN,DARBHANGA,5106038,BH-5106038,KUSHEWER STHAN,corroborated,True,"name 'KUSESHWRA ASTHAN' ~ 'KUSHEWER STHAN' at 0.81, below the 0.86 threshold but the point falls inside it",,0.815,BH-5106038,KUSHEWER STHAN,0.815,
 LAHERIA SARAI,DARBHANGA,5106043,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.556,BH-5106072,DARBHANGA SADAR,0.462,BH-5106072
 MANIGACHHI,DARBHANGA,5106052,BH-5106052,MANIGACHHI,confirmed,True,name and geometry agree,BH-5106052,1.0,BH-5106052,MANIGACHHI,1.0,
-SEMARI BAZAR,DARBHANGA,5106054,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.5,BH-5106054,SIMRI,0.5,BH-5106054
-DARBHANGA TOWN,DARBHANGA,5106055,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.667,BH-5106072,DARBHANGA SADAR,0.667,BH-5106072
+SEMARI BAZAR,DARBHANGA,5106054,BH-5106054,SIMRI,corroborated,True,"'SEMARI BAZAR' and 'SIMRI': same consonant skeleton, unique in this district; the point falls inside it",,0.5,BH-5106054,SIMRI,0.5,
+DARBHANGA TOWN,DARBHANGA,5106055,BH-5106072,DARBHANGA SADAR,corroborated,True,"'DARBHANGA TOWN' and 'DARBHANGA SADAR': same consonant skeleton, unique in this district; the point falls inside it",,0.667,BH-5106072,DARBHANGA SADAR,0.667,
 Alinagar,DARBHANGA,5106056,BH-5106056,ALI NAGAR,confirmed,True,name and geometry agree,BH-5106056,1.0,BH-5106056,ALI NAGAR,1.0,
 SINGWARA,DARBHANGA,5106071,BH-5106071,SINGHWARA,confirmed,True,name and geometry agree,BH-5106071,1.0,BH-5106071,SINGHWARA,1.0,
 DARBHANGA SADAR,DARBHANGA,5106072,BH-5106072,DARBHANGA SADAR,confirmed,True,name and geometry agree,BH-5106072,1.0,BH-5106072,DARBHANGA SADAR,1.0,
@@ -258,7 +258,7 @@ ROSHANGANJ,GAYA,5109068,BH-5109068,RAUSHANGANJ,corroborated,True,"name 'ROSHANGA
 Vishnupad Temple,GAYA,5109070,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.364,BH-5109049,MAGADH MEDICAL,0.286,BH-5109049
 SHERGHATI,GAYA,5109072,BH-5109072,SHERGHATI,confirmed,True,name and geometry agree,BH-5109072,1.0,BH-5109072,SHERGHATI,1.0,
 TEKARI,GAYA,5109076,BH-5109076,TIKARI,corroborated,True,"name 'TEKARI' ~ 'TIKARI' at 0.83, below the 0.86 threshold but the point falls inside it",,0.833,BH-5109076,TIKARI,0.833,
-MEN,GAYA,5109078,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.571,BH-5109078,MAIN,0.571,BH-5109078
+MEN,GAYA,5109078,BH-5109078,MAIN,corroborated,True,"'MEN' and 'MAIN': same consonant skeleton, unique in this district; the point falls inside it",,0.571,BH-5109078,MAIN,0.571,
 WAZIRGANJ,GAYA,5109080,BH-5109080,WAZIRGANJ,confirmed,True,name and geometry agree,BH-5109080,1.0,BH-5109080,WAZIRGANJ,1.0,
 BARAULI,GOPALGANJ,5139001,BH-5139001,BARAULI,confirmed,True,name and geometry agree,BH-5139001,1.0,BH-5139001,BARAULI,1.0,
 Hathua,GOPALGANJ,5139002,BH-5139002,HATHUA,confirmed,True,name and geometry agree,BH-5139002,1.0,BH-5139002,HATHUA,1.0,
@@ -309,7 +309,7 @@ BARARI,KATIHAR,5130006,BH-5130006,BARARI,confirmed,True,name and geometry agree,
 BARSOI,KATIHAR,5130007,BH-5130007,BARSOI,confirmed,True,name and geometry agree,BH-5130007,1.0,BH-5130007,BARSOI,1.0,
 FALKA,KATIHAR,5130008,BH-5130008,FALKA,confirmed,True,name and geometry agree,BH-5130008,1.0,BH-5130008,FALKA,1.0,
 KORHA,KATIHAR,5130009,BH-5130009,KORHA,confirmed,True,name and geometry agree,BH-5130009,1.0,BH-5130009,KORHA,1.0,
-NAGAR,KATIHAR,5130010,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.714,BH-5130010,KATIHAR NAGAR,0.588,BH-5130010
+NAGAR,KATIHAR,5130010,BH-5130010,KATIHAR NAGAR,corroborated,True,'NAGAR' and 'KATIHAR NAGAR': one name contains the other; the point falls inside it,,0.714,BH-5130010,KATIHAR NAGAR,0.588,
 DANDKHORA,KATIHAR,5130011,BH-5130011,DANDKHORA,confirmed,True,name and geometry agree,BH-5130011,1.0,BH-5130011,DANDKHORA,1.0,
 KADWA,KATIHAR,5130012,BH-5130012,KADWA,name-over-geometry,True,"name matched 'KADWA' at 1.0; point fell in 'KATIHAR NAGAR', which is the unreliable witness",BH-5130012,1.0,BH-5130010,KATIHAR NAGAR,0.353,
 MUFASSIL,KATIHAR,5130013,BH-5130013,MUFASSIL,name-over-geometry,True,"name matched 'MUFASSIL' at 1.0; point fell in 'SHAYAK', which is the unreliable witness",BH-5130013,1.0,BH-5130066,SHAYAK,0.308,
@@ -392,7 +392,7 @@ BENIPATTI,MADHUBANI,5129024,BH-5129024,BENIPATTI,confirmed,True,name and geometr
 BISFI,MADHUBANI,5129025,BH-5129025,BISFI,confirmed,True,name and geometry agree,BH-5129025,1.0,BH-5129025,BISFI,1.0,
 HARLAKHI,MADHUBANI,5129026,BH-5129026,HARLAKHI,confirmed,True,name and geometry agree,BH-5129026,1.0,BH-5129026,HARLAKHI,1.0,
 MADHWAPUR,MADHUBANI,5129027,BH-5129027,MADHWAPUR,confirmed,True,name and geometry agree,BH-5129027,1.0,BH-5129027,MADHWAPUR,1.0,
-NAGAR,MADHUBANI,5129028,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.769,BH-5129028,TOWN,0.222,BH-5129028
+NAGAR,MADHUBANI,5129028,BH-5129028,TOWN,corroborated,True,'NAGAR' and 'TOWN': both name the district headquarters station; the point falls inside it,,0.769,BH-5129028,TOWN,0.222,
 KALUAHI,MADHUBANI,5129029,BH-5129029,KALUAHI,confirmed,True,name and geometry agree,BH-5129029,1.0,BH-5129029,KALUAHI,1.0,
 RAHIKA,MADHUBANI,5129030,BH-5129030,RAHIKA,confirmed,True,name and geometry agree,BH-5129030,1.0,BH-5129030,RAHIKA,1.0,
 SAKRI,MADHUBANI,5129035,BH-5129035,SAKRI,confirmed,True,name and geometry agree,BH-5129035,1.0,BH-5129035,SAKRI,1.0,
@@ -452,20 +452,20 @@ KATRA,MUZAFFARPUR,5114026,BH-5114026,KATRA,confirmed,True,name and geometry agre
 KAZI MOHAMMADPUR,MUZAFFARPUR,5114027,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.571,BH-5114054,MUZAFFARPUR SADAR,0.345,BH-5114054
 KUDHANI,MUZAFFARPUR,5114028,BH-5114028,KURAHANI,corroborated,True,"name 'KUDHANI' ~ 'KURAHANI' at 0.80, below the 0.86 threshold but the point falls inside it",,0.8,BH-5114028,KURAHANI,0.8,
 VISHWAVIDYALAYA,MUZAFFARPUR,5114031,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.476,BH-5114054,MUZAFFARPUR SADAR,0.267,BH-5114054
-NAGAR,MUZAFFARPUR,5114032,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.5,BH-5114054,MUZAFFARPUR SADAR,0.3,BH-5114054
+NAGAR,MUZAFFARPUR,5114032,BH-5114054,MUZAFFARPUR SADAR,corroborated,True,'NAGAR' and 'MUZAFFARPUR SADAR': both name the district headquarters station; the point falls inside it,,0.5,BH-5114054,MUZAFFARPUR SADAR,0.3,
 MANIARI,MUZAFFARPUR,5114033,BH-5114033,MANIYARI,confirmed,True,name and geometry agree,BH-5114033,1.0,BH-5114033,MANIYARI,1.0,
 MITHANPURA,MUZAFFARPUR,5114034,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.706,BH-5114054,MUZAFFARPUR SADAR,0.48,BH-5114054
 MINAPUR,MUZAFFARPUR,5114037,BH-5114037,MINAPUR,confirmed,True,name and geometry agree,BH-5114037,1.0,BH-5114037,MINAPUR,1.0,
 MOTIPUR,MUZAFFARPUR,5114038,BH-5114038,MOTIPUR,name-over-geometry,True,"name matched 'MOTIPUR' at 1.0; point fell in 'KATAIYA', which is the unreliable witness",BH-5114038,1.0,BH-5114024,KATAIYA,0.308,
 PARU,MUZAFFARPUR,5114042,BH-5114042,PAROO,confirmed,True,name and geometry agree,BH-5114042,1.0,BH-5114042,PAROO,1.0,
 PIYAR,MUZAFFARPUR,5114044,BH-5114044,PIAR,confirmed,True,name and geometry agree,BH-5114044,1.0,BH-5114044,PIAR,1.0,
-SADAR,MUZAFFARPUR,5114054,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.6,BH-5114054,MUZAFFARPUR SADAR,0.5,BH-5114054
+SADAR,MUZAFFARPUR,5114054,BH-5114054,MUZAFFARPUR SADAR,corroborated,True,'SADAR' and 'MUZAFFARPUR SADAR': one name contains the other; the point falls inside it,,0.6,BH-5114054,MUZAFFARPUR SADAR,0.5,
 SAHEBGANJ,MUZAFFARPUR,5114055,BH-5114055,SAHEBGANJ,confirmed,True,name and geometry agree,BH-5114055,1.0,BH-5114055,SAHEBGANJ,1.0,
 SARAIYA,MUZAFFARPUR,5114056,BH-5114056,SARAIYA,name-over-geometry,True,"name matched 'SARAIYA' at 1.0; point fell in 'PAROO', which is the unreliable witness",BH-5114056,1.0,BH-5114042,PAROO,0.4,
 SAKRA,MUZAFFARPUR,5114057,BH-5114057,SAKRA,confirmed,True,name and geometry agree,BH-5114057,1.0,BH-5114057,SAKRA,1.0,
 SIWAIPATTI,MUZAFFARPUR,5114058,BH-5114058,SEWAIPATTI,confirmed,True,name and geometry agree,BH-5114058,0.889,BH-5114058,SEWAIPATTI,0.889,
 Panapur,MUZAFFARPUR,5114069,BH-5114069,PANAPUR OP,name-over-geometry,True,"name matched 'PANAPUR OP' at 1.0; point fell in 'SEWAIPATTI', which is the unreliable witness",BH-5114069,1.0,BH-5114058,SEWAIPATTI,0.25,
-Turki Khararu,MUZAFFARPUR,5114073,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.625,BH-5114073,TURKI OP,0.625,BH-5114073
+Turki Khararu,MUZAFFARPUR,5114073,BH-5114073,TURKI OP,corroborated,True,'Turki Khararu' and 'TURKI OP': one name contains the other; the point falls inside it,,0.625,BH-5114073,TURKI OP,0.625,
 ASAR GANJ,MUNGER,5113012,BH-5113012,ASARGANJ P.S,confirmed,True,name and geometry agree,BH-5113012,1.0,BH-5113012,ASARGANJ P.S,1.0,
 BARIARPUR,MUNGER,5113015,BH-5113015,BARIARPUR P.S,confirmed,True,name and geometry agree,BH-5113015,1.0,BH-5113015,BARIARPUR P.S,1.0,
 EAST COLONY,MUNGER,5113021,BH-5113021,EAST COLONY P.S,confirmed,True,name and geometry agree,BH-5113021,1.0,BH-5113021,EAST COLONY P.S,1.0,
@@ -564,7 +564,7 @@ KHAGAUL,PATNA,5117042,BH-5117042,KHAGAUL,confirmed,True,name and geometry agree,
 KHAJEKALAN,PATNA,5117043,BH-5117043,KHAJEKALAN,confirmed,True,name and geometry agree,BH-5117043,1.0,BH-5117043,KHAJEKALAN,1.0,
 KOTWALI,PATNA,5117044,BH-5117044,KOTWALI,name-over-geometry,True,"name matched 'KOTWALI' at 1.0; point fell in 'GANDHI MAIDAN', which is the unreliable witness",BH-5117044,1.0,BH-5117028,GANDHI MAIDAN,0.211,
 KHUSRUPUR,PATNA,5117045,BH-5117045,KHUSRUPUR,confirmed,True,name and geometry agree,BH-5117045,1.0,BH-5117045,KHUSRUPUR,1.0,
-SRI KRISHNA PURI,PATNA,5117046,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.621,BH-5117046,SK PURI,0.6,BH-5117046
+SRI KRISHNA PURI,PATNA,5117046,BH-5117046,SK PURI,corroborated,True,'SRI KRISHNA PURI' and 'SK PURI': initials expanded; the point falls inside it,,0.621,BH-5117046,SK PURI,0.6,
 JANIPUR,PATNA,5117047,BH-5117047,JANIPUR,confirmed,True,name and geometry agree,BH-5117047,1.0,BH-5117047,JANIPUR,1.0,
 MALSALAMI,PATNA,5117048,BH-5117048,MALSALAMI,confirmed,True,name and geometry agree,BH-5117048,1.0,BH-5117048,MALSALAMI,1.0,
 MANER,PATNA,5117049,BH-5117049,MANER,confirmed,True,name and geometry agree,BH-5117049,1.0,BH-5117049,MANER,1.0,
@@ -589,7 +589,7 @@ SHAHPUR,PATNA,5117077,BH-5117077,SHAHPUR,name-only,True,no usable point; unambig
 SIGAURI,PATNA,5117079,BH-5117079,SIGORHI,corroborated,True,"name 'SIGAURI' ~ 'SIGORHI' at 0.71, below the 0.86 threshold but the point falls inside it",,0.714,BH-5117079,SIGORHI,0.714,
 SHASTRI NAGAR,PATNA,5117081,BH-5117081,SHASTRI NAGAR,confirmed,True,name and geometry agree,BH-5117081,1.0,BH-5117081,SHASTRI NAGAR,1.0,
 BAHADURPUR,PATNA,5117082,BH-5117082,BAHADURPUR,confirmed,True,name and geometry agree,BH-5117082,1.0,BH-5117082,BAHADURPUR,1.0,
-BEUR,PATNA,5117083,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.615,BH-5117083,BEOUR JAIL,0.615,BH-5117083
+BEUR,PATNA,5117083,BH-5117083,BEOUR JAIL,corroborated,True,"'BEUR' and 'BEOUR JAIL': same consonant skeleton, unique in this district; the point falls inside it",,0.615,BH-5117083,BEOUR JAIL,0.615,
 GOPALPUR,PATNA,5117084,BH-5117084,GOPALPUR,confirmed,True,name and geometry agree,BH-5117084,1.0,BH-5117084,GOPALPUR,1.0,
 BYEPASS,PATNA,5117085,BH-5117085,BYPASS,confirmed,True,name and geometry agree,BH-5117085,0.909,BH-5117085,BYPASS,0.909,
 HAWAI ADDA,PATNA,5117086,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.526,BH-5117003,AIRPORT,0.267,BH-5117003
@@ -616,7 +616,7 @@ KRITYANAND NAGAR,PURNIA,5118046,BH-5118046,KRITYANAND NAGAR,confirmed,True,name 
 KASBA,PURNIA,5118050,BH-5118050,KASBA,confirmed,True,name and geometry agree,BH-5118050,1.0,BH-5118050,KASBA,1.0,
 JALALGARH,PURNIA,5118052,BH-5118052,JALALGARH,confirmed,True,name and geometry agree,BH-5118052,1.0,BH-5118052,JALALGARH,1.0,
 RAUTA,PURNIA,5118062,BH-5118062,RAUTA,confirmed,True,name and geometry agree,BH-5118062,1.0,BH-5118062,RAUTA,1.0,
-SADAR,PURNIA,5118064,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.625,BH-5118064,PURNIA SADAR,0.625,BH-5118064
+SADAR,PURNIA,5118064,BH-5118064,PURNIA SADAR,corroborated,True,'SADAR' and 'PURNIA SADAR': one name contains the other; the point falls inside it,,0.625,BH-5118064,PURNIA SADAR,0.625,
 SARSI,PURNIA,5118068,BH-5118068,SARSI,confirmed,True,name and geometry agree,BH-5118068,1.0,BH-5118068,SARSI,1.0,
 BAISI,PURNIA,5118071,BH-5118071,BAISI,confirmed,True,name and geometry agree,BH-5118071,1.0,BH-5118071,BAISI,1.0,
 TIKAPATTI,PURNIA,5118075,BH-5118075,TIKAPATTI,confirmed,True,name and geometry agree,BH-5118075,1.0,BH-5118075,TIKAPATTI,1.0,
@@ -668,7 +668,7 @@ KALYANPUR,SAMASTIPUR,5133009,BH-5133009,KALYANPUR,confirmed,True,name and geomet
 MOHIUDDIN NAGAR,SAMASTIPUR,5133010,BH-5133010,MOHIUDDINAGAR,confirmed,True,name and geometry agree,BH-5133010,1.0,BH-5133010,MOHIUDDINAGAR,1.0,
 ROSRA,SAMASTIPUR,5133011,BH-5133011,ROSERA,confirmed,True,name and geometry agree,BH-5133011,0.909,BH-5133011,ROSERA,0.909,
 MUFASSIL,SAMASTIPUR,5133012,BH-5133012,MUFFASIL,name-over-geometry,True,"name matched 'MUFFASIL' at 1.0; point fell in 'SAMASTIPUR SADAR', which is the unreliable witness",BH-5133012,1.0,BH-5133024,SAMASTIPUR SADAR,0.364,
-SHAHPUR PATORI,SAMASTIPUR,5133013,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.632,BH-5133004,PATORI,0.632,BH-5133004
+SHAHPUR PATORI,SAMASTIPUR,5133013,BH-5133004,PATORI,corroborated,True,'SHAHPUR PATORI' and 'PATORI': one name contains the other; the point falls inside it,,0.632,BH-5133004,PATORI,0.632,
 SARAI RANJAN,SAMASTIPUR,5133014,BH-5133014,SARAIRANJAN,confirmed,True,name and geometry agree,BH-5133014,1.0,BH-5133014,SARAIRANJAN,1.0,
 SINGHIA,SAMASTIPUR,5133015,BH-5133015,SINGHIA,confirmed,True,name and geometry agree,BH-5133015,1.0,BH-5133015,SINGHIA,1.0,
 TAJPUR,SAMASTIPUR,5133016,BH-5133016,TAJPUR,confirmed,True,name and geometry agree,BH-5133016,1.0,BH-5133016,TAJPUR,1.0,
@@ -678,7 +678,7 @@ HATHAURI,SAMASTIPUR,5133019,BH-5133019,HATHUIRI,name-only,True,no usable point; 
 VIBHUTIPUR,SAMASTIPUR,5133020,BH-5133020,BIBHUTIPUR,confirmed,True,name and geometry agree,BH-5133020,0.9,BH-5133020,BIBHUTIPUR,0.9,
 KHANPUR,SAMASTIPUR,5133021,BH-5133021,KHANPUR,confirmed,True,name and geometry agree,BH-5133021,1.0,BH-5133021,KHANPUR,1.0,
 PUSA,SAMASTIPUR,5133022,BH-5133022,PUSA,confirmed,True,name and geometry agree,BH-5133022,1.0,BH-5133022,PUSA,1.0,
-NAGAR,SAMASTIPUR,5133024,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.667,BH-5133024,SAMASTIPUR SADAR,0.3,BH-5133024
+NAGAR,SAMASTIPUR,5133024,BH-5133024,SAMASTIPUR SADAR,corroborated,True,'NAGAR' and 'SAMASTIPUR SADAR': both name the district headquarters station; the point falls inside it,,0.667,BH-5133024,SAMASTIPUR SADAR,0.3,
 VIDHYAPATI NAGAR,SAMASTIPUR,5133029,BH-5133029,VIDYAPATI NAGAR,confirmed,True,name and geometry agree,BH-5133029,0.966,BH-5133029,VIDYAPATI NAGAR,0.966,
 Bangra,SAMASTIPUR,5133033,BH-5133023,BANGRA,confirmed,True,name and geometry agree,BH-5133023,1.0,BH-5133023,BANGRA,1.0,
 AMNAUR,SARAN,5123001,BH-5123001,AMNOUR,corroborated,True,"name 'AMNAUR' ~ 'AMNOUR' at 0.83, below the 0.86 threshold but the point falls inside it",,0.833,BH-5123001,AMNOUR,0.833,
@@ -695,7 +695,7 @@ ISUAPUR,SARAN,5123014,BH-5123014,ISHUPUR,corroborated,True,"name 'ISUAPUR' ~ 'IS
 BANIAPUR,SARAN,5123020,BH-5123020,BANIYAPUR,confirmed,True,name and geometry agree,BH-5123020,1.0,BH-5123020,BANIYAPUR,1.0,
 DIGHWARA,SARAN,5123021,BH-5123021,DIGHWARA,confirmed,True,name and geometry agree,BH-5123021,1.0,BH-5123021,DIGHWARA,1.0,
 DARIAPUR,SARAN,5123023,BH-5123023,DARIAPUR,confirmed,True,name and geometry agree,BH-5123023,1.0,BH-5123023,DARIAPUR,1.0,
-JANTA BAZAAR,SARAN,5123026,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.69,BH-5123026,LAHLADPUR (JANTA BAZAR),0.69,BH-5123026
+JANTA BAZAAR,SARAN,5123026,BH-5123026,LAHLADPUR (JANTA BAZAR),corroborated,True,'JANTA BAZAAR' and 'LAHLADPUR (JANTA BAZAR)': one name contains the other; the point falls inside it,,0.69,BH-5123026,LAHLADPUR (JANTA BAZAR),0.69,
 KOPA,SARAN,5123027,BH-5123027,KOPA,name-over-geometry,True,"name matched 'KOPA' at 1.0; point fell in 'REVILGANJ', which is the unreliable witness",BH-5123027,1.0,BH-5123007,REVILGANJ,0.154,
 GARKHA,SARAN,5123028,BH-5123028,GARKHA,confirmed,True,name and geometry agree,BH-5123028,1.0,BH-5123028,GARKHA,1.0,
 JALALPUR,SARAN,5123031,BH-5123031,JALALPUR,confirmed,True,name and geometry agree,BH-5123031,1.0,BH-5123031,JALALPUR,1.0,
@@ -752,7 +752,7 @@ Suppi,SITAMARHI,5138037,,,needs-review,False,name too weak to accept and geometr
 AANDAR,SIWAN,5135001,BH-5135001,ANDER,corroborated,True,"name 'AANDAR' ~ 'ANDER' at 0.80, below the 0.86 threshold but the point falls inside it",,0.8,BH-5135001,ANDER,0.8,
 ASAWN,SIWAN,5135002,BH-5135002,ASAWN,name-over-geometry,True,"name matched 'ASAWN' at 1.0; point fell in 'ANDER', which is the unreliable witness",BH-5135002,1.0,BH-5135001,ANDER,0.4,
 JEERADEI,SIWAN,5135004,BH-5135004,ZIRADEI,confirmed,True,name and geometry agree,BH-5135004,1.0,BH-5135004,ZIRADEI,1.0,
-GAUTAM BUDDHA NAGAR,SIWAN,5135005,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.609,BH-5135005,G.B. NAGAR,0.609,BH-5135005
+GAUTAM BUDDHA NAGAR,SIWAN,5135005,BH-5135005,G.B. NAGAR,corroborated,True,'GAUTAM BUDDHA NAGAR' and 'G.B. NAGAR': initials expanded; the point falls inside it,,0.609,BH-5135005,G.B. NAGAR,0.609,
 BARHARIA,SIWAN,5135006,BH-5135006,BARHARIA,name-over-geometry,True,"name matched 'BARHARIA' at 1.0; point fell in 'MAHADEWA OP', which is the unreliable witness",BH-5135006,1.0,BH-5135016,MAHADEWA OP,0.5,
 BASANTPUR,SIWAN,5135007,BH-5135007,BASANTPUR,confirmed,True,name and geometry agree,BH-5135007,1.0,BH-5135007,BASANTPUR,1.0,
 BHAGWANPUR,SIWAN,5135008,BH-5135008,BHAGWANPUR,name-over-geometry,True,"name matched 'BHAGWANPUR' at 1.0; point fell in 'BASANTPUR', which is the unreliable witness",BH-5135008,1.0,BH-5135007,BASANTPUR,0.737,
@@ -761,7 +761,7 @@ DARAUNDA,SIWAN,5135012,BH-5135012,DARAUNDHA,name-over-geometry,True,"name matche
 GUTHANI,SIWAN,5135013,BH-5135013,GUTHANI,confirmed,True,name and geometry agree,BH-5135013,1.0,BH-5135013,GUTHANI,1.0,
 GORIAKOTHI,SIWAN,5135014,BH-5135014,GORIAKITHI,confirmed,True,name and geometry agree,BH-5135014,0.9,BH-5135014,GORIAKITHI,0.9,
 HUSAINGANJ,SIWAN,5135017,BH-5135017,HUSSAINGANJ,confirmed,True,name and geometry agree,BH-5135017,1.0,BH-5135017,HUSSAINGANJ,1.0,
-JAMO BAZAAR,SIWAN,5135019,,,needs-review,False,name too weak to accept and geometry does not corroborate it,,0.615,BH-5135019,JAMO,0.615,BH-5135019
+JAMO BAZAAR,SIWAN,5135019,BH-5135019,JAMO,corroborated,True,'JAMO BAZAAR' and 'JAMO': one name contains the other; the point falls inside it,,0.615,BH-5135019,JAMO,0.615,
 MAHARAJGANJ,SIWAN,5135020,BH-5135020,MAHARAJGANJ,confirmed,True,name and geometry agree,BH-5135020,1.0,BH-5135020,MAHARAJGANJ,1.0,
 MAIRWAN,SIWAN,5135021,BH-5135021,MAIRWA,confirmed,True,name and geometry agree,BH-5135021,0.923,BH-5135021,MAIRWA,0.923,
 NAUTAN,SIWAN,5135022,BH-5135022,NAUTAN,confirmed,True,name and geometry agree,BH-5135022,1.0,BH-5135022,NAUTAN,1.0,

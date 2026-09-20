@@ -3,15 +3,15 @@
   "tiers": {
     "name-over-geometry": 69,
     "confirmed": 546,
-    "corroborated": 53,
-    "needs-review": 118,
+    "corroborated": 72,
+    "needs-review": 99,
     "name-only": 22
   },
-  "mappable_stations": 690,
-  "needs_review": 118,
+  "mappable_stations": 709,
+  "needs_review": 99,
   "thana_polygons": 896,
-  "thanas_reached_by_a_station": 689,
-  "thanas_not_reached_by_a_station": 207,
+  "thanas_reached_by_a_station": 706,
+  "thanas_not_reached_by_a_station": 190,
   "thanas_unresolvable_by_name": 0,
   "unresolvable_examples": [],
   "concordance_where_both_witnesses_spoke": 0.8878

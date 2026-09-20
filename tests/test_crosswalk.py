@@ -147,3 +147,57 @@ class TestIdempotence:
         assert human == {("PATNA", normalise_name("BAKHRI")): "T-2"}
         assert ("PATNA", normalise_name("DEVKUND")) not in human, \
             "a derived alias must not feed the run that derives it"
+
+
+class TestTokenEvidence:
+    """Rules for names that plainly denote the same place but score poorly.
+
+    Each only ever *checks* a polygon that geometry already chose; none of them
+    searches. That is what makes the blunter ones safe.
+    """
+
+    SKELETONS = {"UPAHARA", "JALE", "SIMRI", "MAIN"}
+
+    def evidence(self, station, polygon, district="PATNA"):
+        from pipeline.crosswalk import consonant_skeleton, token_evidence
+        return token_evidence(station, polygon, district,
+                              {consonant_skeleton(s) for s in self.SKELETONS})
+
+    @pytest.mark.parametrize("station,polygon", [
+        ("SADAR", "PURNIA SADAR"),                      # contained
+        ("JAMO BAZAAR", "JAMO"),                        # contained the other way
+        ("BEGUSARAI MUFASSIL", "MUFASSIL"),
+        ("SRI KRISHNA PURI", "SK PURI"),                # initials run together
+        ("GAUTAM BUDDHA NAGAR", "G.B. NAGAR"),          # initials written apart
+        ("UPHARA", "UPAHARA"),                          # inserted vowel
+        ("SEMARI BAZAR", "SIMRI"),                      # generic token then vowels
+        ("DARBHANGA TOWN", "DARBHANGA SADAR"),          # two names for the HQ station
+    ])
+    def test_same_place_is_recognised(self, station, polygon):
+        district = "DARBHANGA" if "DARBHANGA" in station else "PATNA"
+        assert self.evidence(station, polygon, district) is not None
+
+    @pytest.mark.parametrize("station,polygon", [
+        ("CHIKSOHRA", "HILSA PS"),
+        ("CHANDRAMANDI", "CHAKAI"),
+        ("SALIMPUR", "BAKHTIYARPUR"),
+        ("Azan", "MADANPUR"),
+        ("Punaura", "DUMRA"),
+        ("INARWA", "MAINATAND"),
+    ])
+    def test_different_places_are_not_forced_together(self, station, polygon):
+        assert self.evidence(station, polygon) is None
+
+    def test_urban_and_rural_stations_are_never_merged(self):
+        """Every Bihar district HQ has both. Sasaram Nagar and Sasaram
+        (Mufassil) share a place name and are different police stations, so the
+        shared token must not count as evidence."""
+        assert self.evidence("SASARAM NAGAR", "SASARAM (MUFASSIL)", "ROHTAS") is None
+        assert self.evidence("PATNA TOWN", "PATNA MUFASSIL") is None
+
+    def test_a_skeleton_shared_with_a_second_polygon_is_not_evidence(self):
+        """PIAR and PAROO both reduce to PR. Accepting that would put one
+        station's crime in the other's jurisdiction, so a non-unique skeleton
+        is refused even though it matches."""
+        from pipeline.crosswalk import token_evidence
+        assert token_evidence("PIAR", "PAROO", "MUZAFFARPUR", set()) is None

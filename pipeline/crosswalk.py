@@ -42,6 +42,9 @@ from collections import Counter
 from difflib import SequenceMatcher
 from pathlib import Path
 
+import re
+from collections import defaultdict
+
 from .geography import canonical_district, normalise_name
 from .resolver import ACCEPT, ThanaResolver
 
@@ -62,6 +65,95 @@ NEEDS_REVIEW = "needs-review"              # not enough evidence to commit
 MAPPABLE = {CONFIRMED, NAME_OVER_GEOMETRY, CORROBORATED, NAME_ONLY}
 
 
+# Every Bihar district headquarters has BOTH an urban station (Nagar / Town /
+# Sadar) and a rural one (Mufassil) covering the surrounding countryside.
+# "Sasaram Nagar" and "Sasaram (Mufassil)" share a name and are different
+# stations, so a shared token is not evidence when the qualifiers contradict.
+URBAN = {"NAGAR", "TOWN", "SADAR", "CITY", "URBAN"}
+RURAL = {"MUFASSIL", "MUFFASIL", "MOFUSSIL", "MUFASSHIL", "GRAMIN", "RURAL"}
+GENERIC = URBAN | RURAL | {"PS", "OP", "THANA", "BAZAR", "BAZAAR", "JAIL",
+                           "NEW", "OLD", "EAST", "WEST", "NORTH", "SOUTH"}
+
+
+def _tokens(value: str | None) -> list[str]:
+    return [t for t in re.split(r"[^A-Za-z0-9]+", (value or "").upper()) if t]
+
+
+def _qualifier(value: str | None) -> str:
+    present = set(_tokens(value))
+    if present & URBAN:
+        return "urban"
+    if present & RURAL:
+        return "rural"
+    return ""
+
+
+def consonant_skeleton(value: str | None) -> str:
+    """The consonants of a name, which transliteration varies least.
+
+    UPHARA and UPAHARA differ only in an inserted vowel; SEMARI and SIMRI only
+    in which vowels were chosen. Dropping vowels makes them equal.
+
+    Generic tokens are dropped first so that SEMARI BAZAR reduces to the same
+    skeleton as SIMRI; the bazaar is not part of the place name.
+
+    This is far too blunt to search with — inside one district it would merge
+    PIAR with PAROO and ASAWN with SISWAN — so it is used only to check a
+    candidate that geometry has already chosen, and only when the skeleton
+    picks out that polygon uniquely within its district.
+    """
+    meaningful = " ".join(t for t in _tokens(value) if t not in GENERIC) or (value or "")
+    text = re.sub(r"[^A-Z]", "", meaningful.upper())
+    return re.sub(r"(.)\1+", r"\1", re.sub(r"[AEIOU]", "", text))
+
+
+def _initialism(left: str | None, right: str | None) -> bool:
+    """SRI KRISHNA PURI ~ SK PURI; GAUTAM BUDDHA NAGAR ~ G.B. NAGAR."""
+    for first, second in ((left, right), (right, left)):
+        a, b = _tokens(first), _tokens(second)
+        if len(a) < 2 or len(b) < 2:
+            continue
+        if normalise_name(a[-1]) != normalise_name(b[-1]):
+            continue
+        # The abbreviated side may write initials together ("SK") or apart
+        # ("G", "B"), so join its leading single-letter tokens before comparing.
+        lead = "".join(t for t in b[:-1] if len(t) == 1) or (b[0] if len(b) == 2 else "")
+        if lead and lead == "".join(t[0] for t in a[:-1]):
+            return True
+    return False
+
+
+def token_evidence(station: str, polygon: str, district: str,
+                   unique_skeletons: set[str]) -> str | None:
+    """Why a weakly-similar name still plainly denotes the same place.
+
+    Only consulted when geometry has already put the station inside this
+    polygon; these rules corroborate that candidate, they never search for one.
+    """
+    if _qualifier(station) and _qualifier(polygon) and _qualifier(station) != _qualifier(polygon):
+        return None  # urban vs rural: same place name, different station
+
+    a, b = normalise_name(station), normalise_name(polygon)
+    if a and b and (a in b or b in a):
+        return "one name contains the other"
+
+    if _initialism(station, polygon):
+        return "initials expanded"
+
+    skeleton = consonant_skeleton(polygon)
+    if skeleton and skeleton == consonant_skeleton(station) and skeleton in unique_skeletons:
+        return "same consonant skeleton, unique in this district"
+
+    district_tokens = {normalise_name(t) for t in _tokens(district)}
+    def residue(value):
+        return {normalise_name(t) for t in _tokens(value)
+                if t not in GENERIC and normalise_name(t) not in district_tokens}
+    if not residue(station) and not residue(polygon) and _qualifier(station) == _qualifier(polygon) != "":
+        return "both name the district headquarters station"
+
+    return None
+
+
 def similarity(left: str | None, right: str | None) -> float:
     a, b = normalise_name(left), normalise_name(right)
     if not a or not b:
@@ -69,7 +161,17 @@ def similarity(left: str | None, right: str | None) -> float:
     return SequenceMatcher(None, a, b).ratio()
 
 
-def grade(station: dict, thanas: dict, resolver: ThanaResolver) -> dict:
+def unique_skeletons_by_district(thanas: dict) -> dict[str, set[str]]:
+    """Skeletons that identify exactly one polygon inside their district."""
+    counts: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
+    for thana in thanas.values():
+        counts[thana["district"]][consonant_skeleton(thana["name"])] += 1
+    return {district: {s for s, n in skeletons.items() if n == 1}
+            for district, skeletons in counts.items()}
+
+
+def grade(station: dict, thanas: dict, resolver: ThanaResolver,
+          unique_skeletons: dict[str, set[str]] | None = None) -> dict:
     """Decide where one station maps, and say on what evidence."""
     by_geometry = station["thana_id"] or None
     result = resolver.resolve(station["name"], station["district"])
@@ -91,6 +193,12 @@ def grade(station: dict, thanas: dict, resolver: ThanaResolver) -> dict:
         rule = (f"name {station['name']!r} ~ {geometry_name!r} at "
                 f"{geometry_similarity:.2f}, below the {ACCEPT} threshold but the "
                 f"point falls inside it")
+    elif by_geometry and (token_reason := token_evidence(
+            station["name"], geometry_name, station["district"],
+            (unique_skeletons or {}).get(canonical_district(station["district"]), set()))):
+        tier, thana_id = CORROBORATED, by_geometry
+        rule = (f"{station['name']!r} and {geometry_name!r}: {token_reason}; "
+                f"the point falls inside it")
     else:
         tier, thana_id = NEEDS_REVIEW, None
         rule = ("name too weak to accept and geometry does not corroborate it"
@@ -126,7 +234,8 @@ def build_crosswalk() -> tuple[list[dict], dict]:
     with (SPINE / "bihar_stations.csv").open(encoding="utf-8") as handle:
         stations = [s for s in csv.DictReader(handle) if s["kind"] == "territorial"]
 
-    rows = [grade(station, thanas, resolver) for station in stations]
+    unique_skeletons = unique_skeletons_by_district(thanas)
+    rows = [grade(station, thanas, resolver, unique_skeletons) for station in stations]
 
     tiers = Counter(r["tier"] for r in rows)
     reached = {r["thana_id"] for r in rows if r["mappable"] and r["thana_id"]}

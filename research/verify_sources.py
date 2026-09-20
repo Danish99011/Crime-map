@@ -87,7 +87,35 @@ def _ssl_context() -> ssl.SSLContext:
     return context
 
 
-def fetch(url: str, timeout: float, delay: float) -> dict:
+# Failures worth a second attempt. A reset or a handshake timeout means the
+# exchange never completed, and this link drops roughly one request in five, so
+# a single attempt turns flakiness into a permanent verdict about a source. A
+# policy block, a certificate error and an HTTP status are all deterministic
+# answers and are not retried.
+TRANSIENT = ("connection reset", "handshake operation timed out", "timed out",
+             "bad gateway", "temporarily unavailable")
+
+
+def _transient(result: dict) -> bool:
+    error = str(result.get("error") or "").lower()
+    if POLICY_BLOCK.lower() in error:
+        return False
+    return any(sign in error for sign in TRANSIENT)
+
+
+def fetch(url: str, timeout: float, delay: float, tries: int = 3) -> dict:
+    """Check one URL, retrying only genuinely transient network failures."""
+    result = _fetch_once(url, timeout, delay)
+    attempt = 1
+    while attempt < tries and _transient(result):
+        time.sleep(1.5 * attempt)
+        result = _fetch_once(url, timeout, delay)
+        result["attempts"] = attempt + 1
+        attempt += 1
+    return result
+
+
+def _fetch_once(url: str, timeout: float, delay: float) -> dict:
     host = urlsplit(url).netloc
     result = {"url": url, "host": host, "checked_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
 
@@ -163,7 +191,18 @@ def collect_urls(domain_filter: str | None) -> list[tuple[str, str, str, str]]:
     return found
 
 
+# The egress proxy refuses a host it is not allowed to open with
+# "Tunnel connection failed: 403 Forbidden". That is this environment's policy
+# speaking, not the source: it says nothing about whether the URL is good.
+# Recording it as UNREACHABLE is how a perfectly live dataset gets written off,
+# which is the mistake that cost an earlier session the Maharashtra feed.
+POLICY_BLOCK = "Tunnel connection failed: 403"
+
+
 def verdict(result: dict) -> str:
+    error = str(result.get("error") or "")
+    if POLICY_BLOCK in error:
+        return "BLOCKED_BY_POLICY"
     status = result.get("status")
     if status is None:
         return "UNREACHABLE"
@@ -185,7 +224,8 @@ def write_report(rows: list[dict]) -> None:
     for row in rows:
         buckets[row["verdict"]].append(row)
 
-    order = ["OK", "REDIRECTED", "FORBIDDEN", "DEAD", "ERROR", "UNREACHABLE"]
+    order = ["OK", "REDIRECTED", "FORBIDDEN", "DEAD", "ERROR", "UNREACHABLE",
+             "BLOCKED_BY_POLICY", "ROBOTS_DISALLOWED"]
     lines = [
         "# URL Check",
         "",
@@ -203,7 +243,9 @@ def write_report(rows: list[dict]) -> None:
         "FORBIDDEN": "exists but refuses anonymous access (login, geo-block, WAF)",
         "DEAD": "404 — the URL in the catalogue is wrong or the page is gone",
         "ERROR": "other HTTP error, often a server fault rather than a bad URL",
-        "UNREACHABLE": "DNS, TLS or timeout failure — record it, do not assume it is gone",
+        "UNREACHABLE": "DNS, TLS or timeout failure after retries — record it, do not assume it is gone",
+        "BLOCKED_BY_POLICY": "THIS environment is not allowed to open the host — says nothing about the source",
+        "ROBOTS_DISALLOWED": "robots.txt forbids automated access — check by hand or via a registered API",
     }
     for key in order:
         if buckets[key]:
@@ -266,11 +308,28 @@ def main() -> int:
     parser.add_argument("--delay", type=float, default=1.5, help="seconds between requests to the same host")
     parser.add_argument("--timeout", type=float, default=30.0)
     parser.add_argument("--patch", action="store_true", help="write results back into the source jsonl files")
+    parser.add_argument("--report-only", action="store_true",
+                        help="rebuild the markdown report and patch the catalogue "
+                             "from the saved url_check.json, fetching nothing. Use "
+                             "it after a report-writing failure rather than asking "
+                             "800 servers the same question twice.")
     parser.add_argument("--skip-host", action="append", default=[], metavar="HOST",
                         help="do not touch this host; repeatable. Use it when another "
                              "job already owns that host, so the two do not make "
                              "concurrent requests to one public-sector server.")
     args = parser.parse_args()
+
+    if args.report_only:
+        rows = json.loads(REPORT_JSON.read_text(encoding="utf-8"))
+        write_report(rows)
+        counts = defaultdict(int)
+        for row in rows:
+            counts[row["verdict"]] += 1
+        print("  ".join(f"{k}={v}" for k, v in sorted(counts.items())))
+        print(f"Rebuilt {REPORT_JSON.name} and {REPORT_MD.name} from saved results")
+        if args.patch:
+            print(f"Patched url_check onto {patch_jsonl(rows)} entries")
+        return 0
 
     targets = collect_urls(args.domain)
 

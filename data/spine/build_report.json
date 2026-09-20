@@ -1,0 +1,45 @@
+{
+  "sources": {
+    "stations": {
+      "name": "MHA police station master (point locations)",
+      "url": "https://raw.githubusercontent.com/yashveeeeeeer/india-geodata/main/data/police/stations/INDIA_POLICE_STATIONS.geojson",
+      "attribution": "Ministry of Home Affairs, via the india-geodata mirror",
+      "licence": "unstated upstream; mirror asserts CC0-1.0"
+    },
+    "thanas": {
+      "name": "Bihar police thana jurisdiction boundaries",
+      "url": "https://github.com/ramSeraph/indian_admin_boundaries/releases/download/police/Bhugoal_BH_Police_Thana_Boundaries.geojsonl.7z",
+      "attribution": "i-Bhugoal (Government of Bihar), via datameet/ramSeraph",
+      "licence": "CC0-1.0, attribute datameet and the original government source"
+    }
+  },
+  "diagnostics": {
+    "thana_polygons": 896,
+    "thana_polygons_repaired": 5,
+    "station_points": 929,
+    "stations_by_kind": {
+      "mahila": 27,
+      "prohibition": 34,
+      "railway": 34,
+      "sc_st": 24,
+      "territorial": 808,
+      "traffic": 2
+    },
+    "territorial_stations": 808,
+    "territorial_mapped_to_a_thana": 804,
+    "mapped_with_name_agreement": 568,
+    "mapped_on_geometry_alone": 236,
+    "stations_outside_every_polygon": 4,
+    "stations_outside_examples": [
+      "SRINAGAR",
+      "Lohra",
+      "ATRI",
+      "Suhail"
+    ],
+    "ambiguous_containment": 0,
+    "thanas_with_no_station_point": 233,
+    "districts_in_thanas": 40,
+    "districts_in_stations": 44,
+    "district_alias_misses": []
+  }
+}

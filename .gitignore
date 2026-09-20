@@ -4,3 +4,8 @@ __pycache__/
 .DS_Store
 node_modules/
 .env
+
+# Source downloads and large generated geometry: reproducible via
+# `python3 -m pipeline.download` and `python3 -m pipeline.geography`.
+data/raw/
+data/spine/*.geojson

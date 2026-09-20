@@ -106,7 +106,7 @@ def fetch(url: str, timeout: float, delay: float) -> dict:
                         pass
                 result.update(
                     status=response.status,
-                    final_url=response.url,
+                    final_url=response.url.split("?", 1)[0],  # never keep signed/tokened query strings
                     content_type=(response.headers.get("Content-Type") or "").split(";")[0].strip(),
                     content_length=response.headers.get("Content-Length"),
                     redirected=response.url.rstrip("/") != url.rstrip("/"),

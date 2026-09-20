@@ -1,0 +1,5 @@
+district,station_name,thana_id,confirmed_by,note
+# Hand-confirmed station-name -> thana mappings. Populate from review_queue.csv.
+# A row takes effect only once thana_id is filled in. Record who confirmed it
+# and against what evidence: this file overrides the algorithm, so it is the
+# first place to look when a mapping is disputed.

@@ -30,6 +30,12 @@ handled explicitly here rather than silently:
    West Champaran). These are resolved through an explicit, auditable alias
    table, never by fuzzy matching — a wrong district silently moves crime from
    one part of the state to another.
+4. **Some station coordinates are simply wrong.** Around 3% of Bihar points
+   fall inside a polygon belonging to a different district — Bachhwara in
+   Begusarai lands in Harnaut in Nalanda, some 80km away. Containment alone
+   would accept that silently. The district is therefore treated as the stronger
+   signal: a containing polygon in a different district is recorded as a
+   conflict and refused, not mapped.
 
 Run:  python3 -m pipeline.geography
 """
@@ -207,6 +213,7 @@ def build_spine() -> Spine:
         })
 
     stations, unmatched, ambiguous = [], [], 0
+    district_conflicts: list[tuple[str | None, str, str]] = []
     for feature in station_features:
         properties = feature["properties"]
         kind = classify_station(properties.get("ps"), properties.get("district"))
@@ -221,6 +228,17 @@ def build_spine() -> Spine:
                 key=lambda i: name_similarity(properties.get("ps"), thanas[i]["name"]),
                 reverse=True,
             )
+
+        # Containment is only trusted inside the station's own district. Where
+        # the coordinate lands elsewhere it is the coordinate that is wrong, and
+        # accepting it would move this station's crime to another district.
+        district = canonical_district(properties.get("district"))
+        in_district = [i for i in containing if thanas[i]["district"] == district]
+        conflict = bool(containing) and not in_district
+        if conflict:
+            district_conflicts.append(
+                (properties.get("ps"), district, thanas[containing[0]]["district"]))
+        containing = in_district
 
         record = {
             "station_id": f"BH-PS-{properties['ps_cd']}",
@@ -250,6 +268,8 @@ def build_spine() -> Spine:
                 # A specialist unit sits inside this polygon but does not police
                 # it. Record where it physically is, and refuse the mapping.
                 record["match_method"] = f"located-in-{thana['thana_id']}-not-mapped"
+        elif conflict:
+            record["match_method"] = "district-conflict"
         else:
             unmatched.append(record["name"])
 
@@ -274,6 +294,10 @@ def build_spine() -> Spine:
         "mapped_on_geometry_alone": len(mapped) - len(corroborated),
         "stations_outside_every_polygon": len(unmatched),
         "stations_outside_examples": unmatched[:10],
+        "district_conflicts_refused": len(district_conflicts),
+        "district_conflict_examples": [
+            f"{n} ({d}) fell inside a {other} polygon" for n, d, other in district_conflicts[:6]
+        ],
         "ambiguous_containment": ambiguous,
         "thanas_with_no_station_point": len(empty_thanas),
         "districts_in_thanas": len({t["district"] for t in thanas}),

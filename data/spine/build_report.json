@@ -26,9 +26,9 @@
       "traffic": 2
     },
     "territorial_stations": 808,
-    "territorial_mapped_to_a_thana": 804,
-    "mapped_with_name_agreement": 568,
-    "mapped_on_geometry_alone": 236,
+    "territorial_mapped_to_a_thana": 780,
+    "mapped_with_name_agreement": 566,
+    "mapped_on_geometry_alone": 214,
     "stations_outside_every_polygon": 4,
     "stations_outside_examples": [
       "SRINAGAR",
@@ -36,8 +36,17 @@
       "ATRI",
       "Suhail"
     ],
+    "district_conflicts_refused": 58,
+    "district_conflict_examples": [
+      "THAKRAHAN (BAGAHA) fell inside a WEST CHAMPARAN polygon",
+      "BIRPUR (BEGUSARAI) fell inside a NALANDA polygon",
+      "BACHHWARA (BEGUSARAI) fell inside a NALANDA polygon",
+      "BARAUNI (BEGUSARAI) fell inside a LAKHISARAI polygon",
+      "CHERIYABARIYAR PUR (BEGUSARAI) fell inside a PATNA polygon",
+      "KUCHILA (KAIMUR (BHABUA)) fell inside a ROHTAS polygon"
+    ],
     "ambiguous_containment": 0,
-    "thanas_with_no_station_point": 233,
+    "thanas_with_no_station_point": 240,
     "districts_in_thanas": 40,
     "districts_in_stations": 44,
     "district_alias_misses": []

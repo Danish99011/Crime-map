@@ -1,0 +1,107 @@
+group,ipc,offence,bns,relation,confidence,note
+Homicide and hurt (BNS Ch. VI),299,Culpable homicide (def),100,=,H,
+Homicide and hurt (BNS Ch. VI),300,Murder (def),101,=,H,
+Homicide and hurt (BNS Ch. VI),303,Murder by life-convict,104,=,M,
+Homicide and hurt (BNS Ch. VI),305 / 306,Abetment of suicide (child/unsound mind; general),107 / 108,=,H,
+Homicide and hurt (BNS Ch. VI),308,Attempt to commit culpable homicide,110,=,H,
+Homicide and hurt (BNS Ch. VI),309,Attempt to commit suicide,—,GONE,H,only BNS 226 (attempt to suicide to compel a public servant) survives
+Homicide and hurt (BNS Ch. VI),—,Organised crime,**111**,NEW,H,previously only state MCOCA-type acts / UAPA
+Homicide and hurt (BNS Ch. VI),—,Petty organised crime,**112**,NEW,H,"gang theft, pickpocketing, snatching rings, card skimming"
+Homicide and hurt (BNS Ch. VI),—,Terrorist act,**113**,NEW,H,parallel to UAPA; choice of statute is the SHO's
+Homicide and hurt (BNS Ch. VI),310 / 311,Thug,114,=,M,
+Homicide and hurt (BNS Ch. VI),321 / **323**,Voluntarily causing hurt (def / punishment),115(1) / **115(2)**,=,H,
+Homicide and hurt (BNS Ch. VI),320,Grievous hurt (def),116,=,H,
+Homicide and hurt (BNS Ch. VI),322 / **325**,Voluntarily causing grievous hurt (def / punishment),117(1) / **117(2)**,S,H,117(3)/(4) **NEW**: grievous hurt by group of 5+ on identity grounds
+Homicide and hurt (BNS Ch. VI),324 / 326,Hurt / grievous hurt by dangerous weapons,118(1) / 118(2),M,H,two sections merged into one
+Homicide and hurt (BNS Ch. VI),326A / 326B,Acid attack / attempt,124(1) / 124(2),=,H,
+Homicide and hurt (BNS Ch. VI),327 / 329,Hurt or grievous hurt to extort property,119,M,M,
+Homicide and hurt (BNS Ch. VI),330 / 331,Hurt or grievous hurt to extort confession,120,M,M,
+Homicide and hurt (BNS Ch. VI),332 / 333,Hurt or grievous hurt to deter public servant,121,M,M,
+Homicide and hurt (BNS Ch. VI),334 / 335,Hurt or grievous hurt on provocation,122,M,M,
+Homicide and hurt (BNS Ch. VI),328,Administering stupefying drug,123,=,M,
+Homicide and hurt (BNS Ch. VI),336 / 337 / 338,Acts endangering life or personal safety,125,M,M,three sections merged
+Homicide and hurt (BNS Ch. VI),339 / 341,Wrongful restraint,126(1) / 126(2),=,M,
+Homicide and hurt (BNS Ch. VI),340 / 342-348,Wrongful confinement,127,M,M,seven sections merged
+Homicide and hurt (BNS Ch. VI),349 / 350 / 351,Force / criminal force / assault (defs),128 / 129 / 130,=,M,
+Homicide and hurt (BNS Ch. VI),352,Punishment for assault or criminal force,131,=,M,
+Homicide and hurt (BNS Ch. VI),353,Assault to deter public servant,132,=,M,
+Homicide and hurt (BNS Ch. VI),354* (see Ch. V),,,?,L,*moved out of Ch. VI into Ch. V*
+Homicide and hurt (BNS Ch. VI),355 / 356 / 357 / 358,Assault to dishonour / in theft attempt / in confinement attempt / on provocation,133 / 134 / 135 / 136,=,M,
+"Kidnapping, abduction, trafficking (BNS Ch. VI, partly Ch. V)",359-361,Kidnapping (defs),137(1),M,H,
+"Kidnapping, abduction, trafficking (BNS Ch. VI, partly Ch. V)",362,Abduction,138,=,H,
+"Kidnapping, abduction, trafficking (BNS Ch. VI, partly Ch. V)",363A,Kidnapping/maiming a child for begging,139,=,M,
+"Kidnapping, abduction, trafficking (BNS Ch. VI, partly Ch. V)",366A,Procuration of a minor girl,96,⊃,M,"now gender-neutral (""child"")"
+"Kidnapping, abduction, trafficking (BNS Ch. VI, partly Ch. V)",366B,Importation of a girl from a foreign country,141,⊃,M,"now ""girl or boy"""
+"Kidnapping, abduction, trafficking (BNS Ch. VI, partly Ch. V)",368,Wrongfully concealing a kidnapped person,142,=,M,
+"Kidnapping, abduction, trafficking (BNS Ch. VI, partly Ch. V)",370 / 370A,Trafficking / exploitation of a trafficked person,143 / 144,=,H,
+"Kidnapping, abduction, trafficking (BNS Ch. VI, partly Ch. V)",371 / 374,Habitual dealing in slaves / unlawful compulsory labour,145 / 146,=,M,
+Sexual offences and offences against women (BNS Ch. V),375,Rape (definition),**63**,⊃,H,marital-rape exception age raised 15 → 18
+Sexual offences and offences against women (BNS Ch. V),376(3) / 376AB,Rape of a woman under 16 / under 12,65(1) / 65(2),=,H,
+Sexual offences and offences against women (BNS Ch. V),376A,Rape causing death or persistent vegetative state,66,=,H,
+Sexual offences and offences against women (BNS Ch. V),376B,Intercourse by husband during separation,67,=,H,
+Sexual offences and offences against women (BNS Ch. V),376C,Intercourse by a person in authority,68,=,H,
+Sexual offences and offences against women (BNS Ch. V),—,Sexual intercourse by employing deceitful means / false promise of marriage,**69**,NEW,H,**no IPC predecessor**; previously prosecuted (contestedly) as 376 or 417
+Sexual offences and offences against women (BNS Ch. V),376E,Repeat offenders,71,=,H,
+Sexual offences and offences against women (BNS Ch. V),228A,Disclosure of victim identity,72,=,M,
+Sexual offences and offences against women (BNS Ch. V),354A,Sexual harassment,75,=,H,
+Sexual offences and offences against women (BNS Ch. V),354B,Assault with intent to disrobe,76,=,H,
+Sexual offences and offences against women (BNS Ch. V),354C,Voyeurism,77,=,H,
+Sexual offences and offences against women (BNS Ch. V),354D,Stalking,78,=,H,
+Sexual offences and offences against women (BNS Ch. V),509,Word/gesture insulting a woman's modesty,79,=,H,
+Sexual offences and offences against women (BNS Ch. V),312-318,"Miscarriage, child abandonment, concealment of birth",88-94,M,M,
+Sexual offences and offences against women (BNS Ch. V),—,Hiring/employing a child to commit an offence,95,NEW,M,
+Sexual offences and offences against women (BNS Ch. V),372 / 373,Selling / buying a child for prostitution,98 / 99,=,M,
+Sexual offences and offences against women (BNS Ch. V),493-496,"Deceitful cohabitation, bigamy, sham marriage",81-83,=,M,
+Sexual offences and offences against women (BNS Ch. V),498,Enticing a married woman,84,=,M,
+Sexual offences and offences against women (BNS Ch. V),377,Unnatural offences,—,GONE,H,"**no BNS successor.** Non-consensual sex against men and transgender persons, and bestiality, have no provision"
+Sexual offences and offences against women (BNS Ch. V),497,Adultery,—,GONE,H,"already void (*Joseph Shine*, 2018)"
+Property (BNS Ch. XVII),378 / **379**,Theft (def / punishment),303(1) / **303(2)**,=,H,"community service now available for a first theft under ₹5,000 on return of property"
+Property (BNS Ch. XVII),—,Snatching,**304**,NEW,H,**no IPC predecessor.** Pre-2024 series is state-law-dependent (Delhi/Punjab/Haryana amendments)
+Property (BNS Ch. XVII),380,Theft in a dwelling house,305,⊃,H,"widened to means of transport and places of worship — **""theft in dwelling"" and ""theft from vehicle"" are no longer separable post-2024**"
+Property (BNS Ch. XVII),381 / 382,Theft by clerk or servant / after preparation for hurt,306 / 307,=,M,
+Property (BNS Ch. XVII),390 / **392**,Robbery (def / punishment),309(1) / **309(4)**,=,M,sub-section number is the uncertain part
+Property (BNS Ch. XVII),393 / 394,Attempt at robbery / hurt caused in robbery,309(5) / 309(6),M,M,
+Property (BNS Ch. XVII),391 / **395**,Dacoity (def / punishment),310(1) / **310(2)**,=,H,
+Property (BNS Ch. XVII),396,Dacoity with murder,310(3),=,M,
+Property (BNS Ch. XVII),397 / 398,Robbery or dacoity with attempt to kill / armed with deadly weapon,311 / 312,=,M,
+Property (BNS Ch. XVII),399 / 402,Preparation for / assembling for dacoity,310(4)/(5),M,L,
+Property (BNS Ch. XVII),400 / 401,Belonging to a gang of dacoits / thieves,313,M,L,
+Property (BNS Ch. XVII),403 / 404,Dishonest misappropriation,314 / 315,=,M,
+Property (BNS Ch. XVII),405-409,"Criminal breach of trust (incl. by servant, banker, public servant)",316(1)-(5),M,H,
+Property (BNS Ch. XVII),410-414,"Stolen property (receiving, retaining, assisting concealment)",317,M,H,
+Property (BNS Ch. XVII),415 / 417 / 418 / **420**,Cheating (def / punishment / with knowledge / inducing delivery of property),318(1) / 318(2) / 318(3) / **318(4)**,=,H,**420 → 318(4)** is the single most-used mapping in Indian fraud data
+Property (BNS Ch. XVII),416 / 419,Cheating by personation,319(1) / 319(2),=,H,
+Property (BNS Ch. XVII),421-424,Fraudulent removal/concealment of property,320-323,M,M,
+Property (BNS Ch. XVII),425-440,"Mischief (all forms incl. arson, animal maiming, inundation)",324-328,M,M,
+Property (BNS Ch. XVII),441 / 442,Criminal trespass / house-trespass (defs),329(1) / 329(2),=,H,
+Property (BNS Ch. XVII),443 / 444,Lurking house-trespass / by night (defs),330(1) / 330(2),=,H,
+Property (BNS Ch. XVII),449 / 450 / 451,House-trespass to commit an offence punishable with death / life / imprisonment,332(a)/(b)/(c),=,M,
+Property (BNS Ch. XVII),452,House-trespass after preparation for hurt,333,=,M,
+Property (BNS Ch. XVII),461 / 462,Dishonestly breaking open a receptacle,334,M,M,
+"Public order, state, intimidation, documents, misc.",141 / 143,Unlawful assembly (def / punishment),189(1) / 189(2),=,H,
+"Public order, state, intimidation, documents, misc.",144 / 145,Joining armed / after dispersal order,189(3)-(6),M,M,
+"Public order, state, intimidation, documents, misc.",149,Common-object liability of every member,190,=,H,
+"Public order, state, intimidation, documents, misc.",146 / **147** / 148,Rioting (def / punishment / armed),191(1) / **191(2)** / 191(3),=,H,
+"Public order, state, intimidation, documents, misc.",152,Assaulting a public servant suppressing a riot,195,=,M,
+"Public order, state, intimidation, documents, misc.",153,Wantonly provoking a riot,192,=,M,
+"Public order, state, intimidation, documents, misc.",154-156,Liability of landowner/occupier,193,M,L,
+"Public order, state, intimidation, documents, misc.",159 / 160,Affray,194,M,M,
+"Public order, state, intimidation, documents, misc.",153B,Imputations prejudicial to national integration,197,=,M,
+"Public order, state, intimidation, documents, misc.",121,Waging war against the Government of India,**147**,=,H,
+"Public order, state, intimidation, documents, misc.",121A / 122 / 123,Conspiracy / collecting arms / concealing design,148 / 149 / 150,=,M,
+"Public order, state, intimidation, documents, misc.",166A(c),Public servant failing to record information (sexual offences),199,=,M,the anti-burking provision
+"Public order, state, intimidation, documents, misc.",188,Disobedience to a public servant's order,223,=,M,
+"Public order, state, intimidation, documents, misc.",269 / 270,Negligent / malignant act spreading infection,271 / 272,=,M,
+"Public order, state, intimidation, documents, misc.",292 / 293 / 294 / 294A,Obscene material / sale to a child / obscene acts / lottery office,294 / 295 / 296 / 297,=,M,
+"Public order, state, intimidation, documents, misc.",295 / **295A** / 296 / 297 / 298,Religious offences,298 / **299** / 300 / 301 / 302,=,H,
+"Public order, state, intimidation, documents, misc.",463 / 465,Forgery (def / punishment),336(1) / 336(2),=,H,
+"Public order, state, intimidation, documents, misc.",466 / 467 / 468 / 469,Forgery of court record / valuable security / for cheating / to harm reputation,337 / 338 / 336(3) / 336(4),S,M,
+"Public order, state, intimidation, documents, misc.",470 / 471,Forged document / using it as genuine,340(1) / 340(2),=,M,
+"Public order, state, intimidation, documents, misc.",477A,Falsification of accounts,344,=,M,
+"Public order, state, intimidation, documents, misc.",489A-489E,Counterfeiting currency notes,178-181,M,M,
+"Public order, state, intimidation, documents, misc.",503 / **506** / 507,Criminal intimidation (def / punishment / anonymous),351(1) / **351(2)-(3)**,M,H,
+"Public order, state, intimidation, documents, misc.",504 / 505,Insult to provoke breach of peace / public-mischief statements,352 / 353,=,H,
+"Public order, state, intimidation, documents, misc.",499-502,Defamation,356,M,H,community service added
+"Public order, state, intimidation, documents, misc.",508 / 510,Divine-displeasure inducement / drunken misconduct,354 / 355,=,M,
+"Public order, state, intimidation, documents, misc.",120A / 120B,Criminal conspiracy,61,=,H,
+"Public order, state, intimidation, documents, misc.",171A-171I,Election offences,169-177,=,M,

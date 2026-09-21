@@ -203,3 +203,33 @@ python3 scripts/harvest_mumbai.py --from 2021-01 --to 2026-09   # resumes
 
 Do not raise the concurrency. These are public-sector servers that citizens
 depend on, and degrading one does more harm than the map does good.
+
+---
+
+## 7. Locating a pincode: what was tried on 2026-09-21, and why the answer is "the police's own addresses"
+
+The product wants a person to type their pincode and see their locality. No
+Indian authority publishes pincode polygons, so a centre point per pincode was
+the fallback sought. Every candidate failed, each for a different reason, and
+the reasons matter more than the list:
+
+| Source | Result | Why it is out |
+|---|---|---|
+| GeoNames IN postal file (via the sanand0/pincode mirror, CC-BY) | reachable | **Measured unusable**: of 89 Mumbai pincodes, 82 share the single point (19.0167, 72.85). Zooming to it would put most of the city on Fort. |
+| `download.geonames.org` | policy-blocked | same data anyway |
+| Overpass, Nominatim, openstreetmap.org | policy-blocked | OSM `addr:postcode` would have been the best free source |
+| Wikidata (P281 postal code, P625 coordinates, CC0) | policy-blocked | |
+| Wikipedia API (`/w/api.php`) | 429, and robots.txt `User-agent: *` disallows `/w/` and `/api/` | closed under INGESTION rule 2, independent of the rate limit |
+| India Post directory on data.gov.in | robots-disallowed | see §3 |
+| ramSeraph `postal` release (pincode boundaries) | release page and API unreadable through the proxy; asset names not guessable | worth one try from an unblocked network |
+
+What works, and is better than all of the above for this purpose: **Brihan
+Mumbai Police publish each station's own address with its pincode**, on the
+station's page at `mumbaipolice.gov.in/policestation?ps=<id>`, together with
+office telephone numbers, email, beat chowkies (some listing the localities
+each covers), the nearest railway station, and a map embed carrying the
+station's coordinates. That makes "pincode → the stations that sit in it" a
+statement from the police rather than an inference from a third party.
+
+The honest limit follows directly: a pincode that no station lists as its
+address has no location on this map, and the page says so instead of guessing.

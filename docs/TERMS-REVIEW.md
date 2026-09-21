@@ -119,3 +119,36 @@ Reviewing terms for a site we cannot open would be inventing a record.
 **Out of scope by rule 1, independent of its terms.** The FIR search is
 CAPTCHA-gated. That is a closed door, not an obstacle to engineer around, and
 Bhilwara's route is RTI — see `research/sources/rti-playbook.md`.
+
+---
+
+## mumbaipolice.gov.in — Brihan Mumbai Police (the commissionerate's own site)
+
+**Verdict: automated access is not prohibited; reuse of the directory is not
+prohibited; the site itself warns its telephone numbers may be out of date, and
+the map must carry that warning. Ingestion of the station directory may proceed.**
+
+Read on 2026-09-21. The site is Marathi-first; the disclaimer is at
+`/disclaimer` (200) and was read in full in Marathi.
+
+| Check | Result |
+|---|---|
+| `mumbaipolice.gov.in/robots.txt` | **404** — none published, nothing disallowed |
+| Disclaimer: purpose | "content is for information purposes only … to give the public quick and easy access to information; it has no legal sanctity" |
+| Disclaimer: accuracy | "some details such as **telephone numbers**, the name of the officer holding a post, may have changed before they are updated on the website" |
+| Disclaimer: linking | "If you wish to link to information on our site, **no prior permission is required**. However we do not permit our pages to be displayed inside a frame on your site" |
+| Disclaimer: liability | Brihan Mumbai Police accepts no liability for use of the information |
+| Any prohibition on automated access, copying or reuse | **None stated** |
+
+What that means here. The station pages are fetched once, sequentially, three
+seconds apart, and saved, so the parser is developed against files rather than
+against the server. Nothing is framed. What we keep from each page is the
+office: station name, office telephone numbers, office email, division, zone,
+region, beat chowkies, nearest railway station, the office address and its
+pincode, and the coordinates in the page's own map embed. **Officer names are
+dropped at the boundary** — the disclaimer itself says they change, and the
+project does not persist names of people under any circumstances.
+
+The disclaimer's own warning is carried onto the map verbatim in substance:
+telephone numbers come from the commissionerate's site and may have changed;
+in an emergency dial 100 / 112.

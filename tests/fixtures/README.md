@@ -2,9 +2,10 @@
 
 ## Provenance, in one line
 
-**These are third-party harvested scrapes of a live Indian police portal, taken by someone
-unconnected to this project, under no stated licence. They are here so a parser can be written and
-reviewed without touching a government server. They are not ours to republish.**
+**These are saved pages and rows from live Indian police portals, here so a parser can be written and
+reviewed without touching a government server. The CCTNS rows are third-party scrapes under no
+stated licence and are not ours to republish; the Mumbai Police station pages were fetched by this
+project and had every officer's identity removed before being committed. Each section says which.**
 
 ---
 
@@ -112,3 +113,65 @@ establish" section is the part that matters.
 - Do not re-harvest from the live portal to extend them. `docs/INGESTION.md` rule 4: Phase 1 is
   reconnaissance, and rule 2 is unsatisfied — nobody has read that portal's terms of use.
 - If the provenance above cannot be honoured, delete the files rather than quietly keeping them.
+
+---
+
+## `mumbaipolice-station-ps{62,9,18}.html`
+
+Three pages from **Mumbai Police's own station directory**, the commissionerate's site rather than the
+state CCTNS portal: `https://mumbaipolice.gov.in/policestation?ps=<id>` for Nagpada (62), Bandra (9)
+and Chunabhatti (18). They are here so the station-page parser and the directory join
+(`pipeline/mumbai_join.py`) can be written and reviewed without touching the host.
+
+### Chain of custody
+
+| | |
+|---|---|
+| Original publisher | Mumbai Police, a `.gov.in` host |
+| Fetched by | this project, `scripts/crawl_mumbaipolice_stations.py`, one request at a time, 3 s apart |
+| Fetched | 2026-09-21, into `data/raw/mumbaipolice/stations/ps_<id>.html` (gitignored) |
+| Copied here | 2026-09-21, **with officer identity removed** (below); otherwise byte-for-byte |
+| Terms of use | Reviewed: `docs/TERMS-REVIEW.md`. No robots.txt; the site's disclaimer warns that telephone numbers may have changed since publication, and the map must say so too. |
+
+### What was removed, and why
+
+The pages name the station's Senior Police Inspector, the Divisional ACP, the Zonal DCP and the
+Regional Additional CP, each linked to a profile page. Those are people, and `docs/INGESTION.md`
+rule 3 is that identifiers are dropped at the boundary. Fixtures are committed, so the boundary is
+here. In each copy:
+
+| Element on the page | Replaced with |
+|---|---|
+| Sr. PI's name on the "From the desk of Sr. PI" plate | `[officer name removed]` |
+| Sr. PI's mobile number on that plate's post line | `[officer mobile removed]` |
+| Sr. PI's photograph (`images/Police_incharge/<n>.png`) | `src="[officer photo removed]"` |
+| Divisional ACP, DCP Zone and Regional Addl. CP name cells, including the `title` attribute and the `?name=` profile link | `<span class="txt-val" title="[officer name removed]">[officer name removed]</span>` |
+
+Nothing else was changed. The office data stays: station telephone numbers, office email
+(obfuscated by the site as `[dot]`/`[at]`), division, zone and region labels, the ACP / DCP / Addl. CP
+**office** contact numbers, area, population, beat marshals, beat chowkies, hospitals, nearest railway
+station, bus depot, the "Locate Us" address with its pincode, and the map embed the coordinates and
+English name come from.
+
+The removal was done by anchored regexes that fail if a page does not carry exactly the expected
+number of each element, and `tests/test_mumbai_join.py::TestFixturesCarryNoOfficerIdentity` asserts
+the markers are present and no `?name=` link or officer image survives. It does so structurally: a
+test that listed what was removed would carry the very thing it exists to keep out. Any refresh of
+these fixtures must go through the same scrub before being committed.
+
+### Three things to know before parsing them
+
+1. **Devanagari digits.** Telephone numbers, area and the address pincode are written in Devanagari
+   numerals on some pages (`२२२३०९२२९३`, `४०० ००८`) and ASCII on others (`400 050.`). Both occur
+   across these three pages, deliberately.
+2. **Empty is not zero.** Chunabhatti's "DCP office contact no." cell is blank. That is a null with a
+   reason (the site did not publish one), never `""` or `0`.
+3. **The coordinates are the office, not the jurisdiction.** The map embed's `!3d`/`!2d` is where the
+   station building is. Maharashtra publishes no jurisdiction boundaries; nothing here changes that.
+
+### Handling rules
+
+- Parser and join fixtures only. Do not merge into `data/`, do not publish, do not ship in a built
+  site.
+- Do not re-fetch from the site to extend them; the crawl script owns that host, one request at a
+  time.

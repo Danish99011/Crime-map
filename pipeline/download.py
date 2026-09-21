@@ -6,6 +6,13 @@ of government data, which is what made them reachable at all. Re-verify the
 upstream originals before relying on this in production — see
 docs/PHASE1-FINDINGS.md section 9.
 
+Not here, and deliberately: GeoNames' Indian postal-code file (mirrored at
+github.com/sanand0/pincode). It was tried as a way to centre the map on a
+pincode and rejected on measurement: of 89 Mumbai pincodes in it, 82 share one
+point (19.0167, 72.85) and the rest fall on two more. Zooming "to a pincode"
+with that would place most of the city on top of Fort. A pincode is only
+located here from a police station's own published address.
+
 Run:  python3 -m pipeline.download
 """
 

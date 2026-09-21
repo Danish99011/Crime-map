@@ -95,14 +95,11 @@ def harvest_month(client: MahapoliceClient, unit_id: str, year: int, month: int,
     date_from = f"01/{month:02d}/{year}"
     date_to = f"{last_day}/{month:02d}/{year}"
 
-    # Start every month from a freshly re-posted unit selection. The client
-    # carries the __VIEWSTATE of whatever it last received, and after a month
-    # finishes that is the final page of its grid -- state the next month's
-    # search and paging cannot always be driven from. Left alone it cost a
-    # month at its second page and the month after at its search, both
-    # recorded as failures that were ours and not the portal's. One extra
-    # request per month buys each month an independent starting point.
-    client.select_unit(unit_id)
+    # Start every month from a clean form, not from what the last month left
+    # behind. Re-posting only the unit selection was not enough: see
+    # MahapoliceClient.reset, which documents the three-month failure cycle
+    # that cost roughly half of a 23-month run.
+    client.reset(unit_id)
 
     page = client.search(unit_id, date_from, date_to, page_size=PAGE_SIZE)
     declared = total_records(page)

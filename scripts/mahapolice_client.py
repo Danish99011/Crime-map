@@ -194,6 +194,27 @@ class MahapoliceClient:
                 "warm-up. Do not treat this as 'no data'; it is a failed fetch.")
         return units
 
+    def reset(self, unit_id: str) -> list[tuple[str, str]]:
+        """Return to a clean search form with `unit_id` selected.
+
+        A month must not be started from the state the previous month left
+        behind. The client posts the __VIEWSTATE it last received, and after a
+        month finishes that is the final page of that month's results grid.
+        Re-posting the unit selection from there is not enough to clear it:
+        over a 23-month run it produced an exact three-month cycle -- one month
+        complete, the next truncated at its second page with 50 rows, the third
+        refused outright with "unit was rejected", then clean again because the
+        refusal forced a new session. Half the series came back short, and the
+        shortfalls were ours, not the portal's.
+
+        So this re-walks the whole entry path: index.aspx for a session, the
+        form, then the unit postback. Three requests at the start of a month
+        that costs a hundred and sixty, in exchange for each month standing on
+        its own.
+        """
+        self.open_form()
+        return self.select_unit(unit_id)
+
     def select_unit(self, unit_id: str) -> list[tuple[str, str]]:
         """Post back the unit selection; return that unit's police stations."""
         form = self._form_state(self._last_body)

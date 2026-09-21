@@ -97,7 +97,9 @@ def build() -> str:
     join_rows = join.get("rows", join) if isinstance(join, dict) else join
     fir_to_ps = {}
     for row in (join_rows if isinstance(join_rows, list) else []):
-        if row.get("directory_ps_id") is not None and row.get("method") != "none":
+        # Only joins a rule vouches for. A fuzzy near-miss is reviewable, not
+        # trustworthy: it once paired WADALA TT with Wadala, a different station.
+        if row.get("directory_ps_id") is not None and row.get("method") in ("exact", "alias"):
             fir_to_ps[row["fir_name"]] = int(row["directory_ps_id"])
 
     # One record per FIR station (the unit the crime counts live on), carrying
@@ -185,6 +187,26 @@ def build() -> str:
         "directory_stations": len(by_ps),
         "stations_with_phone": sum(1 for s in placed if s["phones"]),
     }
+    # Freshness on the page's face. The critic caught a build of this page
+    # made from a spine that a later rebuild had already superseded, so every
+    # input's write time travels with the payload and is printed in the
+    # provenance line. A reader can see a stale page; so can we.
+    import datetime as _dt
+
+    def _stamp(path: Path) -> str | None:
+        if not path.exists():
+            return None
+        return _dt.datetime.fromtimestamp(path.stat().st_mtime, _dt.timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+
+    payload["built_from"] = {
+        "fir_aggregate": _stamp(FIR_JSON), "station_directory": _stamp(STATIONS_JSON),
+        "join": _stamp(JOIN_JSON), "pincode_index": _stamp(PINCODES_JSON),
+    }
+    if (JOIN_JSON.exists() and STATIONS_JSON.exists()
+            and JOIN_JSON.stat().st_mtime < STATIONS_JSON.stat().st_mtime - 1):
+        raise SystemExit("refusing to build: the join is older than the station directory it "
+                         "was computed from -- run scripts/build_mumbai_stations.py first")
+
     blob = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
     return TEMPLATE.replace("__PAYLOAD__", blob)
 
@@ -341,9 +363,10 @@ footer code{font-family:var(--mono);font-size:11.5px}
     <div>
       <p class="eyebrow">Mumbai &middot; Brihan Mumbai City police commissionerate</p>
       <h1>Your locality, from the record</h1>
-      <p class="sub">Type your pincode or your area. You get the police stations that sit in it, their
-        office numbers, and what kinds of FIRs those stations register &mdash; from Maharashtra
-        Police&rsquo;s published FIRs and Mumbai Police&rsquo;s own station directory, joined on the station.</p>
+      <p class="sub">Type your pincode or your area. You get the police stations whose office address is in
+        it, their office numbers, and the FIRs registered at those stations by offence head &mdash; from
+        Maharashtra Police&rsquo;s published FIRs and Mumbai Police&rsquo;s own station directory, joined on
+        the station. Not where anything happened: no Indian authority publishes that.</p>
     </div>
     <div class="emg" id="emg" role="note" aria-label="Emergency numbers"></div>
   </header>
@@ -498,8 +521,9 @@ function moveTip(e){ if(!tip) return; var box=document.querySelector(".mapcard")
   var x=(e.clientX||box.left)-box.left+12, y=(e.clientY||box.top)-box.top+12; x=Math.min(x,box.width-tip.offsetWidth-8);
   tip.style.left=Math.max(6,x)+"px"; tip.style.top=Math.max(6,y)+"px"; }
 function hideTip(){ if(tip&&tip.parentNode) tip.parentNode.removeChild(tip); tip=null; }
-function drawLegend(){ var h=[]; D.map_heads.forEach(function(k){ h.push('<span class="key"><i class="dot" style="background:'+mapColor[k]+'"></i>mostly '+esc(headLabel[k])+'</span>'); });
-  h.push('<span class="key"><i class="dot" style="background:'+NEUTRAL+'"></i>other, or no FIRs held</span>');
+function drawLegend(){ var h=[]; D.map_heads.forEach(function(k){ h.push('<span class="key"><i class="dot" style="background:'+mapColor[k]+'"></i>largest of the three: '+esc(headLabel[k])+'</span>'); });
+  h.push('<span class="key"><i class="dot" style="background:'+NEUTRAL+'"></i>none of the three, or no FIRs held</span>');
+  h.push('<span class="key" style="flex-basis:100%">Colour compares only theft, cheating and burglary; the full breakdown, where other heads usually outnumber them, is in the panel.</span>');
   h.push('<span class="key">area &#8733; FIRs registered</span>'); document.getElementById("legend").innerHTML=h.join(""); }
 
 // --- search ----------------------------------------------------------------
@@ -508,8 +532,8 @@ function findHits(q){
   var pin=q.replace(/\s+/g,"");
   if(/^\d{6}$/.test(pin)){
     var ids=D.pincodes[pin]||[], hits=all.filter(function(s){ return s.ps_id!=null && ids.indexOf(s.ps_id)>=0; });
-    if(hits.length) return {hits:hits,label:"Pincode "+pin,sub:hits.length+" police station"+(hits.length>1?"s list":" lists")+" this pincode as its own address."};
-    if(/^400\d{3}$/.test(pin)) return {hits:[],label:"Pincode "+pin,sub:"No police station lists this pincode as its address, and Mumbai Police publish no pincode-to-station map. Nothing is drawn rather than guessed: try a neighbouring pincode, your area's name, or the station you know."};
+    if(hits.length) return {hits:hits,label:"Pincode "+pin,sub:hits.length+" police station"+(hits.length>1?"s have their office" : " has its office")+" address in this pincode. That is where the office sits, not a statement of which station covers you."};
+    if(/^400\d{3}$/.test(pin)) return {hits:[],label:"Pincode "+pin,sub:"No police station lists "+pin+" as its own office address. Mumbai Police publish no pincode-to-station map and no station boundaries, so this page cannot say which station covers it \u2014 it is covered; we just cannot show by whom. Nothing is drawn rather than guessed. Try your area or a landmark (matched against the beat-chowky localities Mumbai Police list), tap any station on the map for its address and number, or pick one of the "+Object.keys(D.pincodes).length+" pincodes a station does list \u2014 they are in the search suggestions."};
     return {hits:[],label:"Pincode "+pin,sub:"That is not a Mumbai pincode (Mumbai's run 400001-400104)."};
   }
   var n=norm(q), hits=all.filter(function(s){ return norm(s.name).indexOf(n)>=0 || norm(s.name_en).indexOf(n)>=0; });
@@ -530,9 +554,10 @@ function stationRow(s, distKm){
   var phones=s.phones.length? '<div class="st-phones">'+s.phones.map(function(p){ return '<a href="tel:'+esc(p.replace(/[^\d+]/g,""))+'">'+esc(p)+'</a>'; }).join("")+'</div>'
                               : '<div class="st-none">No office number in the Mumbai Police directory for this station'+(s.ps_id==null?' (no directory match)':'')+'.</div>';
   var meta=[]; if(s.pincode) meta.push("pincode "+esc(s.pincode)); if(s.railway) meta.push("nearest station: "+esc(s.railway.split(",")[0]));
+  if(NOT_TERRITORIAL.test(s.name)||NOT_TERRITORIAL.test(s.name_mr||"")) meta.push("a regional cyber or marine unit: its count covers a whole region, not this spot");
   if(s.no_fir_record) meta.push("no FIRs held for this station yet"); else meta.push(total(s).toLocaleString("en-IN")+" FIRs held");
   return '<li><div class="st-head"><span class="st-name"><button type="button" data-n="'+esc(s.name)+'">'+esc(s.name_en||s.name)+'</button></span>'+
-    (distKm!=null?'<span class="st-dist">'+distKm.toFixed(1)+' km</span>':'')+'</div>'+phones+
+    (distKm!=null?'<span class="st-dist" title="straight line between office addresses, not from you">'+distKm.toFixed(1)+' km straight-line</span>':'')+'</div>'+phones+
     (s.address?'<div class="st-addr">'+esc(s.address)+'</div>':'')+'<div class="st-meta">'+meta.join(" &middot; ")+'</div></li>';
 }
 function panel(){
@@ -552,7 +577,7 @@ function panel(){
     var names=new Set(anchor.map(function(s){return s.name;}));
     list=anchor.map(function(s){ return stationRow(s, state.sel?null:0); });
     var near=all.filter(function(s){return !names.has(s.name) && !NOT_TERRITORIAL.test(s.name) && !NOT_TERRITORIAL.test(s.name_mr||"");}).map(function(s){return {s:s,d:km(c,s)};}).sort(function(a,b){return a.d-b.d;}).slice(0,4);
-    head.textContent=state.sel?"This station, then the nearest":"Police stations here, then the nearest";
+    head.textContent=state.sel?"This station, then the nearest offices (straight-line)":"Stations with an office here, then the nearest offices (straight-line)";
     list=anchor.map(function(s){return stationRow(s,null);}).concat(near.map(function(x){return stationRow(x.s,x.d);}));
   } else {
     head.textContent="Police stations (most FIRs first)";
@@ -587,7 +612,7 @@ document.getElementById("cav").innerHTML=D.caveats.map(function(c){ return '<li>
   '<li><b>Phone numbers may have changed</b><span>'+esc(D.sources.directory.caveat)+' In an emergency dial 100 or 112.</span></li>'+
   '<li><b>A pincode is only where a station says it is</b><span>Pincodes come from each station&rsquo;s own published address. No authority publishes pincode boundaries, so a pincode no station lists is not drawn, rather than guessed.</span></li>';
 document.getElementById("prov").innerHTML="Sources: <a href=\""+esc(D.sources.fir.url||"#")+"\" target=\"_blank\" rel=\"noopener\">"+esc(D.sources.fir.name||"Maharashtra Police published FIRs")+"</a> (contains information published by Maharashtra Police; reproduced with the source acknowledged, as its copyright policy requires) and <a href=\""+esc(D.sources.directory.url)+"\" target=\"_blank\" rel=\"noopener\">"+esc(D.sources.directory.name)+"</a> (office numbers, addresses, beat chowkies and station coordinates from each station&rsquo;s page; officer names are not carried). "+
-  D.records.toLocaleString("en-IN")+" FIRs across "+D.months.length+" months; "+D.stations.length+" stations drawn, "+D.stations_with_phone+" with an office number, "+D.unplaced.length+" listed without a location. Built by <code>pipeline/build_locality_page.py</code>.";
+  D.records.toLocaleString("en-IN")+" FIRs across "+D.months.length+" months; "+D.stations.length+" stations drawn, "+D.stations_with_phone+" with an office number, "+D.unplaced.length+" listed without a location. Built by <code>pipeline/build_locality_page.py</code> from inputs written at: FIR aggregate "+esc(D.built_from.fir_aggregate||"?")+", station directory "+esc(D.built_from.station_directory||"?")+", join "+esc(D.built_from.join||"?")+", pincode index "+esc(D.built_from.pincode_index||"?")+".";
 run();
 })();
 </script>

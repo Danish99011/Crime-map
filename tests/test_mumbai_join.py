@@ -119,17 +119,45 @@ class TestAliasJoin:
 
 
 class TestFuzzyJoin:
-    BORIVALI = record(14, "बोरीवली", "Borivali", 19.229, 72.856, "400092")
+    # A spelling nobody has vouched for. "Pydhoni" and "Pydhonie" are both in
+    # everyday use; the directory happens to write the second.
+    PYDHONI = record(70, "पायधुनी", "Pydhoni", 18.954, 72.832, "400003")
     KHERWADI = record(43, "खेरवाडी", "Kherwadi", 19.066, 72.850, "400051")
 
     def test_a_near_miss_is_offered_but_tagged_fuzzy(self):
-        # W/V is the commonest Marathi transliteration split, and the portal
-        # and the directory sit either side of it.
-        row = join_directory([self.BORIVALI], ["BORIWALI"], MHA)[0]
-        assert row["directory_ps_id"] == 14
+        row = join_directory([self.PYDHONI], ["PYDHONIE"], MHA)[0]
+        assert row["directory_ps_id"] == 70
         assert row["method"] == "fuzzy"
         assert row["similarity"] >= FUZZY_THRESHOLD
+
+    def test_a_confirmed_near_miss_joins_by_alias_not_by_luck(self):
+        # W/V is the commonest Marathi transliteration split. The reviewer
+        # confirmed Borivali against the MHA point (0.02 km), so it is in
+        # ALIASES now and the row says a person vouched for it.
+        borivali = record(14, "बोरीवली", "Borivali", 19.229, 72.856, "400092")
+        row = join_directory([borivali], ["BORIWALI"], MHA)[0]
+        assert row["directory_ps_id"] == 14
+        assert row["method"] == "alias"
+        assert row["similarity"] is None
         assert row["mha_ps"] == "BORIWALI"
+
+    def test_a_page_already_given_to_another_name_is_not_offered(self):
+        # "WADALA TT" is 0.86 like "Wadala", but Wadala's page belongs to
+        # "WADALA". Without the truck terminal's page on hand the answer is
+        # none, not Wadala's phones beside the truck terminal's crime.
+        wadala = record(92, "वडाळा", "Wadala", 19.0153, 72.8614, None)
+        rows = by_fir_name(join_directory([wadala], ["WADALA", "WADALA TT"], MHA))
+        assert rows["WADALA"]["method"] == "exact"
+        assert rows["WADALA TT"]["method"] == "none"
+        assert rows["WADALA TT"]["directory_ps_id"] is None
+
+    def test_a_near_miss_across_a_compass_word_is_a_different_station(self):
+        # "CYBER ... EAST REGION" and "... WEST REGION" differ by one letter
+        # after normalising (0.93), and are two stations in two buildings.
+        west = record(103, "पश्चिम प्रादेशिक विभाग सायबर", "Cyber West Region",
+                      None, None, "400050")
+        row = join_directory([west], ["CYBER POLICE STATION EAST REGION"], MHA)[0]
+        assert row["method"] == "none"
 
     def test_a_far_miss_is_none_not_a_guess(self):
         # KHAR and KHERWADI are neighbouring stations that share a prefix.
@@ -144,6 +172,81 @@ class TestFuzzyJoin:
         twins = [record(1, "अ", "Boriwali N", 19.0, 72.0, None),
                  record(2, "ब", "Boriwali S", 19.0, 72.0, None)]
         row = join_directory(twins, ["BORIWALI"], MHA)[0]
+        assert row["method"] == "none"
+
+
+class TestSpellingsAPersonVouchedFor:
+    """The joins the audit confirmed page by page, so they cannot drift back.
+
+    Coordinates are the ones on the pages; the MHA points are the real ones.
+    """
+    WADALA = record(92, "वडाळा", "Wadala", 19.0153, 72.8614, None)
+    WADALA_TT = record(93, "वडाळा ट्रक टर्मिनल", "Wadala Truck Terminal",
+                       19.0330, 72.8751, "400037")
+    MHA_WADALA = mha(("WADALA", 19.01519, 72.8635), ("WADALA TT", 19.03403, 72.87739))
+
+    def test_wadala_and_wadala_tt_are_two_stations_and_each_gets_its_own_page(self):
+        rows = by_fir_name(join_directory([self.WADALA, self.WADALA_TT],
+                                          ["WADALA", "WADALA TT"], self.MHA_WADALA))
+        assert rows["WADALA"]["directory_ps_id"] == 92
+        assert rows["WADALA"]["method"] == "exact"
+        assert rows["WADALA TT"]["directory_ps_id"] == 93
+        assert rows["WADALA TT"]["method"] == "alias"
+        for row in rows.values():
+            assert row["distance_km_between_directory_and_mha"] < 0.5
+
+    @pytest.mark.parametrize("name_en, fir_name, ps_id", [
+        ("BKC", "BANDRA-KURLA COMPLEX", 10),
+        ("Kandivali", "KANDIVALI (WEST)", 39),
+        ("Mulund", "MULUND (WEST)", 58),
+        ("Kasturba Road", "KASTURBA SUB PS", 41),
+        ("Aarey Road", "AREY SUB PS", 2),
+        ("Sahar Airport", "SAHAR", 73),
+        ("Sewree / Darukhana", "SEWRI", 77),
+    ])
+    def test_a_directory_spelling_in_the_alias_table_joins_as_alias(self, name_en, fir_name, ps_id):
+        row = join_directory([record(ps_id, "क", name_en, 19.0, 72.8, None)], [fir_name], {})[0]
+        assert row["directory_ps_id"] == ps_id
+        assert row["method"] == "alias"
+
+    def test_kandivali_west_is_the_directorys_kandivali_and_not_samta_nagar(self):
+        # Samta Nagar is Kandivali (East) and has its own page; the portal's
+        # "KANDIVALI (WEST)" must land on the Kandivali page alone.
+        kandivali = record(39, "कांदिवली", "Kandivali", 19.2096, 72.8502, "400067")
+        samta = record(75, "समता नगर", "Samta Nagar", 19.1999, 72.8616, "400101")
+        rows = by_fir_name(join_directory([kandivali, samta],
+                                          ["KANDIVALI (WEST)", "SAMTA NAGAR"], {}))
+        assert rows["KANDIVALI (WEST)"]["directory_ps_id"] == 39
+        assert rows["SAMTA NAGAR"]["directory_ps_id"] == 75
+
+    def test_a_page_the_embed_never_named_joins_by_its_roster_name(self):
+        # Deonar's embed label is "Urban hotel", so the parser left name_en
+        # null; the roster's देवनार is what says which page it is.
+        deonar = record(26, "देवनार", None, 19.0590, 72.9169, "400043")
+        row = join_directory([deonar], ["DEONAR"], mha(("DEONAR", 19.05074, 72.91725)))[0]
+        assert row["directory_ps_id"] == 26
+        assert row["method"] == "alias"
+        assert row["distance_km_between_directory_and_mha"] < 1.0
+
+    def test_the_five_cyber_stations_each_find_their_own_page(self):
+        # The roster doubles some spaces ("दक्षिण  प्रादेशिक"); the lookup
+        # must not care.
+        pages = [record(96, "दक्षिण  प्रादेशिक विभाग  सायबर", None, 18.9608, 72.8171, None),
+                 record(101, "मध्य प्रादेशिक विभाग सायबर", None, 19.0051, 72.8174, "400018"),
+                 record(102, "पुर्व  प्रादेशिक विभाग सायबर", None, 19.0634, 72.9168, None),
+                 record(103, "पश्चिम  प्रादेशिक विभाग सायबर", None, None, None, "400050"),
+                 record(104, "उत्तर प्रादेशिक विभाग सायबर", None, None, None, None)]
+        names = [f"CYBER POLICE STATION {region} REGION"
+                 for region in ("SOUTH", "CENTRAL", "EAST", "WEST", "NORTH")]
+        rows = by_fir_name(join_directory(pages, names, {}))
+        assert [rows[n]["directory_ps_id"] for n in names] == [96, 101, 102, 103, 104]
+        assert {rows[n]["method"] for n in names} == {"alias"}
+
+    def test_a_roster_name_nobody_vouched_for_stays_unjoined(self):
+        # मुंबई सागरी -१ (Mumbai Marine 1) has no FIR name and is not in the
+        # table, so it must not be guessed from anything.
+        marine = record(59, "मुंबई सागरी -१", None, 19.0462, 72.8392, "400016")
+        row = join_directory([marine], ["SEWRI"], {})[0]
         assert row["method"] == "none"
 
 

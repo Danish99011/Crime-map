@@ -24,10 +24,19 @@ What a join here may and may not do
   `pipeline/mumbai.py`, so the name that places an FIR on the map is the name
   that finds its directory page. Two normalisers would drift, and a station
   would then show crime with no phone number, or the reverse.
+* A page whose embed never names the station (the label is "Urban hotel", a
+  street address, or there is no label) has no English name to join on. For
+  those, and only those, `ROSTER_NAMES_EN` says by hand what the roster's
+  Marathi name is in the portal's spelling. Each entry was checked against the
+  page's address and the MHA point; the check is written beside it.
 * A near miss (difflib ratio at or above `FUZZY_THRESHOLD` after normalising)
   is offered but tagged `fuzzy`, so a reviewer sees it before it ships. It is
   never promoted to `exact`, because a wrong join here prints one station's
-  phone number beside another station's crime.
+  phone number beside another station's crime. Two near misses are refused
+  outright: a page a rule has already given to another FIR name ("WADALA TT"
+  is 0.86 like "Wadala", and Wadala's page belongs to "WADALA"), and a name
+  that differs in a compass word ("CYBER ... EAST REGION" is 0.93 like
+  "... WEST REGION", and they are two stations).
 * Nothing is guessed for a name no rule reaches. `method` is `none`, the
   identifiers are null, and the list of such rows is the work list for the
   alias table, not a failure to hide.
@@ -55,14 +64,48 @@ from .mumbai import ALIASES, LIVE, normalise
 from .stations import haversine_km
 
 # Below this a near miss is noise; at or above it, it earns a reviewer's glance.
-# 0.85 lets BORIWALI ~ BORIVALI through (0.875) and keeps KHAR away from
-# KHERWADI (0.5). Set against the names in hand, not derived from anything.
+# 0.85 lets a W/V split like BORIWALI ~ BORIVALI through (0.875) and keeps
+# KHAR away from KHERWADI (0.5). Set against the names in hand, not derived
+# from anything. The near misses seen so far were confirmed and moved into
+# ALIASES, so a fuzzy row today is a spelling nobody has looked at yet.
 FUZZY_THRESHOLD = 0.85
 
-# ALIASES is keyed by the FIR portal's exact spelling ("D.B.MARG"). The
+# A near miss that differs in one of these is a different station, however
+# close the rest of the spelling. Matched on the normalised key, where a
+# false hit inside a longer word could only make the step more cautious.
+COMPASS = re.compile(r"EAST|WEST|NORTH|SOUTH|CENTRAL")
+
+# ALIASES is keyed by a station's exact spelling ("D.B.MARG"). The
 # directory's map embed may write the same abbreviation with spaces ("D.B.
 # Marg"), so the table is also consulted on letters alone, both ways.
 _ALIAS_BY_LETTERS = {re.sub(r"[^A-Z0-9]", "", k): v for k, v in ALIASES.items()}
+
+# Roster (Marathi) name -> the portal's spelling, for the pages whose map
+# embed does not name the station and so have no `name_en`. Each was read by
+# hand; the note gives the distance from the office on the page's map to the
+# MHA point of the same name, or what stood in for that when one side had no
+# coordinates. Whitespace-collapsed, because the roster doubles some spaces.
+ROSTER_NAMES_EN = {
+    "देवनार": "DEONAR",              # 0.91 km; the label is "Urban hotel"
+    "गोरेगाव": "GOREGAON",           # 1.32 km; the label is "in"
+    "खेरवाडी": "KHERWADI",           # 0.27 km; the iframe is a bare lat,lon
+    "नवघर": "NAVGHAR",               # 0.74 km; the label is the street address
+    "पार्कसाईट": "PARK SITE",         # no map on the page; the address says
+                                     # Parksite police station, LBS Marg
+    "ताडदेव": "TARDEO",              # 0.73 km; the label is the street address
+    "विलेपार्ले": "VILE PARLE",       # 0.95 km; the label is just "Police Station"
+    "यलो गेट": "YELLOWGATE",         # 0.06 km; the label is "Yellow Gate"
+    # The five regional cyber stations are housed in a territorial station's
+    # building, so the parser refuses the host's name from the embed. The
+    # region word in the roster name is the whole of what tells them apart.
+    "दक्षिण प्रादेशिक विभाग सायबर": "CYBER POLICE STATION SOUTH REGION",    # 0.23 km; at D B Marg PS
+    "मध्य प्रादेशिक विभाग सायबर": "CYBER POLICE STATION CENTRAL REGION",    # 0.01 km; 5th floor, Worli PS
+    "पुर्व प्रादेशिक विभाग सायबर": "CYBER POLICE STATION EAST REGION",      # 0.03 km; Shivaji Nagar PS compound
+    "पश्चिम प्रादेशिक विभाग सायबर": "CYBER POLICE STATION WEST REGION",    # no map; address is Bandra (W)
+                                                                          # 400050, where the MHA point is
+    "उत्तर प्रादेशिक विभाग सायबर": "CYBER POLICE STATION NORTH REGION",    # no map; address is Samta Nagar
+                                                                          # PS compound, 0.07 km from the MHA point
+}
 
 PINCODE_NOTE = (
     "A station is indexed under the pincode of its own office address only. "
@@ -82,29 +125,43 @@ def _directory_index(records: list[dict]) -> dict[str, tuple[dict, bool]]:
     index: dict[str, tuple[dict, bool]] = {}
     for record in records:
         name = record.get("name_en")
-        if not name:
-            # The FIR feed only ever uses the English spelling, so a record
-            # with no English name has nothing to be joined on. It is left out
-            # here and shows up as `none` rows downstream, not indexed under a
-            # Marathi name that nothing will look up.
-            continue
-        index.setdefault(normalise(name), (record, False))
-        expanded = _ALIAS_BY_LETTERS.get(_letters(name))
-        if expanded:
-            index.setdefault(normalise(expanded), (record, True))
+        if name:
+            # `normalise()` applies ALIASES itself, so whether this key came
+            # through one is decided here, before the insert, or the row would
+            # read `exact` for a spelling a person had to vouch for.
+            via_alias = (name.upper().strip() in ALIASES
+                         or _letters(name) in _ALIAS_BY_LETTERS)
+            index.setdefault(normalise(name), (record, via_alias))
+            expanded = _ALIAS_BY_LETTERS.get(_letters(name))
+            if expanded:
+                index.setdefault(normalise(expanded), (record, True))
+        # A record with no English name has nothing the FIR feed will look up,
+        # unless a person has said what its roster name is in the portal's
+        # spelling. Otherwise it is left out here and shows up as `none` rows
+        # downstream, not indexed under a Marathi name nothing will search.
+        spelling = ROSTER_NAMES_EN.get(" ".join((record.get("name_mr") or "").split()))
+        if spelling:
+            index.setdefault(normalise(spelling), (record, True))
     return index
 
 
-def _nearest_spelling(key: str, index: dict[str, tuple[dict, bool]]
-                      ) -> tuple[dict | None, float | None]:
+def _nearest_spelling(key: str, index: dict[str, tuple[dict, bool]],
+                      taken: set[int]) -> tuple[dict | None, float | None]:
     """The one record whose name is close enough to `key`, or nothing.
 
-    Two different records tied at the top is an ambiguity, and an ambiguity
-    resolved by dict order would be a guess, so it returns nothing.
+    A record in `taken` already has its FIR name by rule and is not offered
+    again: the near miss is then a second station sharing a prefix, not a
+    second spelling. A candidate whose compass words differ from the key's is
+    a different station by the same reasoning. Two different records tied at
+    the top is an ambiguity, and an ambiguity resolved by dict order would be
+    a guess, so it returns nothing.
     """
+    compass = set(COMPASS.findall(key))
     scored = sorted(
         ((SequenceMatcher(None, key, candidate).ratio(), candidate, record)
-         for candidate, (record, _) in index.items()),
+         for candidate, (record, _) in index.items()
+         if record["ps_id"] not in taken
+         and set(COMPASS.findall(candidate)) == compass),
         key=lambda item: -item[0])
     if not scored or scored[0][0] < FUZZY_THRESHOLD:
         return None, None
@@ -132,18 +189,26 @@ def join_directory(records: list[dict], fir_station_names: list[str],
     landed on the wrong station.
     """
     index = _directory_index(records)
+    # Rules first, for every name, so that the near-miss pass knows which
+    # pages are already spoken for before it offers any.
+    by_rule: dict[str, tuple[dict, str]] = {}
+    for fir_name in fir_station_names:
+        hit = index.get(normalise(fir_name))
+        if hit:
+            record, via_alias = hit
+            by_rule[fir_name] = (record, "alias" if via_alias
+                                 or fir_name.upper().strip() in ALIASES else "exact")
+    taken = {record["ps_id"] for record, _ in by_rule.values()}
+
     rows = []
     for fir_name in fir_station_names:
         key = normalise(fir_name)
         point = mha_points.get(key)
         similarity = None
-        hit = index.get(key)
-        if hit:
-            record, via_alias = hit
-            method = ("alias" if via_alias or fir_name.upper().strip() in ALIASES
-                      else "exact")
+        if fir_name in by_rule:
+            record, method = by_rule[fir_name]
         else:
-            record, similarity = _nearest_spelling(key, index)
+            record, similarity = _nearest_spelling(key, index, taken)
             method = "fuzzy" if record else "none"
 
         distance = None

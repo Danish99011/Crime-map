@@ -160,6 +160,12 @@ the markers are present and no `?name=` link or officer image survives. It does 
 test that listed what was removed would carry the very thing it exists to keep out. Any refresh of
 these fixtures must go through the same scrub before being committed.
 
+The parser is checked from the other side too: `tests/test_mumbaipolice_stations.py::TestNoPersonalData`
+reads the officers' names off the **unscrubbed** raw page at test time (`data/raw/...`, gitignored,
+so it skips where that file is absent) and asserts that no word of them, and not the number beside
+the Sr. PI's name, appears anywhere in the parsed record. `pipeline/mumbaipolice.py` also raises
+`PersonalDataLeak` at the end of every parse if a name from the page is found in the record.
+
 ### Three things to know before parsing them
 
 1. **Devanagari digits.** Telephone numbers, area and the address pincode are written in Devanagari

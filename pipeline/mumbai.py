@@ -49,14 +49,39 @@ OUT = SITE / "mumbai.json"
 # to spell identically. That coincidence is what makes the join possible.
 UNIT = "BRIHAN MUMBAI CITY"
 
-# Station names the portal writes as Mumbai abbreviations and the MHA master
-# writes in full. Each is a road named after a person, which is why the two
-# spellings look unrelated. Verified by hand against the MHA list; anything not
-# here stays unmatched rather than being guessed at.
+# Spellings of one station that `normalise()` cannot reduce to each other.
+# Every entry was checked by hand; anything not here stays unmatched rather
+# than being guessed at.
 ALIASES = {
+    # The portal's abbreviations, which the MHA master writes in full. Each is
+    # a road named after a person, which is why the two spellings look
+    # unrelated. Verified against the MHA list.
     "D.B.MARG": "DR. DADASAHEB BHADKAMKAR MARG",
     "LT MARG": "LOKMANY TILAK MARG",
     "V.P.ROAD": "VALLABHBHAI PATEL ROAD",
+    # The commissionerate directory's English spellings (the label on each
+    # station page's map embed), written as the portal writes them. Verified
+    # by reading the page: its address names the same place, and the office
+    # on its map sits within 1.4 km of the MHA point of the same name, except
+    # where the note says the MHA point is the one that is off.
+    "AAREY ROAD": "AREY SUB PS",           # no MHA point; the one Aarey, in Aarey Colony, Goregaon (E)
+    "BKC": "BANDRA-KURLA COMPLEX",         # 1.06 km
+    "BORIVALI": "BORIWALI",                # 0.02 km; the W/V transliteration split
+    "CHARKOP": "CHARCOP",                  # 0.00 km
+    "KANDIVALI": "KANDIVALI (WEST)",       # 1.35 km; the address says Kandivali (West).
+                                           # Kandivali (East) is Samta Nagar, its own page.
+    "KASTURBA ROAD": "KASTURBA SUB PS",    # 0.04 km
+    "MATA RAMABAI AMBEDKAR MARG": "M R A MARG",  # no MHA point; the roster's एम.आर.ए.मार्ग
+    "MHB": "MHB COLONY",                   # 0.01 km
+    "MULUND": "MULUND (WEST)",             # 0.80 km; the address says Mulund (West).
+                                           # Mulund (East) is Navghar, its own page.
+    "RAFI AHMED KIDWAI MARG": "R.A KIDWAI MARG",  # 1.15 km
+    "SAHAR AIRPORT": "SAHAR",              # MHA point is 4.45 km off, at Jogeshwari PS;
+                                           # the address is Sahar Airport Road, Andheri (E)
+    "SEWREE / DARUKHANA": "SEWRI",         # MHA point is 2.18 km off; the address is
+                                           # Reay Road, Darukhana, Sewri 400010
+    "VINOBA BHAVE": "VINOBA BHAVE NAGAR",  # 0.14 km
+    "WADALA TRUCK TERMINAL": "WADALA TT",  # 0.27 km. Not Wadala: that office is 2.7 km away
 }
 
 

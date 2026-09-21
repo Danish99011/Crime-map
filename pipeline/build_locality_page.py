@@ -118,6 +118,7 @@ def build() -> str:
             "located_by": "directory" if (d and d.get("lat")) else ("mha" if s.get("lat") else None),
             "ps_id": ps_id,
             "name_en": (d or {}).get("name_en"),
+            "name_mr": (d or {}).get("name_mr"),
             "phones": (d or {}).get("phones") or [],
             "email": (d or {}).get("email"),
             "address": (d or {}).get("address"),
@@ -144,7 +145,7 @@ def build() -> str:
         extra.append({
             "name": d.get("name_en") or d.get("name_mr") or f"ps {ps_id}",
             "total": 0, "months": {}, "lat": d["lat"], "lon": d["lon"],
-            "located_by": "directory", "ps_id": ps_id, "name_en": d.get("name_en"),
+            "located_by": "directory", "ps_id": ps_id, "name_en": d.get("name_en"), "name_mr": d.get("name_mr"),
             "phones": d.get("phones") or [], "email": d.get("email"),
             "address": d.get("address"), "pincode": d.get("pincode"),
             "beats": [b.get("name") for b in d.get("beat_chowkies") or [] if b.get("name")],
@@ -259,7 +260,7 @@ h1{font-size:clamp(24px,3.2vw,33px);line-height:1.12}
 .banner-mark{font-family:var(--mono);color:var(--warn);font-size:17px;line-height:1.3}
 
 .layout{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(320px,1fr);gap:18px;align-items:start}
-@media (max-width:920px){.layout{grid-template-columns:1fr}}
+@media (max-width:920px){.layout{grid-template-columns:1fr} .layout aside{order:-1}}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:6px}
 .mapcard{padding:10px;position:relative}
 svg.map{display:block;width:100%;height:auto}
@@ -423,7 +424,11 @@ D.map_heads.forEach(function(k,i){ mapColor[k]="var("+SV[i]+")"; });
 var headLabel={}; D.heads.forEach(function(h){ headLabel[h.key]=h.label; });
 var all=D.stations, byName={}; all.forEach(function(s){ byName[s.name]=s; });
 var W=D.viewport.width, H=D.viewport.height, KM=D.viewport.km_per_unit||0.05;
-var state={ hits:null, sel:null, label:"", sub:"" };
+var state={ hits:null, sel:null, label:"", sub:"", zoom:1 };
+// Units that are real police stations but not places a resident runs to:
+// the five cyber-crime cells and the two marine units. They stay searchable
+// and keep their counts; they are just not offered as "the nearest station".
+var NOT_TERRITORIAL=/CYBER|SAGRI|MARINE|सायबर|सागरी/i;
 
 function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
 function total(s){ var t=0; for(var m in s.months){ var c=s.months[m]; for(var k in c) t+=c[k]; } return t; }
@@ -438,7 +443,9 @@ function norm(s){ return String(s||"").toLowerCase().replace(/police station|sub
 var svg=document.getElementById("map"); svg.setAttribute("viewBox","0 0 "+W+" "+H);
 var marks=document.getElementById("marks"), labels=document.getElementById("labels"), tip=null;
 var maxTotal=Math.max.apply(null,all.map(total).concat([1]));
-function radius(n){ return n? 4+16*Math.sqrt(n/maxTotal) : 3.5; }
+// Radii are screen pixels: divided by the zoom so a mark drawn at 20px stays
+// 20px after the viewBox tightens, instead of ballooning with the map.
+function radius(n){ return (n? 4+16*Math.sqrt(n/maxTotal) : 3.5)/state.zoom; }
 
 function draw(){
   marks.textContent=""; labels.textContent="";
@@ -447,6 +454,7 @@ function draw(){
     var n=total(s), c=document.createElementNS("http://www.w3.org/2000/svg","circle");
     var cls="st"; if(hitSet){ cls+= hitSet.has(s.name)?" hit":" dim"; } if(state.sel===s.name) cls+=" sel";
     c.setAttribute("class",cls); c.setAttribute("cx",s.x); c.setAttribute("cy",s.y); c.setAttribute("r",radius(n));
+    c.setAttribute("vector-effect","non-scaling-stroke");
     var d=dominant(s); c.setAttribute("fill", d?mapColor[d]:NEUTRAL); c.setAttribute("fill-opacity", n?"0.82":"0.35");
     c.setAttribute("tabindex","0"); c.setAttribute("role","button");
     c.setAttribute("aria-label", s.name+", "+n+" FIRs"+(s.phones.length?", phone "+s.phones[0]:""));
@@ -457,7 +465,8 @@ function draw(){
     marks.appendChild(c);
     if(hitSet && hitSet.has(s.name)){
       var t=document.createElementNS("http://www.w3.org/2000/svg","text");
-      t.setAttribute("class","lbl"); t.setAttribute("x",s.x+radius(n)+4); t.setAttribute("y",s.y+4); t.textContent=s.name_en||s.name;
+      t.setAttribute("class","lbl"); t.setAttribute("x",s.x+radius(n)+4/state.zoom); t.setAttribute("y",s.y+4/state.zoom);
+      t.setAttribute("font-size",(11/state.zoom)+"px"); t.setAttribute("stroke-width",(3/state.zoom)+"px"); t.textContent=s.name_en||s.name;
       labels.appendChild(t);
     }
   });
@@ -469,17 +478,18 @@ function drawScale(){
   var kmTarget = w*KM>8? 2 : (w*KM>3? 1 : 0.5), len=kmTarget/KM;
   var x=x0+w-len-14, y=y0+h-14;
   var l=document.createElementNS("http://www.w3.org/2000/svg","line"); l.setAttribute("x1",x);l.setAttribute("x2",x+len);l.setAttribute("y1",y);l.setAttribute("y2",y); g.appendChild(l);
-  var t=document.createElementNS("http://www.w3.org/2000/svg","text"); t.setAttribute("x",x);t.setAttribute("y",y-5); t.setAttribute("font-size",Math.max(10.5, 10.5*w/W)); t.textContent=kmTarget+" km"; g.appendChild(t);
+  var t=document.createElementNS("http://www.w3.org/2000/svg","text"); t.setAttribute("x",x);t.setAttribute("y",y-5/state.zoom); t.setAttribute("font-size",(10.5/state.zoom)+"px"); t.textContent=kmTarget+" km"; g.appendChild(t);
+  l.setAttribute("vector-effect","non-scaling-stroke");
 }
 function zoomTo(list){
   var zo=document.getElementById("zoomout");
-  if(!list||!list.length){ svg.setAttribute("viewBox","0 0 "+W+" "+H); zo.hidden=true; drawScale(); return; }
+  if(!list||!list.length){ svg.setAttribute("viewBox","0 0 "+W+" "+H); zo.hidden=true; state.zoom=1; draw(); return; }
   var xs=list.map(function(s){return s.x;}), ys=list.map(function(s){return s.y;});
   var minSpan=3/KM; // never tighter than ~3 km across, so neighbours stay in view
   var cx=(Math.min.apply(null,xs)+Math.max.apply(null,xs))/2, cy=(Math.min.apply(null,ys)+Math.max.apply(null,ys))/2;
   var w=Math.max(Math.max.apply(null,xs)-Math.min.apply(null,xs)+80, minSpan), h=Math.max(Math.max.apply(null,ys)-Math.min.apply(null,ys)+80, minSpan*H/W);
   if(w/h > W/H) h=w*H/W; else w=h*W/H;
-  svg.setAttribute("viewBox",(cx-w/2)+" "+(cy-h/2)+" "+w+" "+h); zo.hidden=false; drawScale();
+  svg.setAttribute("viewBox",(cx-w/2)+" "+(cy-h/2)+" "+w+" "+h); zo.hidden=false; state.zoom=W/w; draw();
 }
 function showTip(e,s,n){ hideTip(); tip=document.createElement("div"); tip.className="tip";
   tip.innerHTML="<b>"+esc(s.name_en||s.name)+"</b><span>"+n.toLocaleString("en-IN")+" FIRs"+(s.phones.length?" &middot; "+esc(s.phones[0]):"")+(s.pincode?" &middot; "+esc(s.pincode):"")+"</span>";
@@ -511,7 +521,7 @@ function findHits(q){
 function run(){
   var r=findHits(document.getElementById("q").value); state.hits=r.hits; state.label=r.label; state.sub=r.sub; state.sel=null;
   var hint=document.getElementById("hint"); hint.className="hint"+(r.hits&&!r.hits.length?" bad":""); hint.textContent=r.hits&&!r.hits.length? r.sub : "Search a 6-digit pincode, a station, or a beat-chowky locality named by Mumbai Police.";
-  draw(); zoomTo(r.hits&&r.hits.length?r.hits:null); panel();
+  zoomTo(r.hits&&r.hits.length?r.hits:null); panel();
 }
 function select(name){ state.sel=(state.sel===name)?null:name; draw(); panel(); var c=document.querySelector("circle.sel"); if(c) c.focus({preventScroll:true}); }
 
@@ -541,7 +551,7 @@ function panel(){
     var c={lat:anchor.reduce(function(a,s){return a+s.lat;},0)/anchor.length, lon:anchor.reduce(function(a,s){return a+s.lon;},0)/anchor.length};
     var names=new Set(anchor.map(function(s){return s.name;}));
     list=anchor.map(function(s){ return stationRow(s, state.sel?null:0); });
-    var near=all.filter(function(s){return !names.has(s.name);}).map(function(s){return {s:s,d:km(c,s)};}).sort(function(a,b){return a.d-b.d;}).slice(0,4);
+    var near=all.filter(function(s){return !names.has(s.name) && !NOT_TERRITORIAL.test(s.name) && !NOT_TERRITORIAL.test(s.name_mr||"");}).map(function(s){return {s:s,d:km(c,s)};}).sort(function(a,b){return a.d-b.d;}).slice(0,4);
     head.textContent=state.sel?"This station, then the nearest":"Police stations here, then the nearest";
     list=anchor.map(function(s){return stationRow(s,null);}).concat(near.map(function(x){return stationRow(x.s,x.d);}));
   } else {

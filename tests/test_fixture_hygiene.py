@@ -30,12 +30,17 @@ MUMBAIPOLICE = sorted(FIXTURES.glob("mumbaipolice-station-*.html"))
 def test_no_live_hidden_token_value(path):
     import re
     text = path.read_text(encoding="utf-8")
-    live = re.findall(
-        r'name="(?:_token|csrf[-_]?token|X-CSRF-TOKEN|authenticity_token)"\s+'
-        r'value="([^"]*)"', text, flags=re.I)
-    for value in live:
-        assert value == "[csrf token removed]", (
-            f"{path.name} carries a live token value; scrub it to the placeholder")
+    # Match the whole <input ...> tag and read its attributes in any order, so
+    # a page that writes value= before name= cannot slip a live value past.
+    names = re.compile(r'^(?:_token|csrf[-_]?token|X-CSRF-TOKEN|authenticity_token)$', re.I)
+    for tag in re.findall(r"<input\b[^>]*>", text, flags=re.I):
+        attrs = dict(re.findall(r'([\w:-]+)\s*=\s*"([^"]*)"', tag))
+        if names.match(attrs.get("name", "")):
+            assert attrs.get("value") == "[csrf token removed]", (
+                f"{path.name} carries a live token value; scrub it to the placeholder")
+    # And nothing anywhere in the file should look like a bare 40-char token.
+    for value in re.findall(r'(?:value|content)="([A-Za-z0-9]{40})"', text):
+        raise AssertionError(f"{path.name} carries a 40-character token-like value")
 
 
 @pytest.mark.parametrize("path", MUMBAIPOLICE, ids=[p.name for p in MUMBAIPOLICE])

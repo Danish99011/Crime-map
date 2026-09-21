@@ -108,6 +108,7 @@ def harvest_month(client: MahapoliceClient, unit_id: str, year: int, month: int,
     rows = parse_grid(page)
     seen = {(r["police_station"], r["fir_no_with_year"]) for r in rows}
     collected = list(rows)
+    duplicates = len(rows) - len(seen)
 
     # Rows are written as they arrive rather than at the end of the month.
     # A page costs about twenty seconds of someone else's server, so a month
@@ -140,6 +141,7 @@ def harvest_month(client: MahapoliceClient, unit_id: str, year: int, month: int,
                 break
             fresh = [r for r in batch
                      if (r["police_station"], r["fir_no_with_year"]) not in seen]
+            duplicates += len(batch) - len(fresh)
             if not fresh:
                 # The grid handed back a page we already hold. Stopping is
                 # right: continuing would spin, and the fixture in tests/
@@ -155,17 +157,27 @@ def harvest_month(client: MahapoliceClient, unit_id: str, year: int, month: int,
 
     handle.close()
 
-    complete = declared is not None and len(collected) == declared
+    # A month is accounted for when every record the portal declared has been
+    # seen -- whether it was kept or recognised as one it had already served.
+    # An FIR number is unique to a station and a year, so two rows sharing one
+    # are the same FIR served twice, and dropping the second is correct rather
+    # than a miss. Counting that as a shortfall marked a fully collected month
+    # incomplete over a single duplicate, which is a false alarm in the
+    # direction that matters least -- but a false alarm that would have had
+    # someone re-fetch 8,000 records to chase one row the portal repeated.
+    accounted = len(collected) + duplicates
+    complete = declared is not None and accounted >= declared
     record = {
         "collected": len(collected),
         "declared": declared,
+        "duplicates_dropped": duplicates,
         "complete": complete,
         "fetched_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
     }
     if message:
         record["portal_message"] = message[:120]
-    if declared is not None and len(collected) != declared:
-        record["shortfall"] = declared - len(collected)
+    if declared is not None and accounted < declared:
+        record["shortfall"] = declared - accounted
     state["months"][key] = record
     save_checkpoint(state)
     return record

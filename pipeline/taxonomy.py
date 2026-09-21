@@ -23,6 +23,13 @@ hides them misleads:
   law-and-order and communal FIRs. These categories exist here precisely so the
   map can say "withheld" rather than render a reassuring blank.
 
+Special and local laws are read by the act's name, never by a bare number. A
+handful of them feed a head (`SLL_SECTIONS`): the Motor Vehicles Act into
+rash driving, the NDPS Act into narcotics, the Maharashtra Police and
+Prohibition Acts into public order. A section under any other named act
+matches nothing, because its number means something else under the penal
+codes: Prohibition Act 85 is public drunkenness, BNS 85 is cruelty by a husband.
+
 The concordance in `data/reference/ipc_bns_concordance.csv` was assembled by hand
 and is largely unverified against the gazette — see its provenance note. It is
 used here only to *cross-check* the explicit section lists below and to surface
@@ -99,8 +106,45 @@ CRIME_HEADS: tuple[CrimeHead, ...] = (
               ipc=("147", "148", "149"), bns=("191", "192"), severity=3),
     CrimeHead("negligent-death", "Death by negligence (incl. road)", "other",
               ipc=("304A",), bns=("106",), severity=2),
+    # The three heads below rank beneath every offence against a person or
+    # property, so a theft FIR that also cites rash driving is counted as
+    # theft, as NCRB would count it. Their special-law sections (Motor
+    # Vehicles Act, NDPS Act, Maharashtra Police and Prohibition Acts) are in
+    # SLL_SECTIONS below, gated on the act's name.
+    CrimeHead("narcotics", "Narcotic drugs (NDPS)", "other", severity=5),
+    CrimeHead("rash-driving", "Rash or negligent driving and endangerment", "other",
+              ipc=("279", "283", "287", "336", "337", "338"),
+              bns=("125", "281", "285", "287"), resolution_loss=True, severity=5),
+    CrimeHead("public-order", "Public order and prohibitory orders", "public-order",
+              ipc=("188",), bns=("223",), severity=6),
     CrimeHead("other", "Other offences", "other", severity=5),
 )
+
+# Sections of special and local laws that feed a head, by the act code that
+# `detect_sll_act` returns. They live beside the heads rather than on them
+# because they are not comparable across states the way IPC/BNS sections are:
+# the Motor Vehicles Act and the NDPS Act are central, but the Maharashtra
+# Police Act and the Maharashtra Prohibition Act are state statutes, and
+# another state's equivalents are different acts with different numbering.
+#
+# Only the sections named here count. Every other section under these acts,
+# and every section under an act not named here, stays in "other": being found
+# in suspicious circumstances at night (Police Act 122) is a stop, not an
+# offence against public order, and a helmet fine (MV Act 194D) is not rash
+# driving.
+SLL_SECTIONS: dict[str, dict[str, tuple[str, ...]]] = {
+    # Dangerous driving (184) and driving under the influence (185).
+    "rash-driving": {"MVA": ("184", "185")},
+    # Section 8 is the prohibition every NDPS FIR cites; 15-30 are the
+    # offences and penalties of Chapter IV.
+    "narcotics": {"NDPS": ("8", "8A", "15", "16", "17", "18", "19", "20", "21",
+                           "22", "23", "24", "25", "25A", "26", "27", "27A",
+                           "27B", "28", "29", "30")},
+    # Police Act 37 is the power to issue a prohibitory order and 135 the
+    # penalty for breaking one; Prohibition Act 65 is illicit manufacture,
+    # possession or sale of liquor.
+    "public-order": {"MPA": ("37", "135"), "PROH": ("65",)},
+}
 
 BY_KEY = {head.key: head for head in CRIME_HEADS}
 WITHHELD_KEYS = tuple(h.key for h in CRIME_HEADS if h.withheld)
@@ -122,6 +166,49 @@ _ACT_PATTERNS: tuple[tuple[str, re.Pattern], ...] = (
     ("IPC", re.compile(r"भारतीय\s*दंड\s*संहिता|भा\.?द\.?वि|आई\s*पी\s*सी|"
                        r"\bIPC\b|INDIAN\s+PENAL", re.I)),
 )
+
+# Special and local laws whose sections feed a head (see SLL_SECTIONS). These
+# are matched on the act's name and never on a bare number, because the
+# numbers collide: Motor Vehicles Act 184 and 185 are dangerous and drunk
+# driving, IPC 184 and 185 are obstructing a public sale; Maharashtra
+# Prohibition Act 85 is being drunk in public, BNS 85 is cruelty by a husband.
+# Before the special laws were gated, every Prohibition s.85 FIR in Mumbai
+# was counted as domestic cruelty.
+#
+# Each pattern is written to reject the look-alike acts that sit next to it
+# on the portal's dropdown, listed on the pattern.
+_SLL_ACT_PATTERNS: tuple[tuple[str, re.Pattern], ...] = (
+    # Motor Vehicles Act 1988, written 'मोटरवाहन' and 'मोटार वाहन'. 'अधिनियम'
+    # (Act) is required so that the Maharashtra Motor Vehicles *Rules* 1989
+    # ('मोटार वाहन नियम') and the Motor Vehicles *Tax* Act ('मोटर वाहन (कर)
+    # अधिनियम') do not match: a rule number is not an Act section.
+    ("MVA", re.compile(r"मोटा?र\s*वाहन\s*अधिनियम|MOTOR\s+VEHICLES?\s+ACT", re.I)),
+    # NDPS Act 1985. 'गुंगीकारक' is the word for narcotic in the Marathi
+    # title, which the portal writes with joiners inside conjuncts and a typo
+    # in 'पदार्थ'. The English form refuses 'IN NARCOTIC DRUGS' so that the
+    # Prevention of Illicit Traffic in NDPS Act 1988, a preventive-detention
+    # law whose Marathi title ('अंमली औषधीद्रव्य ... विधिनिसीध्द व्यापार
+    # प्रतिबंध अधिनियम') shares no word with this pattern, is not read as it.
+    ("NDPS", re.compile(r"गुंगीकारक|एन\s*डी\s*पी\s*एस|एनडीपीएस|\bNDPS\b|"
+                        r"(?<!IN\s)NARCOTIC\s+DRUGS", re.I)),
+    # Maharashtra Police Act 1951, formerly the Bombay Police Act. The
+    # Police (Incitement to Disaffection) Act 1922 ('पोलीस (अप्रीतीची भावना
+    # चेतावणे) अधिनियम') is a different statute and does not match.
+    ("MPA", re.compile(r"(?:महाराष्ट्र|मुंबई)\s*पोल[ीि]स\s*अधिनियम|"
+                       r"(?:MAHARASHTRA|BOMBAY)\s+POLICE\s+ACT", re.I)),
+    # Maharashtra Prohibition Act 1949, formerly the Bombay Prohibition Act.
+    # 'दारूबंदी' is liquor prohibition specifically; the Dowry Prohibition
+    # Act is 'हुंडाबंदी'. In English only the Maharashtra/Bombay title is
+    # accepted, since other states' prohibition acts number differently.
+    ("PROH", re.compile(r"दार[ूु]बंदी|(?:MAHARASHTRA|BOMBAY)\s+PROHIBITION\s+ACT",
+                        re.I)),
+)
+
+# Zero-width joiners the portal inserts inside Devanagari conjuncts, and not
+# consistently: 'महाराष्ट्र' appears with and without one. Stripped before an
+# act name is matched, since a regex written against the plain spelling would
+# otherwise miss the joined one.
+_JOINERS = re.compile("[‌‍]")
 
 # Devanagari digits appear in Marathi act years (१९८८) AND in the section
 # numbers themselves: Maharashtra writes pre-BNS FIRs as
@@ -148,8 +235,25 @@ _SEGMENT_SPLIT = re.compile(r"[\r\n]+|;\s*(?=\S*[\u0900-\u097F A-Za-z]{4})")
 
 def detect_act_or_none(text: str | None) -> str | None:
     """'IPC' or 'BNS' if either is named here, else None."""
+    text = _JOINERS.sub("", text or "")
     for code, pattern in _ACT_PATTERNS:
         if text and pattern.search(text):
+            return code
+    return None
+
+
+def detect_sll_act(text: str | None) -> str | None:
+    """The code of a special or local law named here, or None.
+
+    Only the acts in `_SLL_ACT_PATTERNS` are recognised. A penal code is never
+    returned from here, and any other act name is None: its sections are read
+    under no numbering at all rather than under a guessed one.
+    """
+    text = _JOINERS.sub("", text or "")
+    if not text or detect_act_or_none(text):
+        return None
+    for code, pattern in _SLL_ACT_PATTERNS:
+        if pattern.search(text):
             return code
     return None
 
@@ -223,10 +327,14 @@ def classify_field(text: str | None,
     best_key, confident = "other", False
     best_severity = 99
     acts = set()
-    for act_code, _, sections in segments:
+    for act_code, act_name, sections in segments:
         resolved = act_code or hint
         acts.add(resolved or "UNKNOWN")
-        key, ok = classify(sections, resolved or None)
+        # The act's *name* decides which numbering the sections are read
+        # under, so it goes to classify() whole: the code "SLL" alone cannot
+        # say whether 184 is the Motor Vehicles Act or something else. The
+        # code is only the label the record carries.
+        key, ok = classify(sections, act_name or act_code or act_hint or None)
         if ok and BY_KEY[key].severity < best_severity:
             best_key, best_severity, confident = key, BY_KEY[key].severity, True
     return best_key, confident, sorted(acts)
@@ -245,6 +353,12 @@ def _index() -> dict[tuple[str, str], str]:
         for section in head.bns:
             if section[0].isdigit():
                 index.setdefault(("BNS", section.upper()), head.key)
+    for key, acts in SLL_SECTIONS.items():
+        if key not in BY_KEY:
+            raise KeyError(f"SLL_SECTIONS names a head that does not exist: {key!r}")
+        for act, sections in acts.items():
+            for section in sections:
+                index.setdefault((act, section.upper()), key)
     return index
 
 
@@ -286,9 +400,21 @@ def classify(sections: list[str], act: str | None = None) -> tuple[str, bool]:
     depletes subordinate heads — an 'assault' map is inverted in violent areas —
     which is why `aggregate.py` records it alongside every count rather than
     leaving it to a methodology page.
+
+    `act` is a code ('IPC', 'BNS') or the act's name as a portal wrote it, in
+    English or Devanagari. A named act is read under its own numbering only:
+    a penal code by its book, a recognised special law by its code, and any
+    other act not at all, because its numbers mean something else there. Only
+    when no act is named are both penal codes tried.
     """
-    statute = (act or "").upper()
-    books = ("BNS",) if "BNS" in statute else ("IPC",) if "IPC" in statute else ("IPC", "BNS")
+    code = detect_act_or_none(act)
+    if code:
+        books: tuple[str, ...] = (code,)
+    elif act:
+        sll = detect_sll_act(act)
+        books = (sll,) if sll else ()
+    else:
+        books = ("IPC", "BNS")
 
     matches = []
     for section in sections:

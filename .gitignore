@@ -13,6 +13,7 @@ site/*.json
 site/index.html
 site/artifact.html
 site/mumbai.html
+site/locality.html
 
 # --- secure-check: credentials and local state must never be committed ---
 .env.*

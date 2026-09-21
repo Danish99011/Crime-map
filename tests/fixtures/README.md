@@ -130,7 +130,7 @@ and Chunabhatti (18). They are here so the station-page parser and the directory
 | Original publisher | Mumbai Police, a `.gov.in` host |
 | Fetched by | this project, `scripts/crawl_mumbaipolice_stations.py`, one request at a time, 3 s apart |
 | Fetched | 2026-09-21, into `data/raw/mumbaipolice/stations/ps_<id>.html` (gitignored) |
-| Copied here | 2026-09-21, **with officer identity removed** (below); otherwise byte-for-byte |
+| Copied here | 2026-09-21, **with officer identity and the page's live CSRF token removed** (below); otherwise byte-for-byte |
 | Terms of use | Reviewed: `docs/TERMS-REVIEW.md`. No robots.txt; the site's disclaimer warns that telephone numbers may have changed since publication, and the map must say so too. |
 
 ### What was removed, and why
@@ -145,6 +145,7 @@ here. In each copy:
 | Sr. PI's name on the "From the desk of Sr. PI" plate | `[officer name removed]` |
 | Sr. PI's mobile number on that plate's post line | `[officer mobile removed]` |
 | Sr. PI's photograph (`images/Police_incharge/<n>.png`) | `src="[officer photo removed]"` |
+| The page's live Laravel CSRF `_token` (a per-session random value; not this project's credential, and not replayable without the session cookie, which was never captured) | `value="[csrf token removed]"` — caught by the security guard after the first push and scrubbed in the follow-up commit |
 | Divisional ACP, DCP Zone and Regional Addl. CP name cells, including the `title` attribute and the `?name=` profile link | `<span class="txt-val" title="[officer name removed]">[officer name removed]</span>` |
 
 Nothing else was changed. The office data stays: station telephone numbers, office email

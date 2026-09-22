@@ -252,6 +252,50 @@ def test_an_empty_grid_before_the_last_page_leaves_the_chunk_incomplete(harvest,
     assert (harvest.out / "_debug" / "2026-08-15_p2.html").exists()
 
 
+def test_weeks_already_whole_survive_a_kill_before_the_month_is_walked(harvest):
+    # The run dies (not a portal error: the container went) after the first
+    # week. The checkpoint written after that week must still carry it,
+    # so the restart skips it. The first pass threw it away by judging
+    # the month's sum after every chunk.
+    class Gone(FakeClient):
+        def search(self, unit_id, date_from, date_to, page_size):
+            if date_from == W2:
+                raise RuntimeError("container reclaimed")
+            return super().search(unit_id, date_from, date_to, page_size)
+    state = {"months": {}}
+    with pytest.raises(RuntimeError):
+        hm.harvest_month(Gone(ROWS), "19378", 2026, 8, state)
+    saved = state["months"]["2026-08"]
+    assert saved["chunks"]["01-07"]["complete"] and not saved["complete"]
+    assert "chunk_sum_mismatch" not in saved
+    client = FakeClient(ROWS)
+    record, held, _ = harvest(client, state=state)
+    assert record["complete"] and len(held) == 8
+    assert (W1, "07/08/2026") not in client.searched
+
+
+def test_the_stop_file_ends_the_run_between_chunks_without_loss(harvest, monkeypatch):
+    stop = harvest.out / "_stop"
+    monkeypatch.setattr(hm, "STOP", stop)
+
+    class Touching(FakeClient):
+        def goto_grid_page(self, number, unit_id, date_from, date_to, page_size):
+            if date_from == W2 and number == 2:
+                stop.parent.mkdir(parents=True, exist_ok=True)
+                stop.touch()
+            return super().goto_grid_page(number, unit_id, date_from, date_to, page_size)
+    state = {"months": {}}
+    with pytest.raises(hm.StopRequested):
+        hm.harvest_month(Touching(ROWS), "19378", 2026, 8, state)
+    saved = state["months"]["2026-08"]
+    assert [c["complete"] for c in saved["chunks"].values()] == [True, True]
+    assert not stop.exists()          # consumed, so the next run is not stopped too
+    client = FakeClient(ROWS)
+    record, held, _ = harvest(client, state=state)
+    assert record["complete"] and len(held) == 8
+    assert client.searched == [(W1, "31/08/2026"), (W3, "21/08/2026"), (W4, "31/08/2026")]
+
+
 def test_a_torn_last_line_is_dropped_before_appending(harvest):
     harvest.out.mkdir(parents=True)
     path = harvest.out / "2026-08.jsonl"

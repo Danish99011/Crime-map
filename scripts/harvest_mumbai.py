@@ -3,6 +3,7 @@
 
     python3 scripts/harvest_mumbai.py --from 2021-01 --to 2026-09
     python3 scripts/harvest_mumbai.py --resume          # continue where it stopped
+    touch data/raw/live/mumbai/_stop                    # exit cleanly at the next chunk
 
 Writes one JSON Lines file per month under `data/raw/live/mumbai/`, plus a
 checkpoint so an interrupted run continues rather than restarting. Stopping it
@@ -59,6 +60,11 @@ from pipeline.mahapolice import (                             # noqa: E402
 OUT = ROOT / "data" / "raw" / "live" / "mumbai"
 CHECKPOINT = OUT / "_checkpoint.json"
 DEBUG = OUT / "_debug"          # pages the walk could not read, for diagnosis
+STOP = OUT / "_stop"            # touch it and the run exits at the next chunk boundary
+
+
+class StopRequested(Exception):
+    """The `_stop` file exists: finish the current chunk, checkpoint, exit."""
 
 UNIT_NAME = "BRIHAN MUMBAI CITY"
 PAGE_SIZE = 50
@@ -260,12 +266,19 @@ def harvest_month(client: MahapoliceClient, unit_id: str, year: int, month: int,
     # dropped it at page 116 the restart began again at page 1. A dropped
     # chunk now costs a week, and a restart skips the chunks already whole.
     prior = {} if redo else ((state["months"].get(key) or {}).get("chunks") or {})
+    plan = chunks(year, month, chunk_days)
+    labels = [label for _, _, label in plan]
     records: dict[str, dict] = {}
     try:
-        for date_from, date_to, label in chunks(year, month, chunk_days):
+        for date_from, date_to, label in plan:
             if prior.get(label, {}).get("complete"):
                 records[label] = prior[label]
                 continue
+            if STOP.exists():
+                # A clean stop between chunks: nothing walked is lost, and
+                # the run can be restarted with new code at no cost.
+                STOP.unlink()
+                raise StopRequested(f"{key} {label}")
             print(f"    {label} ...", flush=True)
             try:
                 records[label] = _walk(client, unit_id, date_from, date_to, keep)
@@ -278,13 +291,13 @@ def harvest_month(client: MahapoliceClient, unit_id: str, year: int, month: int,
             got = records[label]
             print(f"      {got.get('accounted', 0)} of {got.get('declared')}  "
                   f"{'ok' if got.get('complete') else 'INCOMPLETE'}", flush=True)
-            _save_month(state, key, held, declared, message, records, chunk_days)
+            _save_month(state, key, held, declared, message, records, chunk_days, labels)
     finally:
         handle.close()
-    return _save_month(state, key, held, declared, message, records, chunk_days)
+    return _save_month(state, key, held, declared, message, records, chunk_days, labels)
 
 
-def _save_month(state, key, held, declared, message, records, chunk_days) -> dict:
+def _save_month(state, key, held, declared, message, records, chunk_days, labels) -> dict:
     """Write the month's record from its chunk records, and checkpoint it.
 
     The month is whole only when every chunk is whole and the chunks' own
@@ -296,7 +309,11 @@ def _save_month(state, key, held, declared, message, records, chunk_days) -> dic
     grew from 8,054 to 8,079 in a day), so the chunks can see records the
     whole-month query did not.
     """
-    all_complete = bool(records) and all(c.get("complete") for c in records.values())
+    # Until every chunk has been walked the month is simply unfinished, and
+    # what has been walked is kept: the first pass dropped three whole
+    # weeks of July from the checkpoint by judging the month after each.
+    walked_all = set(labels) <= set(records)
+    all_complete = walked_all and all(c.get("complete") for c in records.values())
     counts = [c.get("declared") for c in records.values()]
     chunk_sum = sum(counts) if counts and all(c is not None for c in counts) else None
     accounted = sum(c.get("accounted", 0) for c in records.values())
@@ -360,6 +377,9 @@ def main() -> int:
         try:
             record = harvest_month(client, unit[0], year, month, state,
                                    chunk_days=args.chunk_days, redo=args.redo)
+        except StopRequested as where:
+            print(f"  stop requested at {where}; checkpoint written, exiting", flush=True)
+            return 0
         except (PortalError, SchemaChanged) as exc:
             print(f"  FAILED {type(exc).__name__}: {str(exc)[:110]}", flush=True)
             # Keep whatever chunk progress the month had already checkpointed.

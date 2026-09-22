@@ -296,6 +296,44 @@ def test_the_stop_file_ends_the_run_between_chunks_without_loss(harvest, monkeyp
     assert client.searched == [(W1, "31/08/2026"), (W3, "21/08/2026"), (W4, "31/08/2026")]
 
 
+def test_a_total_of_one_full_page_is_asked_for_again(harvest, monkeypatch):
+    # The portal said 50 for June 2026 once, for a month of 8,640. Here it
+    # says 1 (one full page of one row) for the second week's first query
+    # and the truth on the second; the first page is kept for diagnosis.
+    monkeypatch.setattr(hm, "DEBUG", harvest.out / "_debug")
+    client = FakeClient(ROWS)
+    real_page, asked = client._page, {"n": 0}
+
+    def page(date_from, date_to, number):
+        out = real_page(date_from, date_to, number)
+        if date_from == W2 and number == 1:
+            asked["n"] += 1
+            if asked["n"] == 1:
+                out["declared"] = 1
+        return out
+    client._page = page
+    record, held, _ = harvest(client)
+    assert record["complete"] and len(held) == 8
+    assert record["chunks"]["08-14"]["declared"] == 2
+    assert asked["n"] == 2
+    assert (harvest.out / "_debug" / "2026-08-08_total1.html").exists()
+
+
+def test_a_wrong_month_figure_is_recorded_beside_what_the_weeks_found(harvest):
+    client = FakeClient(ROWS)
+    real_page = client._page
+
+    def page(date_from, date_to, number):
+        out = real_page(date_from, date_to, number)
+        if (date_from, date_to) == (W1, "31/08/2026"):
+            out["declared"] = 1        # one full page: asked again, same answer
+        return out
+    client._page = page
+    record, held, _ = harvest(client)
+    assert record["complete"] and record["declared"] == 1 and record["chunks_found"] == 8
+    assert client.searched.count((W1, "31/08/2026")) == 2
+
+
 def test_a_torn_last_line_is_dropped_before_appending(harvest):
     harvest.out.mkdir(parents=True)
     path = harvest.out / "2026-08.jsonl"

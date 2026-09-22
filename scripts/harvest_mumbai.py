@@ -146,6 +146,33 @@ def chunks(year: int, month: int, days: int = CHUNK_DAYS) -> list[tuple[str, str
     return out
 
 
+def _open(client: MahapoliceClient, unit_id: str, date_from: str, date_to: str):
+    """A clean form, the range searched, and (page, declared, message).
+
+    A total the portal states as exactly one page while handing back a full
+    page is not believed at first sight: the whole-month query for June 2026
+    once said 50 for a month whose weeks then walked 8,640. Taken at its
+    word, such a figure would mark a range complete after one page, which
+    is the silent under-collection this whole script exists to refuse. The
+    page is kept for diagnosis and the range is asked for once more; the
+    larger of the two answers is used.
+    """
+    client.reset(unit_id)
+    page = client.search(unit_id, date_from, date_to, page_size=PAGE_SIZE)
+    declared = total_records(page)
+    if declared is not None and declared <= PAGE_SIZE and len(parse_grid(page)) == PAGE_SIZE:
+        print(f"      portal says {declared} records with a full page; asking again "
+              f"(page kept under {DEBUG.name}/)", flush=True)
+        DEBUG.mkdir(parents=True, exist_ok=True)
+        (DEBUG / f"{date_from[6:]}-{date_from[3:5]}-{date_from[:2]}_total{declared}.html"
+         ).write_text(str(page), encoding="utf-8")
+        client.reset(unit_id)
+        again = client.search(unit_id, date_from, date_to, page_size=PAGE_SIZE)
+        if (total_records(again) or 0) > declared:
+            page, declared = again, total_records(again)
+    return page, declared, portal_message(page)
+
+
 def _walk(client: MahapoliceClient, unit_id: str, date_from: str, date_to: str,
           keep) -> dict:
     """Walk every page of one date range, handing new rows to `keep`.
@@ -157,10 +184,7 @@ def _walk(client: MahapoliceClient, unit_id: str, date_from: str, date_to: str,
     # posting only the unit selection was not enough: see MahapoliceClient
     # .reset, which documents the three-month failure cycle that cost
     # roughly half of a 23-month run.
-    client.reset(unit_id)
-    page = client.search(unit_id, date_from, date_to, page_size=PAGE_SIZE)
-    declared = total_records(page)
-    message = portal_message(page)
+    page, declared, message = _open(client, unit_id, date_from, date_to)
 
     seen: set[tuple[str, str]] = set()   # rows this walk has served
     accounted = 0                        # rows that count towards `declared`
@@ -254,11 +278,8 @@ def harvest_month(client: MahapoliceClient, unit_id: str, year: int, month: int,
 
     # The portal's own figure for the whole month is the reference every
     # chunk walk is checked against. It costs one query.
-    client.reset(unit_id)
-    whole = client.search(unit_id, f"01/{month:02d}/{year}",
-                          f"{last_day:02d}/{month:02d}/{year}", page_size=PAGE_SIZE)
-    declared = total_records(whole)
-    message = portal_message(whole)
+    _, declared, message = _open(client, unit_id, f"01/{month:02d}/{year}",
+                                 f"{last_day:02d}/{month:02d}/{year}")
 
     # A month is walked a chunk at a time, each chunk a short walk with its
     # own completeness. The grid only accepts a page near the one on screen,
@@ -334,6 +355,9 @@ def _save_month(state, key, held, declared, message, records, chunk_days, labels
     if all_complete and not complete and declared is not None:
         record["chunk_sum_mismatch"] = {"chunks": chunk_sum, "month": declared}
         record["chunks"] = {}
+    if complete and chunk_sum != declared:
+        record["chunks_found"] = chunk_sum
+        print(f"    weeks found {chunk_sum}, the month query said {declared}", flush=True)
     state["months"][key] = record
     save_checkpoint(state)
     return record

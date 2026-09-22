@@ -96,7 +96,13 @@ def harvest(monkeypatch, tmp_path):
     out = tmp_path / "mumbai"
     monkeypatch.setattr(hm, "OUT", out)
     monkeypatch.setattr(hm, "CHECKPOINT", out / "_checkpoint.json")
-    monkeypatch.setattr(hm, "parse_grid", lambda page: list(page["rows"]))
+    monkeypatch.setattr(hm, "DEBUG", out / "_debug")      # never the real data dir
+    monkeypatch.setattr(hm, "STOP", out / "_stop")
+    def parse_grid(page):
+        if page["rows"] is None:
+            raise hm.SchemaChanged("no table with id 'gdvDeadBody' on this page")
+        return list(page["rows"])
+    monkeypatch.setattr(hm, "parse_grid", parse_grid)
     monkeypatch.setattr(hm, "total_records", lambda page: page["declared"])
     monkeypatch.setattr(hm, "portal_message", lambda page: None)
     monkeypatch.setattr(hm, "PAGE_SIZE", 1)
@@ -332,6 +338,53 @@ def test_a_wrong_month_figure_is_recorded_beside_what_the_weeks_found(harvest):
     record, held, _ = harvest(client)
     assert record["complete"] and record["declared"] == 1 and record["chunks_found"] == 8
     assert client.searched.count((W1, "31/08/2026")) == 2
+
+
+def test_a_failed_month_is_asked_for_again_after_a_pause(harvest):
+    # The portal answers the first two whole-month queries with a page that
+    # has no grid, as it did for 25 minutes on 2026-09-22. The month must be
+    # waited for, not skipped: the third attempt walks it whole.
+    class Degraded(FakeClient):
+        failures = 2
+
+        def search(self, unit_id, date_from, date_to, page_size):
+            if Degraded.failures and (date_from, date_to) == (W1, "31/08/2026"):
+                Degraded.failures -= 1
+                raise hm.SchemaChanged("no table with id 'gdvDeadBody' on this page")
+            return super().search(unit_id, date_from, date_to, page_size)
+    state, waited, built = {"months": {}}, [], []
+
+    def rebuild():
+        built.append(1)
+        return Degraded(ROWS)
+    record, client = hm.harvest_month_patiently(
+        Degraded(ROWS), "19378", 2026, 8, state, 7, False, rebuild,
+        sleep=waited.append, backoff=(1, 2, 4))
+    assert record["complete"] and waited == [1, 2] and len(built) == 2
+    assert "error" not in state["months"]["2026-08"]
+
+
+def test_a_month_that_fails_every_attempt_is_recorded_and_left(harvest):
+    class Dead(FakeClient):
+        def search(self, unit_id, date_from, date_to, page_size):
+            raise hm.PortalError("portal error page")
+    state, waited = {"months": {"2026-08": {"collected": 40, "declared": 90}}}, []
+    record, client = hm.harvest_month_patiently(
+        Dead(ROWS), "19378", 2026, 8, state, 7, False, lambda: Dead(ROWS),
+        sleep=waited.append, backoff=(1, 2))
+    assert record is None and waited == [1, 2]
+    saved = state["months"]["2026-08"]
+    assert saved["complete"] is False and saved["error"].startswith("PortalError")
+    assert saved["collected"] == 40 and saved["declared"] == 90   # earlier progress kept
+
+
+def test_a_page_without_a_grid_is_kept_for_diagnosis(harvest):
+    class NoGrid(FakeClient):
+        def search(self, unit_id, date_from, date_to, page_size):
+            return {"rows": None, "declared": None}
+    with pytest.raises(hm.SchemaChanged):
+        hm.harvest_month(NoGrid(ROWS), "19378", 2026, 8, {"months": {}})
+    assert (harvest.out / "_debug" / "2026-08-01_nogrid.html").exists()
 
 
 def test_a_torn_last_line_is_dropped_before_appending(harvest):

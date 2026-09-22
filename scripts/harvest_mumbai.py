@@ -47,6 +47,7 @@ import calendar
 import datetime as dt
 import json
 import sys
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -160,7 +161,16 @@ def _open(client: MahapoliceClient, unit_id: str, date_from: str, date_to: str):
     client.reset(unit_id)
     page = client.search(unit_id, date_from, date_to, page_size=PAGE_SIZE)
     declared = total_records(page)
-    if declared is not None and declared <= PAGE_SIZE and len(parse_grid(page)) == PAGE_SIZE:
+    try:
+        rows = parse_grid(page)
+    except SchemaChanged:
+        # Not a search result at all. Keep it: on 2026-09-22 the portal
+        # answered every whole-month query this way for 25 minutes.
+        DEBUG.mkdir(parents=True, exist_ok=True)
+        (DEBUG / f"{date_from[6:]}-{date_from[3:5]}-{date_from[:2]}_nogrid.html"
+         ).write_text(str(page), encoding="utf-8")
+        raise
+    if declared is not None and declared <= PAGE_SIZE and len(rows) == PAGE_SIZE:
         print(f"      portal says {declared} records with a full page; asking again "
               f"(page kept under {DEBUG.name}/)", flush=True)
         DEBUG.mkdir(parents=True, exist_ok=True)
@@ -363,6 +373,45 @@ def _save_month(state, key, held, declared, message, records, chunk_days, labels
     return record
 
 
+# How long to wait before asking the portal for a failed month again. The
+# first pass through a degraded portal marked 25 months failed in 25 minutes,
+# one query each, and moved on; the portal was answering normally again half
+# an hour later. Waiting is what a person at the form would do.
+BACKOFF = (60, 120, 300, 600, 900)
+
+
+def harvest_month_patiently(client, unit_id, year, month, state, chunk_days, redo,
+                            rebuild, sleep=time.sleep, backoff=BACKOFF):
+    """harvest_month, retried with growing pauses when the portal fails it.
+
+    `rebuild()` returns a fresh client, since a failed search usually means
+    the session is gone. Returns (record or None, client); None means the
+    month failed every attempt and was recorded as such.
+    """
+    for attempt, pause in enumerate((*backoff, None)):
+        try:
+            return harvest_month(client, unit_id, year, month, state,
+                                 chunk_days=chunk_days, redo=redo), client
+        except (PortalError, SchemaChanged) as exc:
+            key = f"{year:04d}-{month:02d}"
+            # Keep whatever chunk progress the month had already checkpointed.
+            state["months"][key] = {
+                **(state["months"].get(key) or {}),
+                "error": f"{type(exc).__name__}: {str(exc)[:200]}",
+                "complete": False,
+                "fetched_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
+            }
+            save_checkpoint(state)
+            if pause is None:
+                print(f"  FAILED after {attempt} retries: {type(exc).__name__}: "
+                      f"{str(exc)[:90]}", flush=True)
+                return None, rebuild()
+            print(f"  {type(exc).__name__}: {str(exc)[:70]}; waiting {pause}s "
+                  f"before asking again", flush=True)
+            sleep(pause)
+            client = rebuild()
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -398,30 +447,23 @@ def main() -> int:
         if done and done.get("complete") and not args.redo:
             continue
         print(f"{key} ...", flush=True)
+
+        def rebuild():
+            fresh = MahapoliceClient(delay=args.delay)
+            fresh.open_form()
+            fresh.select_unit(unit[0])
+            return fresh
+
         try:
-            record = harvest_month(client, unit[0], year, month, state,
-                                   chunk_days=args.chunk_days, redo=args.redo)
+            record, client = harvest_month_patiently(
+                client, unit[0], year, month, state, args.chunk_days, args.redo, rebuild)
         except StopRequested as where:
             print(f"  stop requested at {where}; checkpoint written, exiting", flush=True)
             return 0
-        except (PortalError, SchemaChanged) as exc:
-            print(f"  FAILED {type(exc).__name__}: {str(exc)[:110]}", flush=True)
-            # Keep whatever chunk progress the month had already checkpointed.
-            state["months"][key] = {
-                **(state["months"].get(key) or {}),
-                "error": f"{type(exc).__name__}: {str(exc)[:200]}",
-                "complete": False,
-                "fetched_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
-            }
-            save_checkpoint(state)
-            # A failed month usually means the session died. Rebuild it.
-            try:
-                client = MahapoliceClient(delay=args.delay)
-                client.open_form()
-                client.select_unit(unit[0])
-            except PortalError as rebuild:
-                print(f"  cannot re-establish a session: {rebuild}")
-                return 1
+        except PortalError as exc:
+            print(f"  cannot re-establish a session: {exc}")
+            return 1
+        if record is None:
             continue
         flag = "ok" if record["complete"] else f"INCOMPLETE {record}"
         print(f"  {record['collected']} rows of {record['declared']}  {flag}  "

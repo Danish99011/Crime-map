@@ -58,6 +58,7 @@ from pipeline.mahapolice import (                             # noqa: E402
 
 OUT = ROOT / "data" / "raw" / "live" / "mumbai"
 CHECKPOINT = OUT / "_checkpoint.json"
+DEBUG = OUT / "_debug"          # pages the walk could not read, for diagnosis
 
 UNIT_NAME = "BRIHAN MUMBAI CITY"
 PAGE_SIZE = 50
@@ -188,6 +189,15 @@ def _walk(client: MahapoliceClient, unit_id: str, date_from: str, date_to: str,
                       f"{str(exc)[:70]}", flush=True)
                 break
             if not batch:
+                # An empty grid before the last page is not "no records":
+                # the portal declared more. Say so, keep the page for
+                # diagnosis, and leave the chunk incomplete.
+                note = portal_message(page) or "no message"
+                print(f"      page {number}/{pages}: empty grid ({note[:60]}); "
+                      f"page kept under {DEBUG.name}/", flush=True)
+                DEBUG.mkdir(parents=True, exist_ok=True)
+                (DEBUG / f"{date_from[6:]}-{date_from[3:5]}-{date_from[:2]}"
+                 f"_p{number}.html").write_text(str(page), encoding="utf-8")
                 break
             if not take(batch):
                 # The grid handed back a page we already hold. Stopping is
@@ -278,15 +288,19 @@ def _save_month(state, key, held, declared, message, records, chunk_days) -> dic
     """Write the month's record from its chunk records, and checkpoint it.
 
     The month is whole only when every chunk is whole and the chunks' own
-    declared counts add up to the portal's figure for the whole month. If
-    they do not, something fell between the chunks, and the chunk records
-    are dropped so that the next pass walks the month again in full.
+    declared counts reach the portal's figure for the whole month. Fewer
+    means something fell between the chunks, and the chunk records are
+    dropped so that the next pass walks the month again in full. More is
+    allowed: the month is queried first, and FIRs are entered into the
+    portal with their original date days after registration (August 2026
+    grew from 8,054 to 8,079 in a day), so the chunks can see records the
+    whole-month query did not.
     """
     all_complete = bool(records) and all(c.get("complete") for c in records.values())
     counts = [c.get("declared") for c in records.values()]
     chunk_sum = sum(counts) if counts and all(c is not None for c in counts) else None
     accounted = sum(c.get("accounted", 0) for c in records.values())
-    complete = all_complete and declared is not None and chunk_sum == declared
+    complete = all_complete and declared is not None and chunk_sum >= declared
     record = {
         "collected": len(held),
         "declared": declared,

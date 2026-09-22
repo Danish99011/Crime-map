@@ -216,6 +216,42 @@ def test_chunks_that_do_not_add_up_to_the_month_leave_it_incomplete(harvest):
     assert len(held) == 8
 
 
+def test_chunks_that_find_more_than_the_month_figure_still_complete(harvest):
+    # FIRs are entered days late with their original date, so the weeks,
+    # queried after the month, can see one the month figure did not.
+    client = FakeClient(ROWS)
+    real_page = client._page
+
+    def page(date_from, date_to, number):
+        out = real_page(date_from, date_to, number)
+        if (date_from, date_to) == (W1, "31/08/2026"):
+            out["declared"] = 7
+        return out
+    client._page = page
+    record, held, _ = harvest(client)
+    assert record["complete"] and record["declared"] == 7 and len(held) == 8
+    assert "chunk_sum_mismatch" not in record and "shortfall" not in record
+
+
+def test_an_empty_grid_before_the_last_page_leaves_the_chunk_incomplete(harvest, monkeypatch):
+    # The portal declared two rows for the week but page 2 comes back with
+    # no grid. That is not "no records"; the page is kept for diagnosis.
+    monkeypatch.setattr(hm, "DEBUG", harvest.out / "_debug")
+    client = FakeClient(ROWS)
+    real_page = client._page
+
+    def page(date_from, date_to, number):
+        out = real_page(date_from, date_to, number)
+        if date_from == W3 and number == 2:
+            out["rows"] = []
+        return out
+    client._page = page
+    record, held, _ = harvest(client)
+    chunk = record["chunks"]["15-21"]
+    assert not chunk["complete"] and chunk["accounted"] == 1 and len(held) == 7
+    assert (harvest.out / "_debug" / "2026-08-15_p2.html").exists()
+
+
 def test_a_torn_last_line_is_dropped_before_appending(harvest):
     harvest.out.mkdir(parents=True)
     path = harvest.out / "2026-08.jsonl"

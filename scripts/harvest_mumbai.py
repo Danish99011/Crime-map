@@ -24,11 +24,14 @@ coverage should be recent coverage.
 
 What is counted as done
 -----------------------
-A month is complete only when the rows collected equal `total records found`
-on the portal's own page. Short of that the month is written but left
-incomplete, with the shortfall recorded. Under-collection must never be
-silently frozen into the data as a quiet month -- that is the same error as
-rendering an absence as zero, arrived at from a different direction.
+A month is complete only when one walk of its pages served every record
+the portal's own `total records found` declared. Short of that the month is
+written but left incomplete, with the shortfall recorded. A restart keeps
+the rows an earlier walk left on disk and walks the pages again from the
+first (the grid accepts no other order), adding what it had not reached.
+Under-collection must never be silently frozen into the data as a quiet
+month -- that is the same error as rendering an absence as zero, arrived at
+from a different direction.
 """
 
 from __future__ import annotations
@@ -88,6 +91,28 @@ def save_checkpoint(state: dict) -> None:
                           encoding="utf-8")
 
 
+def _held(path: Path) -> set[tuple[str, str]]:
+    """Keys of the rows an earlier run left in this month's file.
+
+    A run killed mid-write can leave a torn last line; it is dropped and the
+    file rewritten without it, so the aggregator never meets half a record.
+    """
+    if not path.exists():
+        return set()
+    keys, good = set(), []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        keys.add((row["police_station"], row["fir_no_with_year"]))
+        good.append(line)
+    path.write_text("".join(l + "\n" for l in good), encoding="utf-8")
+    return keys
+
+
 def harvest_month(client: MahapoliceClient, unit_id: str, year: int, month: int,
                   state: dict) -> dict:
     key = f"{year:04d}-{month:02d}"
@@ -105,26 +130,47 @@ def harvest_month(client: MahapoliceClient, unit_id: str, year: int, month: int,
     declared = total_records(page)
     message = portal_message(page)
 
-    rows = parse_grid(page)
-    seen = {(r["police_station"], r["fir_no_with_year"]) for r in rows}
-    collected = list(rows)
-    duplicates = len(rows) - len(seen)
-
-    # Rows are written as they arrive rather than at the end of the month.
-    # A page costs about twenty seconds of someone else's server, so a month
-    # is half an hour of work; losing it to an interrupted run would mean
-    # asking that server to do it all again for nothing.
+    # Rows are written as they arrive, and appended to whatever an earlier,
+    # interrupted run of this month already holds. The grid only accepts a
+    # page near the one on screen, so a restart must walk from page 1 again
+    # and that time is simply lost; the rows must not be. Opening the file
+    # for writing here once replaced 8,000 held rows of a month with the 50
+    # a fresh walk had reached, and the published page showed the month
+    # nearly empty until the walk caught up.
     path = OUT / f"{key}.jsonl"
     OUT.mkdir(parents=True, exist_ok=True)
-    handle = path.open("w", encoding="utf-8")
+    held = _held(path)
+    handle = path.open("a", encoding="utf-8")
 
-    def flush(batch):
-        for row in batch:
-            handle.write(json.dumps({k: row.get(k, "") for k in KEEP},
-                                    ensure_ascii=False) + "\n")
+    seen_run: set[tuple[str, str]] = set()    # rows this walk has served
+    accounted = 0                             # rows that count towards `declared`
+    duplicates = 0
+
+    def key_of(row):
+        return (row["police_station"], row["fir_no_with_year"])
+
+    def take(batch) -> int:
+        """Record one page. Returns how many of its rows were new to this walk."""
+        nonlocal accounted, duplicates
+        fresh = [r for r in batch if key_of(r) not in seen_run]
+        duplicates += len(batch) - len(fresh)
+        if fresh:
+            # The grid moved on. A repeated row on a page that advanced is the
+            # portal serving one FIR twice (an FIR number is unique to a
+            # station and a year), and it counts towards the declared total.
+            # A page with nothing new is the grid handing back the same page,
+            # and counts for nothing: the rows behind it were never served.
+            accounted += len(batch)
+        seen_run.update(key_of(r) for r in fresh)
+        for row in fresh:
+            if key_of(row) not in held:
+                held.add(key_of(row))
+                handle.write(json.dumps({k: row.get(k, "") for k in KEEP},
+                                        ensure_ascii=False) + "\n")
         handle.flush()
+        return len(fresh)
 
-    flush(rows)
+    take(parse_grid(page))
 
     if declared:
         pages = (declared + PAGE_SIZE - 1) // PAGE_SIZE
@@ -139,36 +185,25 @@ def harvest_month(client: MahapoliceClient, unit_id: str, year: int, month: int,
                 break
             if not batch:
                 break
-            fresh = [r for r in batch
-                     if (r["police_station"], r["fir_no_with_year"]) not in seen]
-            duplicates += len(batch) - len(fresh)
-            if not fresh:
+            if not take(batch):
                 # The grid handed back a page we already hold. Stopping is
                 # right: continuing would spin, and the fixture in tests/
                 # exists because another scraper did exactly that 50 times.
                 print(f"    page {number}: repeated rows, stopping", flush=True)
                 break
-            seen.update((r["police_station"], r["fir_no_with_year"]) for r in fresh)
-            collected.extend(fresh)
-            flush(fresh)
             if number % 10 == 0:
-                print(f"    page {number}/{pages}  {len(collected)} rows",
+                print(f"    page {number}/{pages}  {len(held)} rows held",
                       flush=True)
 
     handle.close()
 
-    # A month is accounted for when every record the portal declared has been
-    # seen -- whether it was kept or recognised as one it had already served.
-    # An FIR number is unique to a station and a year, so two rows sharing one
-    # are the same FIR served twice, and dropping the second is correct rather
-    # than a miss. Counting that as a shortfall marked a fully collected month
-    # incomplete over a single duplicate, which is a false alarm in the
-    # direction that matters least -- but a false alarm that would have had
-    # someone re-fetch 8,000 records to chase one row the portal repeated.
-    accounted = len(collected) + duplicates
+    # A month is accounted for when this walk served every record the portal
+    # declared, kept or recognised as one it had already served on a page
+    # that advanced. Rows held from an earlier run do not count on their own:
+    # only a walk that reached the end can say the month is whole.
     complete = declared is not None and accounted >= declared
     record = {
-        "collected": len(collected),
+        "collected": len(held),
         "declared": declared,
         "duplicates_dropped": duplicates,
         "complete": complete,

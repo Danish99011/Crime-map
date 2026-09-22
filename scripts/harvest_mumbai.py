@@ -24,11 +24,16 @@ coverage should be recent coverage.
 
 What is counted as done
 -----------------------
-A month is complete only when one walk of its pages served every record
-the portal's own `total records found` declared. Short of that the month is
-written but left incomplete, with the shortfall recorded. A restart keeps
-the rows an earlier walk left on disk and walks the pages again from the
-first (the grid accepts no other order), adding what it had not reached.
+A month is walked in date chunks, a week each by default, because the grid
+only accepts a page near the one on screen: a whole month was one walk of
+some 170 pages, and the portal dropped two in a row at pages 116 and 54. A
+chunk is complete only when one walk of its pages served every record the
+portal declared for that range, and the month only when every chunk is and
+the chunks' counts add up to the portal's own figure for the whole month
+(the date filter is inclusive at both ends; the weekly counts for June 2026
+summed to its 8,640 exactly). Short of that the month is written but left
+incomplete, with the shortfall recorded. A restart keeps the rows an earlier
+walk left on disk and walks again only the chunks that were not whole.
 Under-collection must never be silently frozen into the data as a quiet
 month -- that is the same error as rendering an absence as zero, arrived at
 from a different direction.
@@ -113,46 +118,51 @@ def _held(path: Path) -> set[tuple[str, str]]:
     return keys
 
 
-def harvest_month(client: MahapoliceClient, unit_id: str, year: int, month: int,
-                  state: dict) -> dict:
-    key = f"{year:04d}-{month:02d}"
-    last_day = calendar.monthrange(year, month)[1]
-    date_from = f"01/{month:02d}/{year}"
-    date_to = f"{last_day}/{month:02d}/{year}"
+CHUNK_DAYS = 7
 
-    # Start every month from a clean form, not from what the last month left
-    # behind. Re-posting only the unit selection was not enough: see
-    # MahapoliceClient.reset, which documents the three-month failure cycle
-    # that cost roughly half of a 23-month run.
+
+def chunks(year: int, month: int, days: int = CHUNK_DAYS) -> list[tuple[str, str, str]]:
+    """Cut a month into inclusive date ranges of `days`, as (from, to, label).
+
+    The portal's date filter includes both ends, and a tail shorter than
+    half a chunk is folded into the chunk before it rather than walked alone.
+    """
+    last = calendar.monthrange(year, month)[1]
+    out, start = [], 1
+    while start <= last:
+        end = min(start + days - 1, last)
+        if last - end <= days // 2:
+            end = last
+        out.append((f"{start:02d}/{month:02d}/{year}", f"{end:02d}/{month:02d}/{year}",
+                    f"{start:02d}-{end:02d}"))
+        start = end + 1
+    return out
+
+
+def _walk(client: MahapoliceClient, unit_id: str, date_from: str, date_to: str,
+          keep) -> dict:
+    """Walk every page of one date range, handing new rows to `keep`.
+
+    Returns the range's own accounting: what the portal declared, how many
+    rows this walk served on pages that advanced, and whether the two meet.
+    """
+    # Start from a clean form, not from what the last walk left behind. Re-
+    # posting only the unit selection was not enough: see MahapoliceClient
+    # .reset, which documents the three-month failure cycle that cost
+    # roughly half of a 23-month run.
     client.reset(unit_id)
-
     page = client.search(unit_id, date_from, date_to, page_size=PAGE_SIZE)
     declared = total_records(page)
     message = portal_message(page)
 
-    # Rows are written as they arrive, and appended to whatever an earlier,
-    # interrupted run of this month already holds. The grid only accepts a
-    # page near the one on screen, so a restart must walk from page 1 again
-    # and that time is simply lost; the rows must not be. Opening the file
-    # for writing here once replaced 8,000 held rows of a month with the 50
-    # a fresh walk had reached, and the published page showed the month
-    # nearly empty until the walk caught up.
-    path = OUT / f"{key}.jsonl"
-    OUT.mkdir(parents=True, exist_ok=True)
-    held = _held(path)
-    handle = path.open("a", encoding="utf-8")
-
-    seen_run: set[tuple[str, str]] = set()    # rows this walk has served
-    accounted = 0                             # rows that count towards `declared`
+    seen: set[tuple[str, str]] = set()   # rows this walk has served
+    accounted = 0                        # rows that count towards `declared`
     duplicates = 0
-
-    def key_of(row):
-        return (row["police_station"], row["fir_no_with_year"])
 
     def take(batch) -> int:
         """Record one page. Returns how many of its rows were new to this walk."""
         nonlocal accounted, duplicates
-        fresh = [r for r in batch if key_of(r) not in seen_run]
+        fresh = [r for r in batch if _key(r) not in seen]
         duplicates += len(batch) - len(fresh)
         if fresh:
             # The grid moved on. A repeated row on a page that advanced is the
@@ -161,17 +171,11 @@ def harvest_month(client: MahapoliceClient, unit_id: str, year: int, month: int,
             # A page with nothing new is the grid handing back the same page,
             # and counts for nothing: the rows behind it were never served.
             accounted += len(batch)
-        seen_run.update(key_of(r) for r in fresh)
-        for row in fresh:
-            if key_of(row) not in held:
-                held.add(key_of(row))
-                handle.write(json.dumps({k: row.get(k, "") for k in KEEP},
-                                        ensure_ascii=False) + "\n")
-        handle.flush()
+        seen.update(_key(r) for r in fresh)
+        keep(fresh)
         return len(fresh)
 
     take(parse_grid(page))
-
     if declared:
         pages = (declared + PAGE_SIZE - 1) // PAGE_SIZE
         for number in range(2, pages + 1):
@@ -180,7 +184,7 @@ def harvest_month(client: MahapoliceClient, unit_id: str, year: int, month: int,
                                              date_to, PAGE_SIZE)
                 batch = parse_grid(page)
             except (PortalError, SchemaChanged) as exc:
-                print(f"    page {number}: {type(exc).__name__}: "
+                print(f"      page {number}/{pages}: {type(exc).__name__}: "
                       f"{str(exc)[:70]}", flush=True)
                 break
             if not batch:
@@ -189,30 +193,116 @@ def harvest_month(client: MahapoliceClient, unit_id: str, year: int, month: int,
                 # The grid handed back a page we already hold. Stopping is
                 # right: continuing would spin, and the fixture in tests/
                 # exists because another scraper did exactly that 50 times.
-                print(f"    page {number}: repeated rows, stopping", flush=True)
+                print(f"      page {number}/{pages}: repeated rows, stopping", flush=True)
                 break
-            if number % 10 == 0:
-                print(f"    page {number}/{pages}  {len(held)} rows held",
-                      flush=True)
+            if number % 20 == 0:
+                print(f"      page {number}/{pages}", flush=True)
 
-    handle.close()
+    record = {
+        "declared": declared,
+        "accounted": accounted,
+        "duplicates_dropped": duplicates,
+        "complete": declared is not None and accounted >= declared,
+    }
+    if message:
+        record["portal_message"] = message[:120]
+    return record
 
-    # A month is accounted for when this walk served every record the portal
-    # declared, kept or recognised as one it had already served on a page
-    # that advanced. Rows held from an earlier run do not count on their own:
-    # only a walk that reached the end can say the month is whole.
-    complete = declared is not None and accounted >= declared
+
+def _key(row) -> tuple[str, str]:
+    return (row["police_station"], row["fir_no_with_year"])
+
+
+def harvest_month(client: MahapoliceClient, unit_id: str, year: int, month: int,
+                  state: dict, chunk_days: int = CHUNK_DAYS, redo: bool = False) -> dict:
+    key = f"{year:04d}-{month:02d}"
+    last_day = calendar.monthrange(year, month)[1]
+
+    # Rows are written as they arrive, and appended to whatever an earlier,
+    # interrupted run of this month already holds. Opening the file for
+    # writing here once replaced 8,000 held rows of a month with the 50 a
+    # fresh walk had reached, and the published page showed the month nearly
+    # empty until the walk caught up.
+    path = OUT / f"{key}.jsonl"
+    OUT.mkdir(parents=True, exist_ok=True)
+    held = _held(path)
+    handle = path.open("a", encoding="utf-8")
+
+    def keep(rows):
+        for row in rows:
+            if _key(row) not in held:
+                held.add(_key(row))
+                handle.write(json.dumps({k: row.get(k, "") for k in KEEP},
+                                        ensure_ascii=False) + "\n")
+        handle.flush()
+
+    # The portal's own figure for the whole month is the reference every
+    # chunk walk is checked against. It costs one query.
+    client.reset(unit_id)
+    whole = client.search(unit_id, f"01/{month:02d}/{year}",
+                          f"{last_day:02d}/{month:02d}/{year}", page_size=PAGE_SIZE)
+    declared = total_records(whole)
+    message = portal_message(whole)
+
+    # A month is walked a chunk at a time, each chunk a short walk with its
+    # own completeness. The grid only accepts a page near the one on screen,
+    # so a whole month was one walk of ~170 pages, and when the portal
+    # dropped it at page 116 the restart began again at page 1. A dropped
+    # chunk now costs a week, and a restart skips the chunks already whole.
+    prior = {} if redo else ((state["months"].get(key) or {}).get("chunks") or {})
+    records: dict[str, dict] = {}
+    try:
+        for date_from, date_to, label in chunks(year, month, chunk_days):
+            if prior.get(label, {}).get("complete"):
+                records[label] = prior[label]
+                continue
+            print(f"    {label} ...", flush=True)
+            try:
+                records[label] = _walk(client, unit_id, date_from, date_to, keep)
+            except (PortalError, SchemaChanged) as exc:
+                # The walk never started, or the session is gone. The next
+                # chunk's reset rebuilds it; this one is walked next pass.
+                print(f"      {type(exc).__name__}: {str(exc)[:90]}", flush=True)
+                records[label] = {"complete": False,
+                                  "error": f"{type(exc).__name__}: {str(exc)[:200]}"}
+            got = records[label]
+            print(f"      {got.get('accounted', 0)} of {got.get('declared')}  "
+                  f"{'ok' if got.get('complete') else 'INCOMPLETE'}", flush=True)
+            _save_month(state, key, held, declared, message, records, chunk_days)
+    finally:
+        handle.close()
+    return _save_month(state, key, held, declared, message, records, chunk_days)
+
+
+def _save_month(state, key, held, declared, message, records, chunk_days) -> dict:
+    """Write the month's record from its chunk records, and checkpoint it.
+
+    The month is whole only when every chunk is whole and the chunks' own
+    declared counts add up to the portal's figure for the whole month. If
+    they do not, something fell between the chunks, and the chunk records
+    are dropped so that the next pass walks the month again in full.
+    """
+    all_complete = bool(records) and all(c.get("complete") for c in records.values())
+    counts = [c.get("declared") for c in records.values()]
+    chunk_sum = sum(counts) if counts and all(c is not None for c in counts) else None
+    accounted = sum(c.get("accounted", 0) for c in records.values())
+    complete = all_complete and declared is not None and chunk_sum == declared
     record = {
         "collected": len(held),
         "declared": declared,
-        "duplicates_dropped": duplicates,
+        "duplicates_dropped": sum(c.get("duplicates_dropped", 0) for c in records.values()),
         "complete": complete,
+        "chunk_days": chunk_days,
+        "chunks": records,
         "fetched_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
     }
     if message:
         record["portal_message"] = message[:120]
     if declared is not None and accounted < declared:
         record["shortfall"] = declared - accounted
+    if all_complete and not complete and declared is not None:
+        record["chunk_sum_mismatch"] = {"chunks": chunk_sum, "month": declared}
+        record["chunks"] = {}
     state["months"][key] = record
     save_checkpoint(state)
     return record
@@ -227,6 +317,8 @@ def main() -> int:
     parser.add_argument("--delay", type=float, default=3.0)
     parser.add_argument("--redo", action="store_true",
                         help="re-fetch months already marked complete")
+    parser.add_argument("--chunk-days", type=int, default=CHUNK_DAYS,
+                        help="walk each month in date ranges this long")
     args = parser.parse_args()
 
     state = load_checkpoint()
@@ -252,10 +344,13 @@ def main() -> int:
             continue
         print(f"{key} ...", flush=True)
         try:
-            record = harvest_month(client, unit[0], year, month, state)
+            record = harvest_month(client, unit[0], year, month, state,
+                                   chunk_days=args.chunk_days, redo=args.redo)
         except (PortalError, SchemaChanged) as exc:
             print(f"  FAILED {type(exc).__name__}: {str(exc)[:110]}", flush=True)
+            # Keep whatever chunk progress the month had already checkpointed.
             state["months"][key] = {
+                **(state["months"].get(key) or {}),
                 "error": f"{type(exc).__name__}: {str(exc)[:200]}",
                 "complete": False,
                 "fetched_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),

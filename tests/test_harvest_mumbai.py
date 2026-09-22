@@ -1,16 +1,27 @@
-"""The harvester must not throw away a month's rows when it is restarted.
+"""The harvester walks a month in date chunks and must not lose what it holds.
 
-The portal's GridView only accepts a page near the one on screen, so an
-interrupted month has to be walked again from page 1. That costs time, and
-there is no way round it. What it must not cost is data: before this test
-existed, the month's file was opened for writing on every start, so a
-restart at page 80 of 161 replaced 4,000 rows on disk with the 50 the fresh
-walk had reached. The published page then showed a month it had held nearly
-complete as almost empty. Rows already held are kept; the walk only adds.
+Two things drove the design under test here, both seen on the live portal on
+2026-09-22:
 
-The fake client below serves a month as a fixed list of pages, and the
-parsers are replaced by ones that read that shape, so the harvester's own
-bookkeeping is what is under test.
+* **A mid-walk failure cost the whole month.** The grid only accepts a page
+  near the one on screen, so a month of 170 pages is a single 3-hour walk,
+  and the portal dropped two months in a row at pages 116 and 54. Each
+  restart walked from page 1 again. A month is now fetched in date chunks
+  (a week by default), each its own short walk with its own completeness,
+  so a failure costs a week and a restart skips the weeks already whole.
+  The portal's date filter is inclusive at both ends and the weekly counts
+  summed exactly to the month's own count (2,075 + 2,296 + 2,214 + 2,055 =
+  8,640 for June 2026), which is checked again for every month fetched:
+  the chunks must add up to the portal's whole-month figure or the month
+  stays incomplete.
+* **A restart threw away the rows on disk.** The month's file was opened
+  for writing on every start, so one restart replaced 8,000 held rows with
+  50. Rows are now appended; a torn last line from a mid-write kill is
+  dropped.
+
+The fake client serves rows by the date range asked for, paged the way the
+portal pages, and the parsers are replaced by ones that read that shape, so
+the harvester's own bookkeeping is what is under test.
 """
 
 import json
@@ -22,34 +33,62 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 import harvest_mumbai as hm  # noqa: E402
 
+BNS_THEFT = "भारतीय न्याय संहिता (बी एन एस), 2023 - 303(2) ;"
 
-def row(station, number):
+
+def row(station, number, day):
     return {"state": "MAHARASHTRA", "district": "BRIHAN MUMBAI CITY",
             "police_station": station, "year": "2026", "fir_number": str(number),
-            "registration_date": "01/08/2026 10:00:00",
-            "fir_no_with_year": f"{number:04d}/2026",
-            "sections": "भारतीय न्याय संहिता (बी एन एस), 2023 - 303(2) ;"}
+            "registration_date": f"{day:02d}/08/2026 10:00:00",
+            "fir_no_with_year": f"{number:04d}/2026", "sections": BNS_THEFT}
+
+
+def _day(text):
+    return int(text.split("/")[0])
 
 
 class FakeClient:
-    """Serves `pages` in order; `die_after` pages, raises like a lost session."""
+    """Serves `rows` filtered to the range asked for, `page_size` at a time.
 
-    def __init__(self, pages, declared, die_after=None):
-        self.pages, self.declared, self.die_after = pages, declared, die_after
+    `fail` maps (date_from, page) to how many times that page should raise
+    before it works; `repeat` names a range whose page 2 is page 1 again;
+    `declared_override` lets the whole-month figure disagree with the rows.
+    """
+
+    def __init__(self, rows, page_size=1, fail=None, repeat=None, declared_override=None):
+        self.rows, self.page_size = rows, page_size
+        self.fail, self.repeat = dict(fail or {}), repeat
+        self.declared_override = declared_override or {}
         self.requests_made = self.retries = 0
+        self.searched = []
+
+    def _in(self, date_from, date_to):
+        lo, hi = _day(date_from), _day(date_to)
+        return [r for r in self.rows if lo <= _day(r["registration_date"]) <= hi]
+
+    def _page(self, date_from, date_to, number):
+        rows = self._in(date_from, date_to)
+        if self.repeat == date_from and number == 2:
+            number = 1
+        start = (number - 1) * self.page_size
+        return {"rows": rows[start:start + self.page_size],
+                "declared": self.declared_override.get(date_from, len(rows))}
 
     def reset(self, unit_id):
-        pass
+        self.requests_made += 3
 
     def search(self, unit_id, date_from, date_to, page_size):
         self.requests_made += 1
-        return {"rows": self.pages[0], "declared": self.declared}
+        self.searched.append((date_from, date_to))
+        return self._page(date_from, date_to, 1)
 
     def goto_grid_page(self, number, unit_id, date_from, date_to, page_size):
         self.requests_made += 1
-        if self.die_after is not None and number > self.die_after:
+        left = self.fail.get((date_from, number), 0)
+        if left:
+            self.fail[(date_from, number)] = left - 1
             raise hm.PortalError("connection reset")
-        return {"rows": self.pages[number - 1], "declared": self.declared}
+        return self._page(date_from, date_to, number)
 
 
 @pytest.fixture
@@ -60,74 +99,141 @@ def harvest(monkeypatch, tmp_path):
     monkeypatch.setattr(hm, "parse_grid", lambda page: list(page["rows"]))
     monkeypatch.setattr(hm, "total_records", lambda page: page["declared"])
     monkeypatch.setattr(hm, "portal_message", lambda page: None)
-    monkeypatch.setattr(hm, "PAGE_SIZE", 2)
+    monkeypatch.setattr(hm, "PAGE_SIZE", 1)
 
-    def run(pages, declared, die_after=None, state=None):
+    def run(client, state=None, redo=False):
         state = state if state is not None else {"months": {}}
-        client = FakeClient(pages, declared, die_after)
-        record = hm.harvest_month(client, "19378", 2026, 8, state)
-        held = [json.loads(l) for l in (out / "2026-08.jsonl").read_text(
-            encoding="utf-8").splitlines() if l.strip()]
+        record = hm.harvest_month(client, "19378", 2026, 8, state, redo=redo)
+        text = (out / "2026-08.jsonl").read_text(encoding="utf-8")
+        held = [json.loads(l) for l in text.splitlines() if l.strip()]
         return record, held, state
 
+    run.out = out
     return run
 
 
-PAGES = [[row("AGRIPADA", 1), row("AGRIPADA", 2)],
-         [row("AGRIPADA", 3), row("BANDRA", 1)],
-         [row("BANDRA", 2), row("BANDRA", 3)]]
+# Two rows in each week of August 2026: chunks 01-07, 08-14, 15-21, 22-31.
+ROWS = [row("AGRIPADA", 1, 1), row("AGRIPADA", 2, 2),
+        row("AGRIPADA", 3, 9), row("BANDRA", 1, 10),
+        row("BANDRA", 2, 16), row("BANDRA", 3, 17),
+        row("COLABA", 1, 23), row("COLABA", 2, 30)]
+
+W1, W2, W3, W4 = "01/08/2026", "08/08/2026", "15/08/2026", "22/08/2026"
+
+
+def test_a_month_is_cut_into_inclusive_chunks_that_cover_every_day():
+    assert hm.chunks(2026, 8) == [(W1, "07/08/2026", "01-07"), (W2, "14/08/2026", "08-14"),
+                                  (W3, "21/08/2026", "15-21"), (W4, "31/08/2026", "22-31")]
+    assert hm.chunks(2026, 2)[-1] == ("22/02/2026", "28/02/2026", "22-28")
+    # A tail of half a chunk or less folds into the chunk before it.
+    assert hm.chunks(2026, 6, days=7)[-1] == ("22/06/2026", "30/06/2026", "22-30")
+    assert hm.chunks(2026, 6, days=10) == [("01/06/2026", "10/06/2026", "01-10"),
+                                           ("11/06/2026", "20/06/2026", "11-20"),
+                                           ("21/06/2026", "30/06/2026", "21-30")]
+    for year, month in ((2024, 2), (2026, 1), (2026, 4)):
+        got = hm.chunks(year, month)
+        assert got[0][0].startswith("01/") and _day(got[-1][1]) == hm.calendar.monthrange(year, month)[1]
+        for (_, end, _), (start, _, _) in zip(got, got[1:]):
+            assert _day(start) == _day(end) + 1
 
 
 def test_a_clean_walk_is_complete(harvest):
-    record, held, _ = harvest(PAGES, declared=6)
-    assert record["complete"] and record["collected"] == 6 and "shortfall" not in record
+    client = FakeClient(ROWS)
+    record, held, _ = harvest(client)
+    assert record["complete"] and record["collected"] == 8 and record["declared"] == 8
+    assert "shortfall" not in record
+    assert [c["complete"] for c in record["chunks"].values()] == [True] * 4
+    assert list(record["chunks"]) == ["01-07", "08-14", "15-21", "22-31"]
     assert [r["fir_no_with_year"] for r in held] == [
-        "0001/2026", "0002/2026", "0003/2026", "0001/2026", "0002/2026", "0003/2026"]
+        "0001/2026", "0002/2026", "0003/2026", "0001/2026",
+        "0002/2026", "0003/2026", "0001/2026", "0002/2026"]
     assert set(held[0]) == set(hm.KEEP)
+    # The whole month was asked for once (the reference figure), then each week.
+    assert client.searched == [(W1, "31/08/2026"), (W1, "07/08/2026"), (W2, "14/08/2026"),
+                               (W3, "21/08/2026"), (W4, "31/08/2026")]
 
 
-def test_an_interrupted_walk_is_incomplete_but_keeps_what_it_got(harvest):
-    record, held, _ = harvest(PAGES, declared=6, die_after=2)
-    assert not record["complete"] and record["collected"] == 4 and record["shortfall"] == 2
-    assert len(held) == 4
+def test_a_failure_costs_the_chunk_not_the_month(harvest):
+    client = FakeClient(ROWS, fail={(W2, 2): 1})
+    record, held, _ = harvest(client)
+    assert not record["complete"] and record["shortfall"] == 1
+    assert record["collected"] == 7 and len(held) == 7
+    assert [c["complete"] for c in record["chunks"].values()] == [True, False, True, True]
+    assert record["chunks"]["08-14"]["accounted"] == 1
+
+
+def test_a_restart_walks_only_the_chunks_that_were_not_whole(harvest):
+    _, _, state = harvest(FakeClient(ROWS, fail={(W2, 2): 1}))
+    client = FakeClient(ROWS)
+    record, held, _ = harvest(client, state=state)
+    assert record["complete"] and record["collected"] == 8 and len(held) == 8
+    assert client.searched == [(W1, "31/08/2026"), (W2, "14/08/2026")]
+    assert len(held) == len({(r["police_station"], r["fir_no_with_year"]) for r in held})
+    assert record["duplicates_dropped"] == 0
 
 
 def test_a_restart_keeps_the_rows_already_held(harvest):
-    # First run dies after page 2 holding 4 rows; second run is interrupted
-    # even earlier. The file must still hold 4, not shrink to 2.
-    _, _, state = harvest(PAGES, declared=6, die_after=2)
-    record, held, _ = harvest(PAGES, declared=6, die_after=1, state=state)
-    assert len(held) == 4 and record["collected"] == 4
-    assert not record["complete"] and record["shortfall"] == 4
+    # First run gets 7 rows; the second dies on the very chunk it has to
+    # redo, before adding anything. The file must still hold 7, not shrink.
+    _, _, state = harvest(FakeClient(ROWS, fail={(W2, 2): 1}))
+    record, held, _ = harvest(FakeClient(ROWS, fail={(W2, 2): 1}), state=state)
+    assert len(held) == 7 and record["collected"] == 7 and not record["complete"]
 
 
-def test_a_restart_that_finishes_completes_without_duplicating_rows(harvest):
-    _, _, state = harvest(PAGES, declared=6, die_after=2)
-    record, held, _ = harvest(PAGES, declared=6, state=state)
-    assert record["complete"] and record["collected"] == 6
-    assert len(held) == 6 == len({(r["police_station"], r["fir_no_with_year"]) for r in held})
-    assert record["duplicates_dropped"] == 0   # re-served rows are not duplicates
+def test_redo_walks_every_chunk_again_without_doubling_rows(harvest):
+    _, _, state = harvest(FakeClient(ROWS))
+    client = FakeClient(ROWS)
+    record, held, _ = harvest(client, state=state, redo=True)
+    assert record["complete"] and len(held) == 8 and len(client.searched) == 5
 
 
-def test_pages_already_held_do_not_stop_the_walk(harvest):
-    # After a restart the first pages are all rows already on disk. That is
-    # not the grid repeating itself, and the walk must continue past them.
-    _, _, state = harvest(PAGES, declared=6, die_after=2)
-    record, held, _ = harvest(PAGES, declared=6, state=state)
-    assert record["complete"] and len(held) == 6
+def test_the_grid_repeating_a_page_stops_that_chunk(harvest):
+    # Page 2 of the third week is page 1 again: the portal is spinning.
+    record, held, _ = harvest(FakeClient(ROWS, repeat=W3))
+    chunk = record["chunks"]["15-21"]
+    assert not chunk["complete"] and chunk["duplicates_dropped"] == 1 and chunk["accounted"] == 1
+    assert not record["complete"] and record["shortfall"] == 1 and len(held) == 7
 
 
-def test_the_grid_repeating_a_page_stops_the_walk(harvest):
-    # Page 3 is page 2 again: the portal is spinning, so stop and record it.
-    pages = [PAGES[0], PAGES[1], PAGES[1]]
-    record, held, _ = harvest(pages, declared=6)
-    assert not record["complete"] and record["collected"] == 4
-    assert record["duplicates_dropped"] == 2 and record["shortfall"] == 2
-    assert len(held) == 4
+def test_chunks_that_do_not_add_up_to_the_month_leave_it_incomplete(harvest):
+    # The portal's whole-month figure says 9 but the weeks only found 8.
+    client = FakeClient(ROWS, declared_override={W1: 9})
+    # W1 is also the first week's date_from; give the week its true count.
+    client.declared_override = {}
+    real_page = client._page
+
+    def page(date_from, date_to, number):
+        out = real_page(date_from, date_to, number)
+        if (date_from, date_to) == (W1, "31/08/2026"):
+            out["declared"] = 9
+        return out
+    client._page = page
+    record, held, _ = harvest(client)
+    assert not record["complete"] and record["declared"] == 9 and record["shortfall"] == 1
+    assert record["chunk_sum_mismatch"] == {"chunks": 8, "month": 9}
+    # Nothing is carried forward: the next pass walks the month again.
+    assert record["chunks"] == {}
+    assert len(held) == 8
 
 
-def test_a_completed_month_is_not_reopened_for_appending_twice(harvest):
-    # --redo on a complete month: rows are re-served, nothing is doubled.
-    _, _, state = harvest(PAGES, declared=6)
-    record, held, _ = harvest(PAGES, declared=6, state=state)
-    assert len(held) == 6 and record["complete"]
+def test_a_torn_last_line_is_dropped_before_appending(harvest):
+    harvest.out.mkdir(parents=True)
+    path = harvest.out / "2026-08.jsonl"
+    path.write_text(json.dumps(row("AGRIPADA", 1, 1), ensure_ascii=False) + "\n"
+                    + '{"state": "MAHARASHTRA", "district": "BRI', encoding="utf-8")
+    record, held, _ = harvest(FakeClient(ROWS))
+    assert record["complete"] and len(held) == 8
+    assert all(json.loads(l) for l in path.read_text(encoding="utf-8").splitlines())
+
+
+def test_an_error_before_any_page_is_recorded_on_the_chunk(harvest):
+    class Dead(FakeClient):
+        def search(self, unit_id, date_from, date_to, page_size):
+            if date_from == W4:
+                raise hm.PortalError("portal error page")
+            return super().search(unit_id, date_from, date_to, page_size)
+    record, held, _ = harvest(Dead(ROWS))
+    assert not record["complete"] and len(held) == 6
+    assert record["chunks"]["22-31"]["complete"] is False
+    assert "error" in record["chunks"]["22-31"]
+    assert record["shortfall"] == 2

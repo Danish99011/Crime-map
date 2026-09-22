@@ -286,10 +286,23 @@ def harvest_month(client: MahapoliceClient, unit_id: str, year: int, month: int,
                                         ensure_ascii=False) + "\n")
         handle.flush()
 
-    # The portal's own figure for the whole month is the reference every
-    # chunk walk is checked against. It costs one query.
-    _, declared, message = _open(client, unit_id, f"01/{month:02d}/{year}",
-                                 f"{last_day:02d}/{month:02d}/{year}")
+    # The portal's own figure for the whole month is the reference the
+    # chunk walks are checked against. It costs one query, and it is the
+    # one query the portal answers unreliably: on 2026-09-22 it came back
+    # without the results grid for 30 months in a row while every weekly
+    # query was answered, and the same range answered normally minutes
+    # later. So it is asked for once and not insisted on. Without it the
+    # month is judged by its weeks alone, which is what the check adds to.
+    previous = state["months"].get(key) or {}
+    try:
+        _, declared, message = _open(client, unit_id, f"01/{month:02d}/{year}",
+                                     f"{last_day:02d}/{month:02d}/{year}")
+        month_query = "answered"
+    except SchemaChanged:
+        declared, message = previous.get("declared"), None
+        month_query = "no grid; figure carried from the last checkpoint" if declared else "no grid"
+        print(f"    month query came back without a grid; walking the weeks anyway",
+              flush=True)
 
     # A month is walked a chunk at a time, each chunk a short walk with its
     # own completeness. The grid only accepts a page near the one on screen,
@@ -322,13 +335,16 @@ def harvest_month(client: MahapoliceClient, unit_id: str, year: int, month: int,
             got = records[label]
             print(f"      {got.get('accounted', 0)} of {got.get('declared')}  "
                   f"{'ok' if got.get('complete') else 'INCOMPLETE'}", flush=True)
-            _save_month(state, key, held, declared, message, records, chunk_days, labels)
+            _save_month(state, key, held, declared, message, records, chunk_days, labels,
+                        month_query)
     finally:
         handle.close()
-    return _save_month(state, key, held, declared, message, records, chunk_days, labels)
+    return _save_month(state, key, held, declared, message, records, chunk_days, labels,
+                       month_query)
 
 
-def _save_month(state, key, held, declared, message, records, chunk_days, labels) -> dict:
+def _save_month(state, key, held, declared, message, records, chunk_days, labels,
+                month_query="answered") -> dict:
     """Write the month's record from its chunk records, and checkpoint it.
 
     The month is whole only when every chunk is whole and the chunks' own
@@ -348,10 +364,18 @@ def _save_month(state, key, held, declared, message, records, chunk_days, labels
     counts = [c.get("declared") for c in records.values()]
     chunk_sum = sum(counts) if counts and all(c is not None for c in counts) else None
     accounted = sum(c.get("accounted", 0) for c in records.values())
-    complete = all_complete and declared is not None and chunk_sum >= declared
+    if month_query == "answered":
+        complete = all_complete and declared is not None and chunk_sum >= declared
+    else:
+        # No month figure to check against: the weeks stand on their own,
+        # each verified against its own count, and their sum is the figure.
+        complete = all_complete and chunk_sum is not None
+        if complete:
+            declared = chunk_sum
     record = {
         "collected": len(held),
         "declared": declared,
+        "month_query": month_query,
         "duplicates_dropped": sum(c.get("duplicates_dropped", 0) for c in records.values()),
         "complete": complete,
         "chunk_days": chunk_days,
@@ -362,7 +386,7 @@ def _save_month(state, key, held, declared, message, records, chunk_days, labels
         record["portal_message"] = message[:120]
     if declared is not None and accounted < declared:
         record["shortfall"] = declared - accounted
-    if all_complete and not complete and declared is not None:
+    if all_complete and not complete and declared is not None and month_query == "answered":
         record["chunk_sum_mismatch"] = {"chunks": chunk_sum, "month": declared}
         record["chunks"] = {}
     if complete and chunk_sum != declared:

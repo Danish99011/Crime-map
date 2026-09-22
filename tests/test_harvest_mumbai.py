@@ -341,16 +341,16 @@ def test_a_wrong_month_figure_is_recorded_beside_what_the_weeks_found(harvest):
 
 
 def test_a_failed_month_is_asked_for_again_after_a_pause(harvest):
-    # The portal answers the first two whole-month queries with a page that
-    # has no grid, as it did for 25 minutes on 2026-09-22. The month must be
-    # waited for, not skipped: the third attempt walks it whole.
+    # The portal answers the first two whole-month queries with its error
+    # page. The month must be waited for, not skipped: the third attempt
+    # walks it whole.
     class Degraded(FakeClient):
         failures = 2
 
         def search(self, unit_id, date_from, date_to, page_size):
             if Degraded.failures and (date_from, date_to) == (W1, "31/08/2026"):
                 Degraded.failures -= 1
-                raise hm.SchemaChanged("no table with id 'gdvDeadBody' on this page")
+                raise hm.PortalError("search returned the portal's error page")
             return super().search(unit_id, date_from, date_to, page_size)
     state, waited, built = {"months": {}}, [], []
 
@@ -378,13 +378,46 @@ def test_a_month_that_fails_every_attempt_is_recorded_and_left(harvest):
     assert saved["collected"] == 40 and saved["declared"] == 90   # earlier progress kept
 
 
-def test_a_page_without_a_grid_is_kept_for_diagnosis(harvest):
-    class NoGrid(FakeClient):
+def test_a_month_query_without_a_grid_is_kept_and_the_weeks_walked_anyway(harvest):
+    # The portal answered the whole-month query without a grid for 30
+    # months in a row on 2026-09-22 while answering every weekly query.
+    # The month is judged by its weeks; their sum becomes its figure.
+    class NoMonthGrid(FakeClient):
         def search(self, unit_id, date_from, date_to, page_size):
-            return {"rows": None, "declared": None}
-    with pytest.raises(hm.SchemaChanged):
-        hm.harvest_month(NoGrid(ROWS), "19378", 2026, 8, {"months": {}})
+            if (date_from, date_to) == (W1, "31/08/2026"):
+                return {"rows": None, "declared": None}
+            return super().search(unit_id, date_from, date_to, page_size)
+    record, held, _ = harvest(NoMonthGrid(ROWS))
+    assert record["complete"] and len(held) == 8
+    assert record["declared"] == 8 and record["month_query"] == "no grid"
+    assert "chunk_sum_mismatch" not in record
     assert (harvest.out / "_debug" / "2026-08-01_nogrid.html").exists()
+
+
+def test_a_month_query_without_a_grid_carries_the_last_figure_while_incomplete(harvest):
+    class NoMonthGrid(FakeClient):
+        def search(self, unit_id, date_from, date_to, page_size):
+            if (date_from, date_to) == (W1, "31/08/2026"):
+                return {"rows": None, "declared": None}
+            return super().search(unit_id, date_from, date_to, page_size)
+    state = {"months": {"2026-08": {"collected": 3, "declared": 9}}}
+    record, held, _ = harvest(NoMonthGrid(ROWS, fail={(W3, 2): 1}), state=state)
+    assert not record["complete"] and record["declared"] == 9
+    assert record["month_query"].startswith("no grid; figure carried")
+    assert record["shortfall"] == 2
+
+
+def test_a_week_query_without_a_grid_is_a_failure_to_retry(harvest):
+    class NoWeekGrid(FakeClient):
+        def search(self, unit_id, date_from, date_to, page_size):
+            if date_from == W2:
+                return {"rows": None, "declared": None}
+            return super().search(unit_id, date_from, date_to, page_size)
+    state = {"months": {}}
+    record, held, _ = harvest(NoWeekGrid(ROWS), state=state)
+    # Inside harvest_month a chunk's own failure is recorded on the chunk.
+    assert not record["complete"] and "error" in record["chunks"]["08-14"]
+    assert (harvest.out / "_debug" / "2026-08-08_nogrid.html").exists()
 
 
 def test_a_torn_last_line_is_dropped_before_appending(harvest):

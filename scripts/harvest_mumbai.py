@@ -67,6 +67,14 @@ STOP = OUT / "_stop"            # touch it and the run exits at the next chunk b
 class StopRequested(Exception):
     """The `_stop` file exists: finish the current chunk, checkpoint, exit."""
 
+
+# How long to wait before asking the portal for a failed range again. The
+# first pass through a degraded portal marked 25 months failed in 25 minutes,
+# one query each, and moved on; the next day it did the same to the weeks of
+# June 2022 in under a minute. The portal was answering normally again within
+# the hour both times. Waiting is what a person at the form would do.
+BACKOFF = (60, 120, 300, 600, 900)
+
 UNIT_NAME = "BRIHAN MUMBAI CITY"
 PAGE_SIZE = 50
 
@@ -264,7 +272,8 @@ def _key(row) -> tuple[str, str]:
 
 
 def harvest_month(client: MahapoliceClient, unit_id: str, year: int, month: int,
-                  state: dict, chunk_days: int = CHUNK_DAYS, redo: bool = False) -> dict:
+                  state: dict, chunk_days: int = CHUNK_DAYS, redo: bool = False,
+                  sleep=time.sleep, backoff=BACKOFF) -> dict:
     key = f"{year:04d}-{month:02d}"
     last_day = calendar.monthrange(year, month)[1]
 
@@ -324,14 +333,23 @@ def harvest_month(client: MahapoliceClient, unit_id: str, year: int, month: int,
                 STOP.unlink()
                 raise StopRequested(f"{key} {label}")
             print(f"    {label} ...", flush=True)
-            try:
-                records[label] = _walk(client, unit_id, date_from, date_to, keep)
-            except (PortalError, SchemaChanged) as exc:
-                # The walk never started, or the session is gone. The next
-                # chunk's reset rebuilds it; this one is walked next pass.
-                print(f"      {type(exc).__name__}: {str(exc)[:90]}", flush=True)
-                records[label] = {"complete": False,
-                                  "error": f"{type(exc).__name__}: {str(exc)[:200]}"}
+            for pause in (*backoff, None):
+                try:
+                    records[label] = _walk(client, unit_id, date_from, date_to, keep)
+                    break
+                except (PortalError, SchemaChanged) as exc:
+                    # The walk never started, or the session is gone. Wait
+                    # and ask again from a clean form (the walk's own reset);
+                    # only after the last wait is the chunk left for the
+                    # next pass.
+                    if pause is None:
+                        print(f"      {type(exc).__name__}: {str(exc)[:90]}", flush=True)
+                        records[label] = {"complete": False,
+                                          "error": f"{type(exc).__name__}: {str(exc)[:200]}"}
+                    else:
+                        print(f"      {type(exc).__name__}: {str(exc)[:60]}; waiting "
+                              f"{pause}s before asking again", flush=True)
+                        sleep(pause)
             got = records[label]
             print(f"      {got.get('accounted', 0)} of {got.get('declared')}  "
                   f"{'ok' if got.get('complete') else 'INCOMPLETE'}", flush=True)
@@ -395,13 +413,6 @@ def _save_month(state, key, held, declared, message, records, chunk_days, labels
     state["months"][key] = record
     save_checkpoint(state)
     return record
-
-
-# How long to wait before asking the portal for a failed month again. The
-# first pass through a degraded portal marked 25 months failed in 25 minutes,
-# one query each, and moved on; the portal was answering normally again half
-# an hour later. Waiting is what a person at the form would do.
-BACKOFF = (60, 120, 300, 600, 900)
 
 
 def harvest_month_patiently(client, unit_id, year, month, state, chunk_days, redo,

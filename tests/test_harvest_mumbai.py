@@ -107,14 +107,16 @@ def harvest(monkeypatch, tmp_path):
     monkeypatch.setattr(hm, "portal_message", lambda page: None)
     monkeypatch.setattr(hm, "PAGE_SIZE", 1)
 
-    def run(client, state=None, redo=False):
+    def run(client, state=None, redo=False, backoff=()):
         state = state if state is not None else {"months": {}}
-        record = hm.harvest_month(client, "19378", 2026, 8, state, redo=redo)
+        record = hm.harvest_month(client, "19378", 2026, 8, state, redo=redo,
+                                  sleep=run.slept.append, backoff=backoff)
         text = (out / "2026-08.jsonl").read_text(encoding="utf-8")
         held = [json.loads(l) for l in text.splitlines() if l.strip()]
         return record, held, state
 
     run.out = out
+    run.slept = []
     return run
 
 
@@ -407,17 +409,32 @@ def test_a_month_query_without_a_grid_carries_the_last_figure_while_incomplete(h
     assert record["shortfall"] == 2
 
 
-def test_a_week_query_without_a_grid_is_a_failure_to_retry(harvest):
+def test_a_week_query_without_a_grid_is_waited_for_and_asked_again(harvest):
+    # The portal refuses the second week twice, then answers. The week is
+    # waited for and walked whole; the month completes.
+    class Flaky(FakeClient):
+        refusals = 2
+
+        def search(self, unit_id, date_from, date_to, page_size):
+            if date_from == W2 and Flaky.refusals:
+                Flaky.refusals -= 1
+                return {"rows": None, "declared": None}
+            return super().search(unit_id, date_from, date_to, page_size)
+    record, held, _ = harvest(Flaky(ROWS), backoff=(1, 2, 4))
+    assert record["complete"] and len(held) == 8 and harvest.slept == [1, 2]
+    assert (harvest.out / "_debug" / "2026-08-08_nogrid.html").exists()
+
+
+def test_a_week_that_fails_every_wait_is_recorded_and_left_for_the_next_pass(harvest):
     class NoWeekGrid(FakeClient):
         def search(self, unit_id, date_from, date_to, page_size):
             if date_from == W2:
                 return {"rows": None, "declared": None}
             return super().search(unit_id, date_from, date_to, page_size)
-    state = {"months": {}}
-    record, held, _ = harvest(NoWeekGrid(ROWS), state=state)
-    # Inside harvest_month a chunk's own failure is recorded on the chunk.
+    record, held, _ = harvest(NoWeekGrid(ROWS), backoff=(1, 2))
     assert not record["complete"] and "error" in record["chunks"]["08-14"]
-    assert (harvest.out / "_debug" / "2026-08-08_nogrid.html").exists()
+    assert harvest.slept == [1, 2] and len(held) == 6
+    assert [c.get("complete") for c in record["chunks"].values()] == [True, False, True, True]
 
 
 def test_a_torn_last_line_is_dropped_before_appending(harvest):

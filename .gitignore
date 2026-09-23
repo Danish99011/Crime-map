@@ -56,3 +56,15 @@ data/
 *.sqlite
 *.sqlite3
 *.db
+
+# Android app: build outputs, IDE state, local SDK path and signing secrets.
+# The bundled page under assets/ is copied in at build time, never committed.
+android/.gradle/
+android/.kotlin/
+android/.idea/
+android/build/
+android/app/build/
+android/app/src/main/assets/
+android/local.properties
+android/keystore.properties
+*.iml

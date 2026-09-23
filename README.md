@@ -120,3 +120,10 @@ stated above the fold on the map itself. See `docs/INGESTION.md` rule 5.
    post-2024 data is published.
 5. Bengaluru, when `ksp.karnataka.gov.in` is reachable — or via the OpenCity
    Karnataka CSVs, which are already machine-readable and licensed.
+
+## Android app
+
+`android/` is the dashboard bundled as an app that opens offline and hands
+station phone numbers to the dialler. It asks for no permissions at all,
+so it cannot phone home. Build the dashboard first, then open the folder in
+Android Studio; see `android/README.md`.

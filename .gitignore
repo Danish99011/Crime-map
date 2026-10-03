@@ -71,6 +71,3 @@ android/app/src/main/assets/
 android/local.properties
 android/keystore.properties
 *.iml
-
-# --- secure-check: credentials and local state must never be committed ---
-data/

@@ -52,7 +52,10 @@ id_ed25519*
 .pypirc
 .npmrc
 .git-credentials
-data/
+data/*
+# Tracked public reference data for the portal (no credentials, no personal data):
+!data/reference/
+!data/spine/
 *.sqlite
 *.sqlite3
 *.db
